@@ -1,0 +1,169 @@
+import { createClient } from "@libsql/client";
+import { config } from "dotenv";
+import { writeFileSync } from "fs";
+
+config();
+
+const url = process.env.TURSO_URL || process.env.VITE_TURSO_URL || "";
+
+async function fetchAndWrite() {
+  // No DB URL (e.g. a preview build without Turso env vars) — keep the committed
+  // products.ts rather than crashing the build on an empty URL.
+  if (!url) {
+    console.log("No TURSO_URL set — skipping product refresh, keeping committed products.ts");
+    return;
+  }
+  const db = createClient({
+    url,
+    authToken: process.env.TURSO_AUTH_TOKEN || process.env.VITE_TURSO_AUTH_TOKEN || undefined,
+  });
+  try {
+    const result = await db.execute(
+      "SELECT * FROM products WHERE vendor = 'tamarack' ORDER BY sort_order ASC"
+    );
+
+    // Tamarack carries no footwear or safetywear — drop those rows so a
+    // regeneration from the shared database can't reintroduce them.
+    const EXCLUDED_CATEGORIES = new Set(["Safety Boots", "Safety Shoes", "Footwear", "Flame Resistant"]);
+    const products = result.rows
+      .filter((row: any) => !EXCLUDED_CATEGORIES.has(row.category))
+      .map((row: any) => ({
+      sku: row.sku,
+      name: row.name,
+      category: row.category,
+      sizes: row.sizes,
+      badge: row.badge,
+      colors: JSON.parse(row.colors || "[]"),
+      price: row.price,
+      img: row.img,
+      imgs: JSON.parse(row.imgs || "[]"),
+      material: row.material,
+      details: row.details,
+      pdf: row.pdf || undefined,
+    }));
+
+    const output = `// AUTO-GENERATED — do not edit manually. Updated from database at build time.
+import { t } from "../../i18n";
+import type { Locale } from "../../i18n";
+
+export const allProducts = ${JSON.stringify(products, null, 2)};
+
+export type Product = typeof allProducts[0];
+
+export const categories = ["All", ...Array.from(new Set(allProducts.map((p) => p.category)))];
+
+export const badgeMap: Record<string, string> = { New: "badge.new", Popular: "badge.popular" };
+export function badgeClass(badge: string) {
+  return badge === "New" ? "product-card__badge product-card__badge--new" : "product-card__badge product-card__badge--popular";
+}
+
+const colorNames: Record<string, Record<string, string>> = {
+  "#00703c": { en: "Green", fr: "Vert" },
+  "#1a1a18": { en: "Black", fr: "Noir" },
+  "#ffffff": { en: "White", fr: "Blanc" },
+  "#2c3e50": { en: "Navy", fr: "Marine" },
+  "#6e6e6e": { en: "Grey", fr: "Gris" },
+  "#ff6600": { en: "Safety Orange", fr: "Orange sécurité" },
+  "#94a3b8": { en: "Silver", fr: "Argent" },
+  "#4a4a4a": { en: "Charcoal", fr: "Charbon" },
+  "#6b8bb0": { en: "Solace Blue", fr: "Bleu Solace" },
+  "#7dd3fc": { en: "Light Blue", fr: "Bleu clair" },
+  "#b8b8b8": { en: "Grey Heather", fr: "Gris chiné" },
+  "#6b3fa0": { en: "Purple", fr: "Violet" },
+  "#c0392b": { en: "Red", fr: "Rouge" },
+  "#1e40af": { en: "Royal", fr: "Bleu royal" },
+  "#8a5d3b": { en: "Carhartt Brown", fr: "Brun Carhartt" },
+  "#00b5e2": { en: "Sky Blue", fr: "Bleu ciel" },
+  "#0047ab": { en: "Cobalt", fr: "Cobalt" },
+  "#0f52ba": { en: "Sapphire", fr: "Saphir" },
+  "#1b2a41": { en: "Navy", fr: "Marine" },
+  "#1e4d2b": { en: "Forest Green", fr: "Vert forêt" },
+  "#1f6f6f": { en: "Teal", fr: "Sarcelle" },
+  "#2b2b2b": { en: "Charcoal", fr: "Charbon" },
+  "#2c5aa0": { en: "Royal Blue", fr: "Bleu royal" },
+  "#333333": { en: "Charcoal", fr: "Charbon" },
+  "#33425b": { en: "Slate Blue", fr: "Bleu ardoise" },
+  "#383838": { en: "Charcoal", fr: "Charbon" },
+  "#3a3a3a": { en: "Charcoal", fr: "Charbon" },
+  "#3a5bbf": { en: "Royal Blue", fr: "Bleu royal" },
+  "#3a8fb7": { en: "Blue", fr: "Bleu" },
+  "#3d4a63": { en: "Slate Blue", fr: "Bleu ardoise" },
+  "#3f3f3f": { en: "Charcoal", fr: "Charbon" },
+  "#4a2545": { en: "Plum", fr: "Prune" },
+  "#4b5320": { en: "Olive", fr: "Olive" },
+  "#4f6b45": { en: "Sage Green", fr: "Vert sauge" },
+  "#585858": { en: "Grey", fr: "Gris" },
+  "#5a2733": { en: "Maroon", fr: "Bordeaux" },
+  "#5a5a5a": { en: "Grey", fr: "Gris" },
+  "#5a6248": { en: "Olive", fr: "Olive" },
+  "#5b6d7e": { en: "Slate", fr: "Ardoise" },
+  "#5b7fa6": { en: "Steel Blue", fr: "Bleu acier" },
+  "#5c1a2b": { en: "Maroon", fr: "Bordeaux" },
+  "#5e2233": { en: "Maroon", fr: "Bordeaux" },
+  "#6a6d70": { en: "Grey", fr: "Gris" },
+  "#6b1f2a": { en: "Maroon", fr: "Bordeaux" },
+  "#6b3f2a": { en: "Brown", fr: "Brun" },
+  "#6b6a4a": { en: "Olive", fr: "Olive" },
+  "#6b6f74": { en: "Grey", fr: "Gris" },
+  "#6d2b3f": { en: "Maroon", fr: "Bordeaux" },
+  "#6e7377": { en: "Grey", fr: "Gris" },
+  "#6e8ca0": { en: "Steel Blue", fr: "Bleu acier" },
+  "#7a3540": { en: "Maroon", fr: "Bordeaux" },
+  "#7a7a7a": { en: "Grey", fr: "Gris" },
+  "#7a8fa6": { en: "Steel Blue", fr: "Bleu acier" },
+  "#7ba4d0": { en: "Light Blue", fr: "Bleu clair" },
+  "#7c7a5e": { en: "Olive", fr: "Olive" },
+  "#8a8a8a": { en: "Grey", fr: "Gris" },
+  "#8c1d2c": { en: "Cardinal", fr: "Cardinal" },
+  "#9b9b9b": { en: "Grey", fr: "Gris" },
+  "#a0a0a0": { en: "Grey", fr: "Gris" },
+  "#a6a6a6": { en: "Grey", fr: "Gris" },
+  "#a8c4d8": { en: "Light Blue", fr: "Bleu clair" },
+  "#a9682f": { en: "Brown", fr: "Brun" },
+  "#b0b0b0": { en: "Grey", fr: "Gris" },
+  "#b6e021": { en: "Safety Green", fr: "Vert sécurité" },
+  "#b8ad97": { en: "Khaki", fr: "Kaki" },
+  "#b98b8b": { en: "Rose", fr: "Rose" },
+  "#bf5700": { en: "Burnt Orange", fr: "Orange brûlé" },
+  "#c2a878": { en: "Tan", fr: "Beige" },
+  "#c2c2c2": { en: "Light Grey", fr: "Gris clair" },
+  "#c3a984": { en: "Tan", fr: "Beige" },
+  "#c65b52": { en: "Coral", fr: "Corail" },
+  "#c9b79c": { en: "Tan", fr: "Beige" },
+  "#c9ccc9": { en: "Light Grey", fr: "Gris clair" },
+  "#e3c9c9": { en: "Pink", fr: "Rose" },
+  "#e8863b": { en: "Orange", fr: "Orange" },
+  "#f2efe6": { en: "Natural", fr: "Naturel" },
+  "#ff6a13": { en: "Orange", fr: "Orange" },
+};
+export function colorName(hex: string, locale: Locale): string {
+  return colorNames[hex]?.[locale] || hex;
+}
+
+export function categoryLabel(cat: string, locale: Locale): string {
+  if (cat === "All") return t("apparel.all", locale);
+  const key = \`cat.\${cat}\` as any;
+  return t(key, locale);
+}
+
+export function expandSizes(sizes: string): string[] {
+  if (sizes === "One Size") return ["One Size"];
+  const order = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL"];
+  const match = sizes.match(/^(\\w+)\\s*-\\s*(\\w+)$/);
+  if (!match) return [sizes];
+  const start = order.indexOf(match[1]);
+  const end = order.indexOf(match[2]);
+  if (start === -1 || end === -1) return [sizes];
+  return order.slice(start, end + 1);
+}
+`;
+
+    writeFileSync("src/routes/apparel/products.ts", output);
+    console.log(`Wrote ${products.length} products from database`);
+  } catch (e: any) {
+    console.error("Failed to fetch from database, keeping existing products.ts:", e.message);
+    // Don't fail the build — keep the existing hardcoded file
+  }
+}
+
+fetchAndWrite();

@@ -1,0 +1,18 @@
+const BASE="http://localhost:5174"; const CDP="http://127.0.0.1:9222";
+import {writeFileSync} from "node:fs";
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const p=(await (await fetch(`${CDP}/json/list`)).json()).find(t=>t.type==="page");
+const ws=new WebSocket(p.webSocketDebuggerUrl); await new Promise(r=>ws.onopen=r);
+let id=0;const pend=new Map();
+ws.onmessage=e=>{const m=JSON.parse(e.data);if(pend.has(m.id)){pend.get(m.id)(m.result);pend.delete(m.id);}};
+const send=(m,params={})=>new Promise(res=>{const i=++id;pend.set(i,res);ws.send(JSON.stringify({id:i,method:m,params}))});
+const ev=async x=>(await send("Runtime.evaluate",{expression:x,returnByValue:true,awaitPromise:true})).result.value;
+await send("Page.enable");await send("Runtime.enable");await send("Network.enable");
+await send("Network.setCookie",{name:"ce_auth",value:"clothing",url:BASE,path:"/"});
+await send("Emulation.setDeviceMetricsOverride",{width:1440,height:900,deviceScaleFactor:2,mobile:false});
+await send("Page.navigate",{url:BASE+"/apparel/"}); await sleep(6500);
+await ev(`(()=>{const t=[...document.querySelectorAll('.home-catalog__tabs .apparel-titlebar__tab')].find(x=>x.textContent.includes('Hats'));t.click();})()`); await sleep(900);
+const r=await send("Page.captureScreenshot",{format:"png",captureBeyondViewport:true,clip:{x:0,y:70,width:560,height:340,scale:2}});
+writeFileSync("_hats.png",Buffer.from(r.data,"base64"));
+console.log("wrote _hats.png");
+ws.close();process.exit(0);

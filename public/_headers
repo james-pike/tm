@@ -1,0 +1,37 @@
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Robots-Tag: noindex, nofollow
+
+# Cloudflare Pages serves static assets with `max-age=0, must-revalidate` unless
+# told otherwise, so without the rules below EVERY asset — every product photo,
+# every JS chunk — is revalidated on every page view. Those 304s are still
+# requests, which is why this site's request count runs so far above the others.
+
+# Build output is content-hashed (q-*.js, *-style.css): the filename changes when
+# the content does, so it can never go stale. Cache it forever.
+/build/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Product photos. NOT immutable: the filenames are stable (/wt/122366_omf_fl-1.jpg),
+# so replacing a photo reuses its name and an immutable cache would pin the old
+# one indefinitely. A month of caching with a year of stale-while-revalidate means
+# repeat visits serve from cache and refresh in the background.
+/wt/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+/sku/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+/textures/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+# HTML is server-rendered per request and must not be cached by the browser.
+/
+  Cache-Control: public, max-age=0, must-revalidate

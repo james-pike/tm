@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "Wills Transfer Apparel",
+  "short_name": "Wills Transfer",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#C97B0C",
+  "theme_color": "#C97B0C",
+  "description": "Internal apparel ordering for Wills Transfer staff.",
+  "icons": [
+    {
+      "src": "/wills-logo.png",
+      "sizes": "200x200",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
