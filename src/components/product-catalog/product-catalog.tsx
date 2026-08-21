@@ -15,7 +15,7 @@ const VIEW_MODES: { key: number | "list"; label: string; icon: string }[] = [
 ];
 
 
-const CLOTHING_CATEGORIES = ["All", "Work Wear", "Polos", "T-Shirts", "Jackets", "Hats", "Swag"];
+const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Polos", "Sweaters", "Jackets", "Hats", "Swag"];
 
 // Safety catalog: every MNFR-* item plus a small allowlist of standard SKUs,
 // minus a deny list for FR items we don't carry yet.

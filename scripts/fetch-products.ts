@@ -60,6 +60,7 @@ export function badgeClass(badge: string) {
 const colorNames: Record<string, Record<string, string>> = {
   "#00703c": { en: "Green", fr: "Vert" },
   "#1a1a18": { en: "Black", fr: "Noir" },
+  "#a5e82c": { en: "Lime Shock", fr: "Lime éclatant" },
   "#ffffff": { en: "White", fr: "Blanc" },
   "#2c3e50": { en: "Navy", fr: "Marine" },
   "#6e6e6e": { en: "Grey", fr: "Gris" },

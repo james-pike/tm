@@ -24,7 +24,7 @@ export default component$(() => {
     <QwikCityProvider viewTransition={false}>
       <head>
         <meta charset="utf-8" />
-        <meta name="theme-color" content="#2e7d32" />
+        <meta name="theme-color" content="#1B6551" />
         <meta name="google" content="notranslate" />
         {/* Tamarack mark. Explicit tags — without them the browser silently falls
             back to /favicon.ico, which used to be the inherited pinwheel. */}

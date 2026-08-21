@@ -1,11 +1,18 @@
-/* ===== Tamarack Apparel Brand Theme ===== */
+/* ===== Tamarack Apparel Brand Theme =====
+   Palette drawn from tamarackhomes.com:
+     primary green  #1B6551  (logo, buttons, links, active states)
+     deep panel     #2D4841  (footer panel / watermark ground)
+     sage accent    #AECBC3
+     gold accent    #E2B93B  (hover accents, primary CTA highlights) */
 :root {
-  --ce-green: #43a047;
-  --ce-green-dark: #2e7d32;
-  --ce-green-light: #66bb6a;
-  --ce-orange: #2e7d32;
-  --ce-orange-light: #43a047;
-  --ce-gold: #2e7d32;
+  --ce-green: #1B6551;
+  --ce-green-dark: #12463a;   /* deeper teal for hover / pressed / depth */
+  --ce-green-light: #3d8a76;  /* lighter teal accent */
+  --ce-footer: #2D4841;       /* deep footer panel */
+  --ce-sage: #AECBC3;         /* light sage accent */
+  --ce-orange: #1B6551;       /* legacy alias -> primary green */
+  --ce-orange-light: #3d8a76;
+  --ce-gold: #E2B93B;         /* Tamarack gold accent */
 
   --ce-white: #ffffff;
   /* Product image panel. Images multiply onto this, so their baked-in white
@@ -151,7 +158,7 @@ dialog:not([open]) {
   transform: translateX(-50%);
   z-index: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle, rgba(67, 160, 71,0.55) 1.5px, transparent 1.5px);
+  background-image: radial-gradient(circle, rgba(27, 101, 81,0.55) 1.5px, transparent 1.5px);
   background-size: 20px 20px;
   -webkit-mask-image:
     linear-gradient(to right,
@@ -292,8 +299,8 @@ img { max-width: 100%; display: block; }
 }
 .site-header--hero-visible .cart-btn,
 .site-header--hero-visible .cart-btn.cart-btn--active {
-  background: #2e7d32 !important;
-  border-color: #2e7d32 !important;
+  background: #1B6551 !important;
+  border-color: #1B6551 !important;
   color: #ffffff !important;
   border-radius: 4px !important;
   box-shadow: inset 0 1px 4px rgba(0,0,0,0.18), inset 0 0 6px rgba(0,0,0,0.08) !important;
@@ -400,6 +407,37 @@ img { max-width: 100%; display: block; }
   width: 100%;
   height: clamp(420px, 67vh, 760px);
   overflow: hidden;
+  z-index: 0;
+}
+/* Branded hero: the same green iron-textured "sign" surface the header, login
+   modal, and tab bars use (--wt-iron grain over --wt-box shade over the green
+   --wt-orange), with the pressed-edge inner shadows so it reads as one sheet of
+   the same weathered metal. The iron grain repeats down the tall panel. */
+.hero__upper--brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* No iron grain — the brand mark is the panel texture (see ::before). */
+  background:
+    linear-gradient(var(--wt-box), var(--wt-box)),
+    var(--wt-orange);
+  /* Keep the white "sign" margins the header carries: a white frame around the
+     green textured panel, flush to the screen edges (border-box, so it insets
+     the texture rather than growing the panel). */
+  border: var(--wt-box-my) solid #fff;
+  /* No inset dark vignette — the white frame is the only ring around the
+     cover. (The pressed-edge inner shadow read as a black strip inside the
+     white border.) */
+}
+/* Brand-mark texture — large (zoomed in) so only a couple show across the
+   panel, unlike the footer's smaller tiled row. */
+.hero__upper--brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url(/footer-mark.png) center / auto 90% repeat;
+  opacity: 0.06;
+  pointer-events: none;
   z-index: 0;
 }
 .hero__lower {
@@ -1227,7 +1265,7 @@ img { max-width: 100%; display: block; }
 }
 
 .hero__title--accent {
-  color: #43a047;
+  color: #1B6551;
 }
 .hero__title--muted {
   color: var(--ce-gray-200);
@@ -1361,7 +1399,7 @@ img { max-width: 100%; display: block; }
 }
 .hero-nav__item.active {
   background: rgba(255,255,255,0.15);
-  border-color: rgba(67, 160, 71,0.4);
+  border-color: rgba(27, 101, 81,0.4);
 }
 .hero-nav__back {
   display: block;
@@ -1807,12 +1845,29 @@ body:has(.nav-drawer-overlay) .site-header {
 /* ===== Home Catalog Section ===== */
 /* Site Footer */
 .site-footer {
-  background: #2e7d32;
+  background: var(--ce-footer);
   color: rgba(255,255,255,0.7);
   padding: 2rem 1rem 1.5rem;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+/* Oversized brand-mark watermark, bled off the bottom-right — the same
+   low-contrast signature Tamarack uses on its own site footer. */
+.site-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* A row of smaller marks tiled across the FULL footer width (rather than one
+     oversized mark bled off the corner). */
+  background: url(/footer-mark.png) left center / auto 74% repeat-x;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
 }
 .site-footer__inner {
+  position: relative;
+  z-index: 1;
   max-width: var(--site-max);
   margin: 0 auto;
   display: flex;
@@ -1847,7 +1902,7 @@ body:has(.nav-drawer-overlay) .site-header {
   margin: 0;
 }
 .privacy-page__contact-link {
-  color: #2e7d32;
+  color: #1B6551;
   text-decoration: underline;
   font-weight: 500;
 }
@@ -2438,7 +2493,7 @@ body:has(.nav-drawer-overlay) .site-header {
 .btn--green {
   background: var(--ce-green);
   color: var(--ce-white);
-  box-shadow: 0 4px 16px rgba(67, 160, 71,0.2);
+  box-shadow: 0 4px 16px rgba(27, 101, 81,0.2);
 }
 .btn--green:hover {
   background: var(--ce-green-dark);
@@ -2646,7 +2701,7 @@ body:has(.nav-drawer-overlay) .site-header {
 }
 
 /* Teaser card color rotation: green, gold, orange */
-.teaser-card { --tc-bg: rgba(255,255,255,0.1); --tc-text: #fff; --tc-tag-bg: rgba(49,117,156,0.15); --tc-tag-border: rgba(49,117,156,0.3); --tc-tag-color: #2e7d32; --tc-btn-bg: #2e7d32; --tc-btn-color: #fff; --tc-dot-color: rgba(255,255,255,0.4); --tc-glow: #2e7d32; }
+.teaser-card { --tc-bg: rgba(255,255,255,0.1); --tc-text: #fff; --tc-tag-bg: rgba(49,117,156,0.15); --tc-tag-border: rgba(49,117,156,0.3); --tc-tag-color: #1B6551; --tc-btn-bg: #1B6551; --tc-btn-color: #fff; --tc-dot-color: rgba(255,255,255,0.4); --tc-glow: #1B6551; }
 
 .teaser-card {
   background: var(--tc-bg);
@@ -2775,7 +2830,7 @@ body:has(.nav-drawer-overlay) .site-header {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--tc-glow, #43a047), var(--tc-btn-bg, var(--ce-orange)), var(--tc-glow, #43a047));
+  background: linear-gradient(90deg, var(--tc-glow, #1B6551), var(--tc-btn-bg, var(--ce-orange)), var(--tc-glow, #1B6551));
   transform: translateY(0);
   pointer-events: none;
   z-index: 10;
@@ -3129,17 +3184,20 @@ body:has(.nav-drawer-overlay) .site-header {
   border-radius: 0;
 }
 
-.product-card__badge--green { background: rgba(67, 160, 71,0.08); color: var(--ce-green); }
-.product-card__badge--orange { background: rgba(46, 125, 50,0.08); color: var(--ce-orange); }
+.product-card__badge--green { background: rgba(27, 101, 81,0.08); color: var(--ce-green); }
+.product-card__badge--orange { background: rgba(27, 101, 81,0.08); color: var(--ce-orange); }
 .product-card__badge--gold { background: rgba(49,117,156,0.12); color: #1e4a66; }
 
 /* ===== Login Modal ===== */
 .login-overlay {
   position: fixed; inset: 0; z-index: 200;
-  background: rgba(26,26,24,0.85);
-  backdrop-filter: blur(20px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 1rem;
+  /* The login sits IN the site's layout — greige surround in the gutters, same
+     as the rest of the page — rather than floating on a dark modal backdrop. */
+  background: var(--ce-greige);
+  /* Top-aligned so the split card sits exactly where the hero cover will be
+     (top ~9px), letting login fade straight into the hero without a shift. */
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 9px 0 0;
   animation: fadeIn 0.2s ease;
   transition: opacity 0.8s ease, backdrop-filter 0.8s ease;
 }
@@ -3249,6 +3307,169 @@ body:has(.nav-drawer-overlay) .site-header {
     0 2px 5px rgba(0, 0, 0, 0.30);
 }
 .login-modal__submit.btn:active { transform: translateY(1px); }
+
+/* ===== Split login cover: form on the left third, product carousel on the
+   right two-thirds — built to read as the same green sign as the hero. ===== */
+.login-modal--split {
+  /* Match the hero green panel's box exactly (it's inset ~1rem within the
+     --site-max card) so login fades straight into the hero with no shift. */
+  max-width: calc(var(--site-max) - 1rem) !important;
+  width: calc(100% - 1rem);
+  margin: 0 auto;
+  display: flex;
+  align-items: stretch;
+  /* Same height as the hero cover so login fades straight into it. */
+  height: min(60vh, 600px);
+  border: var(--wt-box-my) solid #fff;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+}
+.login-modal__form-pane {
+  flex: 0 0 33.333%;
+  max-width: 33.333%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* the same green iron-textured sign surface as the hero / header */
+  background:
+    var(--wt-iron) left top / 100% auto repeat,
+    linear-gradient(var(--wt-box), var(--wt-box)),
+    var(--wt-orange);
+}
+/* The brand header now sits on the pane's own green — drop its separate bar. */
+.login-modal--split .login-modal__header {
+  background: none;
+  box-shadow: none;
+  padding: 2rem 1.75rem 1.6rem;
+}
+/* Stack the wordmark over an "Apparel" kicker instead of the overlapping inline
+   treatment (which collides in the narrow pane, same as it did in the hero). */
+.login-modal--split .login-modal__brand--img {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.login-modal--split .login-modal__brand--img .brand-apparel {
+  margin-left: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  /* Stretch the caps taller without widening the tracking. */
+  display: inline-block;
+  transform: scaleY(1.35);
+  transform-origin: center;
+}
+.login-modal--split .login-modal__logo-white { height: 56px; }
+.login-modal--split .login-modal__form {
+  padding: 1.1rem 1.75rem 1.9rem;
+  gap: 1.05rem;
+}
+.login-modal--split .login-modal__field label {
+  color: rgba(255, 255, 255, 0.9);
+}
+.login-modal--split .login-modal__field input {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+.login-modal--split .login-modal__field input::placeholder { color: rgba(255, 255, 255, 0.55); }
+.login-modal--split .login-modal__field input:focus {
+  border-color: var(--ce-gold);
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 0 3px rgba(226, 185, 59, 0.25);
+}
+.login-modal--split .login-modal__error {
+  background: rgba(0, 0, 0, 0.22);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+/* Submit is the gold brand button on the green pane. */
+.login-modal--split .login-modal__submit.btn {
+  background: var(--ce-gold);
+  color: var(--ce-green-dark);
+  border: none;
+  text-shadow: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.login-modal--split .login-modal__submit.btn:hover {
+  background: #efc85a;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Language toggle pinned to the top of the login pane. */
+.login-modal__lang {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.login-modal__lang:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* Carousel pane */
+.login-modal__carousel {
+  flex: 1 1 66.667%;
+  position: relative;
+  overflow: hidden;
+  background: var(--ce-greige);
+}
+.login-modal__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.login-modal__slide.is-active { opacity: 1; }
+.login-modal__dots {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 2;
+}
+.login-modal__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.login-modal__dot.is-active { background: var(--ce-gold); transform: scale(1.25); }
+
+/* Mobile: stack the form over a shorter carousel band. */
+@media (max-width: 600px) {
+  .login-modal--split {
+    flex-direction: column;
+    min-height: 0;
+    max-width: 420px !important;
+  }
+  .login-modal__form-pane { flex: none; max-width: 100%; }
+  .login-modal__carousel { flex: none; height: 190px; width: 100%; }
+}
 
 .login-modal__error {
   background: #fff4ec; border: 1px solid var(--wt-orange); color: #8a3b0a;
@@ -3974,7 +4195,7 @@ body:has(.nav-drawer-overlay) .site-header {
   background: #4689b3 !important;
   color: #ffffff !important;
 }
-.hero-card-header__btn--to-fr:hover { background: #2e7d32 !important; color: #ffffff !important; }
+.hero-card-header__btn--to-fr:hover { background: #1B6551 !important; color: #ffffff !important; }
 .hero-card-header__btn--to-en {
   background: #d43950 !important;
   color: #ffffff !important;
@@ -4159,8 +4380,8 @@ body:has(.nav-drawer-overlay) .site-header {
 @media (hover: hover) { .cart-btn:hover { border-color: var(--ce-gold); background: #eaf3fa; color: #1e4a66; } .cart-btn:hover svg { stroke: #1e4a66; } }
 .cart-btn svg { stroke: var(--ce-gray-700); width: 17px; height: 17px; }
 .cart-btn--active {
-  border-color: #2e7d32;
-  background: #2e7d32;
+  border-color: #1B6551;
+  background: #1B6551;
   color: #ffffff;
   box-shadow: inset 0 1px 4px rgba(0,0,0,0.18), inset 0 0 6px rgba(0,0,0,0.08);
 }
@@ -5046,7 +5267,7 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
 .product-modal__add--branded:active .product-modal__add-pinwheel polygon:nth-child(6),
 .product-modal__add--added .product-modal__add-pinwheel polygon:nth-child(6) { fill: #4689b3; transition-delay: 0.125s; }
 .product-modal__add--branded:active .product-modal__add-pinwheel polygon:nth-child(7),
-.product-modal__add--added .product-modal__add-pinwheel polygon:nth-child(7) { fill: #2e7d32; transition-delay: 0.15s; }
+.product-modal__add--added .product-modal__add-pinwheel polygon:nth-child(7) { fill: #1B6551; transition-delay: 0.15s; }
 .product-modal__add--branded:active .product-modal__add-pinwheel polygon:nth-child(8),
 .product-modal__add--added .product-modal__add-pinwheel polygon:nth-child(8) { fill: #ffd25b; transition-delay: 0.175s; }
 /* Cart outline at the centre — always white, with a soft dark shadow so
@@ -5132,7 +5353,7 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   .product-modal__add--branded:hover .product-modal__add-pinwheel polygon:nth-child(4) { fill: #9ec069; transition-delay: 0.075s; }
   .product-modal__add--branded:hover .product-modal__add-pinwheel polygon:nth-child(5) { fill: #7fa244; transition-delay: 0.1s; }
   .product-modal__add--branded:hover .product-modal__add-pinwheel polygon:nth-child(6) { fill: #4689b3; transition-delay: 0.125s; }
-  .product-modal__add--branded:hover .product-modal__add-pinwheel polygon:nth-child(7) { fill: #2e7d32; transition-delay: 0.15s; }
+  .product-modal__add--branded:hover .product-modal__add-pinwheel polygon:nth-child(7) { fill: #1B6551; transition-delay: 0.15s; }
   .product-modal__add--branded:hover .product-modal__add-pinwheel polygon:nth-child(8) { fill: #ffd25b; transition-delay: 0.175s; }
   .product-modal__add--branded:not(:disabled):hover .product-modal__add-pinwheel { transform: rotate(45deg) scale(0.62); }
   .product-modal__add--branded:not(:disabled):hover::before {
@@ -5143,7 +5364,7 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
 
 /* Add to Cart — filled, in the logo's blue→teal triangle palette */
 .product-modal__add.btn--primary {
-  background: linear-gradient(135deg, #2e7d32 0%, #4689b3 100%);
+  background: linear-gradient(135deg, #1B6551 0%, #4689b3 100%);
   color: var(--ce-white);
   border: none;
   box-shadow: 0 6px 22px rgba(49,117,156,0.34);
@@ -5167,11 +5388,11 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   color: var(--ce-white);
 }
 /* Order Now — ghost button edged in the logo's darker-blue triangle
-   colour (#2e7d32). Fills with the warm gold triangle on hover so the
+   colour (#1B6551). Fills with the warm gold triangle on hover so the
    two buttons echo opposite corners of the pinwheel. */
 .product-modal__add.btn--secondary {
   background: var(--ce-white);
-  border: 1.5px solid #2e7d32;
+  border: 1.5px solid #1B6551;
   color: #1e4a66;
   box-shadow: 0 4px 16px rgba(49,117,156,0.14);
 }
@@ -5906,7 +6127,7 @@ details[open] > .cart-drawer__checkout-title::after {
   outline: none;
   border-color: var(--ce-green);
   background-color: var(--ce-white);
-  box-shadow: 0 0 0 2px rgba(67, 160, 71,0.06);
+  box-shadow: 0 0 0 2px rgba(27, 101, 81,0.06);
 }
 .checkout-modal__submit {
   width: 100%;
@@ -5941,7 +6162,7 @@ details[open] > .cart-drawer__checkout-title::after {
 .site-header__login {
   display: inline-flex; padding: 7px 18px;
   border-radius: 3px;
-  background: #43a047; color: var(--ce-white);
+  background: #1B6551; color: var(--ce-white);
   font-size: 0.8rem; font-weight: 600;
   border: none; cursor: pointer;
   transition: all var(--transition-fast);
@@ -6000,7 +6221,7 @@ details[open] > .cart-drawer__checkout-title::after {
   .teaser-card:hover .btn--sm { transform: none; box-shadow: none; }
   .teaser-card:hover .btn--primary,
   .teaser-card .btn--primary:hover { background: var(--tc-btn-bg); color: var(--ce-gray-900); }
-  .teaser-card:hover .teaser-card__body::after { background: linear-gradient(90deg, var(--tc-glow, #43a047), var(--tc-btn-bg, var(--ce-orange)), var(--tc-glow, #43a047)); }
+  .teaser-card:hover .teaser-card__body::after { background: linear-gradient(90deg, var(--tc-glow, #1B6551), var(--tc-btn-bg, var(--ce-orange)), var(--tc-glow, #1B6551)); }
   .teaser-card__image { aspect-ratio: 3/1; }
   .teaser-card__body { padding: 0.35rem 0.75rem 0.35rem 1.4rem; flex-direction: row; align-items: center; justify-content: space-between; }
   .teaser-card__body .featured-banner__tag { display: none; }
@@ -6080,7 +6301,7 @@ details[open] > .cart-drawer__checkout-title::after {
   .logout-form { display: none; }
   .hero-card-header__btn--logout { display: none; }
   .cart-btn svg { width: 22px; height: 22px; }
-  .cart-btn--active { background: #2e7d32 !important; border-color: #2e7d32 !important; color: #ffffff !important; box-shadow: inset 0 1px 4px rgba(0,0,0,0.18), inset 0 0 6px rgba(0,0,0,0.08) !important; }
+  .cart-btn--active { background: #1B6551 !important; border-color: #1B6551 !important; color: #ffffff !important; box-shadow: inset 0 1px 4px rgba(0,0,0,0.18), inset 0 0 6px rgba(0,0,0,0.08) !important; }
   .cart-btn--active svg { stroke: #ffffff !important; }
   .cart-btn--active .cart-btn__label { color: #ffffff !important; }
   .site-header__nav a { font-size: 0.75rem; }
@@ -6268,7 +6489,7 @@ details[open] > .cart-drawer__checkout-title::after {
     text-decoration: none;
     padding: 4px 8px;
   }
-  .hero-card-header__nav-link:hover { color: #2e7d32; }
+  .hero-card-header__nav-link:hover { color: #1B6551; }
   .hero-card-header__nav-link.active { color: #4689b3; }
   .hero-card-header__brand { display: none !important; }
   .hero-card-header__actions .hero-card-header__btn:last-child { display: none !important; }
@@ -6502,11 +6723,11 @@ details[open] > .cart-drawer__checkout-title::after {
   .site-header--hero-hidden.site-header--hero-visible .site-header__logo-apparel { color: var(--ce-gray-400); }
   .site-header--hero-hidden.site-header--hero-visible .locale-btn { color: var(--ce-gray-700); background: rgba(0,0,0,0.03); border: 1px solid var(--ce-gray-200); border-radius: 4px; }
   .site-header--hero-hidden.site-header--hero-visible .locale-btn:hover { color: var(--ce-gray-700); background: rgba(0,0,0,0.03); border-color: var(--ce-gray-200); }
-  .site-header--hero-hidden.site-header--hero-visible .cart-btn { background: #2e7d32; border: 1px solid #2e7d32; border-radius: 4px; color: #ffffff; }
+  .site-header--hero-hidden.site-header--hero-visible .cart-btn { background: #1B6551; border: 1px solid #1B6551; border-radius: 4px; color: #ffffff; }
   .site-header--hero-hidden.site-header--hero-visible .cart-btn:hover { color: #ffffff; background: #265f80; border-color: #265f80; }
   .site-header--hero-hidden.site-header--hero-visible .cart-btn svg { stroke: #ffffff; }
   .site-header--hero-hidden.site-header--hero-visible .cart-btn:hover svg { stroke: #ffffff; }
-  .site-header--hero-hidden.site-header--hero-visible .cart-btn.cart-btn--active { background: #2e7d32; border-color: #2e7d32; color: #ffffff; }
+  .site-header--hero-hidden.site-header--hero-visible .cart-btn.cart-btn--active { background: #1B6551; border-color: #1B6551; color: #ffffff; }
   .site-header--hero-hidden.site-header--hero-visible .cart-btn.cart-btn--active:hover { background: #265f80; border-color: #265f80; color: #ffffff; }
   .site-header--hero-hidden.site-header--hero-visible .cart-btn.cart-btn--active svg { stroke: #ffffff; }
   .site-header--hero-hidden.site-header--hero-visible .cart-btn.cart-btn--active:hover svg { stroke: #ffffff; }
@@ -6662,6 +6883,10 @@ details[open] > .cart-drawer__checkout-title::after {
     background: var(--ce-white);
   }
   .home-catalog__tabs .apparel-titlebar__tab:last-child::after { display: none; }
+  /* Drop the thin dividers on both sides of the selected tab — its own thicker
+     white frame already separates it, so the 1px lines just doubled up. */
+  .home-catalog__tabs .apparel-titlebar__tab.active::after,
+  .home-catalog__tabs .apparel-titlebar__tab:has(+ .apparel-titlebar__tab.active)::after { display: none; }
   .home-catalog__right {
     display: none;
   }
@@ -6885,7 +7110,7 @@ details[open] > .cart-drawer__checkout-title::after {
   .hero-card-header__nav { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; margin-right: 0.5rem; }
   .hero-card-header__nav-link { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: rgba(255,255,255,0.7); text-decoration: none; padding: 4px 8px; }
   .hero-card-header__nav-link:hover { color: #4689b3; }
-  .hero-card-header__nav-link.active { color: #2e7d32; }
+  .hero-card-header__nav-link.active { color: #1B6551; }
   .hero-card-header__actions .hero-card-header__btn:last-child { display: none; }
 
   /* Hero carousel — shorter on tablet so it doesn't dominate */
@@ -7124,8 +7349,8 @@ details[open] > .cart-drawer__checkout-title::after {
   .site-header.site-header--hero-visible .cart-btn,
   .site-header:not(.site-header--hero-hidden) .cart-btn.cart-btn--active,
   .site-header.site-header--hero-visible .cart-btn.cart-btn--active {
-    background: #2e7d32 !important;
-    border-color: #2e7d32 !important;
+    background: #1B6551 !important;
+    border-color: #1B6551 !important;
     color: #ffffff !important;
     border-radius: 0 !important;
     box-shadow: inset 0 1px 4px rgba(0,0,0,0.18), inset 0 0 6px rgba(0,0,0,0.08) !important;
@@ -7803,8 +8028,8 @@ details[open] > .cart-drawer__checkout-title::after {
     box-shadow: inset 0 1px 4px rgba(0,0,0,0.18), inset 0 0 6px rgba(0,0,0,0.08) !important;
   }
   .hero__upper .hero-card-header__btn--cart:hover {
-    background: #2e7d32 !important;
-    border-color: #2e7d32 !important;
+    background: #1B6551 !important;
+    border-color: #1B6551 !important;
     color: #ffffff !important;
   }
   .hero__upper .hero-card-header__btn--cart svg { stroke: #ffffff !important; }
@@ -8106,7 +8331,7 @@ details[open] > .cart-drawer__checkout-title::after {
     height: auto !important;
   }
   .hero__upper {
-    height: calc(100vh - 7vw - 1rem) !important;
+    height: min(60vh, 600px) !important;
     flex: 0 0 auto !important;
   }
   .hero__lower {
@@ -8463,15 +8688,20 @@ details[open] > .cart-drawer__checkout-title::after {
 }
 
 /* ============================================================
-   Orange brand theme — willstransfer.com header colour (#4e9c40)
+   Orange brand theme — willstransfer.com header colour (#1B6551)
    with the white "Tamarack Limited" wordmark logo.
    Applies to every device header, the mobile menu drawer, and the
    login modal. Appended last so it wins over the stateful rules above.
    ============================================================ */
 :root {
-  --wt-orange: #4e9c40;
-  --wt-orange-dark: #357a2b;
-  --wt-orange-hi: #d9edca;
+  --wt-orange: #1B6551;
+  --wt-orange-dark: #12463a;
+  --wt-orange-hi: #AECBC3;
+  /* Secondary-bar greys (category tab strip, breadcrumb, cart chrome): light
+     neutral grey with a darker highlight for selected/active fills — the sign
+     surfaces stay green, only the secondary bars go grey (matches sister sites). */
+  --wt-bar-bg: #e0e3e6;
+  --wt-bar-hi: #cfd5d9;
   /* Darker-orange overlay box behind the logo + buttons (willstransfer.com
      mobile/tablet look): ~30% black over the orange bar → ~#255524. */
   --wt-box: rgba(0,0,0,0.30);
@@ -8536,6 +8766,30 @@ details[open] > .cart-drawer__checkout-title::after {
 .login-modal__brand--img .brand-apparel { font-size: 1.15rem; margin-left: -1.85rem; color: #fff; }
 @media (min-width: 768px) and (max-width: 1024px) { .site-header .brand-apparel { font-size: 1.45rem; margin-left: -2.95rem; } }
 @media (max-width: 767px) { .site-header .brand-apparel { font-size: 1rem; letter-spacing: 0.08em; margin-left: -2.1rem; } }
+/* Desktop: APPAREL sits inline to the RIGHT of the wordmark (divided by a
+   hairline), not overlapping on top of it — matching the hero lockup. */
+@media (min-width: 1025px) {
+  .site-header .site-header__logo--img .brand-apparel {
+    position: relative !important;
+    inset: auto !important;
+    top: 7px !important;
+    right: auto !important;
+    bottom: auto !important;
+    font-family: var(--font-sans) !important;
+    font-weight: 400 !important;
+    font-size: 1.4rem !important;
+    letter-spacing: 0.02em !important;
+    margin-left: 0.6rem !important;
+    padding-left: 0 !important;
+    border-left: none !important;
+    align-self: center !important;
+  }
+  /* A little more breathing room to the left of the logo. (Higher specificity
+     than the unscoped `margin: 0 auto 0 0 !important` shorthand that resets it.) */
+  .site-header .site-header__logo--img { margin-left: 18px !important; }
+  /* Tighten the My Cart -> logout gap so it matches the FR -> cart gap. */
+  .site-header .logout-form { margin-left: -2px !important; }
+}
 
 /* ---- White wordmark logo image ---- */
 /* Logo sits in the same darker-orange overlay box as the buttons. */
@@ -8850,7 +9104,7 @@ details[open] > .cart-drawer__checkout-title::after {
 }
 
 /* ---- Catalog tabs tie into the orange header ---- */
-/* A mid orange BETWEEN the header orange (#4e9c40) and the darker box overlay
+/* A mid orange BETWEEN the header orange (#1B6551) and the darker box overlay
    (~#ab5c18): an ~18% black overlay over the header orange. Distinct from the
    header while staying in the family; the active tab is the bright header
    orange, the buttons/logo boxes are the darker shade. */
@@ -8975,8 +9229,9 @@ details[open] > .cart-drawer__checkout-title::after {
      center/cover: cover rescales the grain and stretches the dark marks out of
      it, which is why the footer read lighter than the header even though the
      paint underneath is the same colour. */
+  /* No iron grain here — the footer's decoration is the scraped Tamarack brand
+     mark (see .site-footer::before), matching tamarackhomes.com's footer. */
   background:
-    var(--wt-iron) left top / 100% auto no-repeat,
     linear-gradient(var(--wt-box), var(--wt-box)),
     var(--wt-orange);
   border-radius: 0 0 6px 6px;
@@ -9235,44 +9490,131 @@ details[open] > .cart-drawer__checkout-title::after {
    scaled up. Replaces the old Modern Niagara pinwheel + text.
    ============================================================ */
 .hero__upper .hero__text.hero__text--wills {
-  flex-direction: row !important;
+  display: flex !important;
+  flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
   aspect-ratio: auto !important;
-  width: min(92%, 660px) !important;
-  gap: 0 !important;
+  /* Re-centre: a stale desktop rule (from the old card layout) left-anchors
+     .hero__text at left:5vw; override it back to true centre for the cover. */
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  height: auto !important;
+  width: min(94%, 920px) !important;
+  gap: clamp(1rem, 2.6vw, 1.75rem) !important;
   padding: clamp(1.4rem, 4vw, 3rem) clamp(1.2rem, 3.5vw, 2.5rem) !important;
+  /* No dark contrast box / diamond clip — the logo sits directly on the green
+     textured sign (the photo-hero's dark overlay isn't needed here). */
+  background: transparent !important;
+  clip-path: none !important;
 }
+/* Hero lockup: the wordmark stacked ABOVE the category word (rather than the
+   header's overlapping inline treatment, which breaks at hero scale — and in
+   French, where "Vêtements" runs long and covers the wordmark). */
 .hero__upper .hero__text--wills .hero__brand-lockup {
   display: flex !important;
+  flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
+  gap: clamp(0.4rem, 1.1vw, 0.75rem) !important;
   max-width: 100% !important;
   opacity: 0;
   animation: hero-word-fade 0.7s ease-out 0.15s forwards;
 }
 .hero__upper .hero__text--wills .hero__brand-logo {
-  width: clamp(190px, 42vw, 400px) !important;
+  width: clamp(230px, 44vw, 470px) !important;
   height: auto !important;
   display: block !important;
   flex-shrink: 0 !important;
   filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5)) !important;
 }
-/* APPAREL in the header's serif-caps style, overlapping the wordmark tail.
-   The negative margin is in em so the overlap scales with the font, matching
-   the header's proportions at any size. */
+/* The category word as a clean, letter-spaced kicker under the wordmark. */
 .hero__upper .hero__text--wills .hero__brand-apparel {
-  font-family: 'Times New Roman', Times, Georgia, serif !important;
-  font-weight: 700 !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.06em !important;
-  color: #fff !important;
+  letter-spacing: 0.42em !important;
+  color: rgba(255,255,255,0.9) !important;
   line-height: 1 !important;
   white-space: nowrap !important;
-  font-size: clamp(1.5rem, 5vw, 3.4rem) !important;
-  margin-left: -2.15em !important;
+  font-size: clamp(0.8rem, 1.9vw, 1.25rem) !important;
+  /* indent by half the tracking so the block stays optically centred */
+  margin: 0 0 0 0.42em !important;
   position: relative !important;
   z-index: 2 !important;
+}
+
+/* ===== Hero cover content — badge, tagline, CTA stacked with the lockup =====
+   The pieces fade in staggered after the logo so the cover assembles itself. */
+.hero__upper .hero__text--wills .hero__badge {
+  opacity: 0;
+  animation: hero-word-fade 0.6s ease-out 0.05s forwards;
+}
+.hero__upper .hero__text--wills .hero__badge-dot {
+  background: var(--ce-gold);
+  box-shadow: 0 0 8px var(--ce-gold);
+}
+.hero__tagline {
+  margin: 0;
+  color: rgba(255,255,255,0.92);
+  font-size: clamp(1.05rem, 2.2vw, 1.5rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  opacity: 0;
+  animation: hero-word-fade 0.6s ease-out 0.4s forwards;
+}
+.hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.85em 1.9em;
+  background: var(--ce-gold);
+  color: var(--ce-green-dark);
+  font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+  text-shadow: none;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  opacity: 0;
+  animation: hero-word-fade 0.6s ease-out 0.55s forwards;
+}
+.hero__cta svg {
+  width: 1.05em;
+  height: 1.05em;
+  transition: transform var(--transition-fast);
+}
+@media (hover: hover) {
+  .hero__cta:hover {
+    background: #efc85a;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.34);
+  }
+  .hero__cta:hover svg { transform: translateX(3px); }
+}
+.hero__cta:active { transform: translateY(0); }
+
+/* Desktop: set the category word BESIDE the wordmark (to its right, divided by
+   a hairline) rather than stacked beneath it — there's room for the inline
+   lockup on wide screens. Mobile/tablet keep the stacked column above. */
+@media (min-width: 1025px) {
+  .hero__upper .hero__text--wills .hero__brand-lockup {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: clamp(1rem, 1.8vw, 1.5rem) !important;
+  }
+  .hero__upper .hero__text--wills .hero__brand-apparel {
+    margin: 0 !important;
+    padding-left: clamp(1rem, 1.8vw, 1.5rem) !important;
+    border-left: 1.5px solid rgba(255,255,255,0.4) !important;
+    letter-spacing: 0.3em !important;
+    font-size: clamp(1rem, 1.5vw, 1.45rem) !important;
+  }
 }
 
 
@@ -9572,8 +9914,8 @@ details[open] > .cart-drawer__checkout-title::after {
   :root { --wt-box-h: 56px; }
   .site-header { height: 64px; }
   .site-header:not(.site-header--hero-hidden) {
-    margin-top: 4px;
-    top: 4px;
+    margin-top: 2px;
+    top: 2px;
     /* The 1025px base sets overflow: hidden, which would clip the ::after
        greige strip painted above the header's box. But the overflow was also
        containing the inner bar's top margin — flow-root keeps that margin
@@ -10364,13 +10706,12 @@ details[open] > .cart-drawer__checkout-title::after {
      Because the seam is part of the header's height, widening it also moves
      every sticky pin down by 1px automatically. */
   --wt-header-h: calc(var(--wt-box-my) + var(--wt-box-h) + 3px);
-  /* Desktop pins the header 4px DOWN from the viewport top, so a strip of the
-     greige surround shows above the card (see the .site-header rule in the
-     1025px block). The strips therefore have to pin at the header's BOTTOM
-     EDGE — offset + height — not at its height. Getting this wrong is what
-     made the tab bar and breadcrumb look short: the header covered their top
-     4px, clipping the tops off the search field and the Catalog button. */
-  --wt-header-top: 4px;
+  /* The header is fixed flush at the viewport top (top:0), so the sticky
+     strips below it pin at the header's height — no extra offset. Adding a
+     4px offset here (for a "floated 4px down" card that isn't actually
+     applied) only opened a thick greige gap between the header and the tab
+     bar, so it's pinned flush like the mobile/tablet block does. */
+  --wt-header-top: 0px;
 }
 /* Mobile/tablet pin the header at 0 and pay for that 4px with PADDING inside
    the box, which --wt-header-h already counts — so no extra offset here. */
@@ -10560,7 +10901,7 @@ details[open] > .cart-drawer__checkout-title::after {
    Keeps the Modern Niagara button wholesale: the mark chip, the staggered
    fade-in of the triangles, the square->diamond rotate, the travelling sheen,
    the cart->check crossfade. Only the COLOUR changes.
-   Was: a #2e7d32 -> #4689b3 gradient (brown into MN blue) with the triangles
+   Was: a #1B6551 -> #4689b3 gradient (brown into MN blue) with the triangles
    staggering through MN's brand reds, greens, blue and yellow — none of which
    appear anywhere else in this app.
    Now: the sign palette. The ramp is one warm family (cream -> orange ->
@@ -10570,13 +10911,13 @@ details[open] > .cart-drawer__checkout-title::after {
    will carry over to whatever shape lands, as long as it keeps 8 polygons.
    ============================================================ */
 :root {
-  --wt-pin-1: #d9edca;  /* --wt-orange-hi, the cream highlight */
+  --wt-pin-1: #AECBC3;  /* --wt-orange-hi, the cream highlight */
   --wt-pin-2: #7c3f06;  /* deepest burnt edge */
   --wt-pin-3: #255524;  /* the dark-box orange (30% black over the sign) */
   --wt-pin-4: #f9a24f;  /* lifted orange */
-  --wt-pin-5: #4e9c40;  /* --wt-orange, the sign itself */
-  --wt-pin-6: #357a2b;  /* --wt-orange-dark */
-  --wt-pin-7: #2e7d32;  /* the brown-orange already used on the cart button */
+  --wt-pin-5: #1B6551;  /* --wt-orange, the sign itself */
+  --wt-pin-6: #12463a;  /* --wt-orange-dark */
+  --wt-pin-7: #1B6551;  /* the brown-orange already used on the cart button */
   --wt-pin-8: #ffc98a;  /* pale warm, closes the ring back to the highlight */
 }
 .product-modal__add--branded:active .product-modal__add-pinwheel polygon:nth-child(1),
@@ -12275,3 +12616,59 @@ body:has(.product-fullscreen) { overflow: hidden; }
 @media (max-width: 600px) {
   .site-header__logo--img { margin-left: 3px !important; }
 }
+
+/* ═══ Secondary bars — light grey, dark text ═════════════════════════════════
+   The secondary bars (category tab strip, product breadcrumb, cart table head,
+   cart back bar, menu-drawer header) drop the green sign treatment for a light
+   neutral grey with DARK text. The green PRIMARY colour is kept only as the
+   active-tab / current-category pill. Appended last so it wins the many
+   breakpoint rules above. */
+.home-catalog__header,
+.home-catalog__tabs,
+.pdp-breadcrumb,
+.nav-drawer__header,
+.cart-table thead,
+.cart-table thead tr,
+.cart-drawer__back-btn {
+  background: var(--wt-bar-bg) !important;  /* shorthand also clears the iron texture */
+  box-shadow: none !important;              /* no white seam line under the header */
+  color: var(--ce-gray-700) !important;
+  border: none !important;                  /* no top OR bottom border on the bars */
+}
+/* The breadcrumb's current-category pill matches the active-tab pill. */
+.pdp-breadcrumb__cat { color: var(--ce-gray-900) !important; }
+.pdp-breadcrumb__cat::before { background: var(--wt-bar-hi) !important; }
+/* Dark labels / icons across the bars. */
+.home-catalog__tabs .apparel-titlebar__tab,
+.pdp-breadcrumb__back,
+.pdp-breadcrumb__link,
+.pdp-breadcrumb__sku,
+.nav-drawer__header,
+.nav-drawer__header *,
+.cart-table thead th,
+.cart-drawer__back-btn,
+.cart-drawer__back-btn * { color: var(--ce-gray-700) !important; }
+.pdp-breadcrumb svg,
+.nav-drawer__header svg,
+.cart-drawer__back-btn svg { stroke: var(--ce-gray-700) !important; }
+.home-catalog__tabs .apparel-titlebar__tab:hover { background: rgba(0, 0, 0, 0.05) !important; color: var(--ce-gray-900) !important; }
+/* Active tab = a gentle grey HIGHLIGHT with the dark tab text kept (bolded) —
+   not white text, not the green sign colour. */
+.home-catalog__tabs .apparel-titlebar__tab.active { color: var(--ce-gray-900) !important; }
+.home-catalog__tabs .apparel-titlebar__tab.active,
+.home-catalog__tabs .apparel-titlebar__tab.active::before {
+  background: var(--wt-bar-hi) !important;
+}
+/* The Catalog / view-mode toggle and the tab-bar search: a touch darker grey than
+   the bar with dark text (a subtle control, not a bold green chip). */
+.home-catalog__viewmode,
+.home-catalog__sidebar-search {
+  background: var(--wt-bar-hi) !important;
+  color: var(--ce-gray-900) !important;
+  border: 1px solid var(--ce-gray-200) !important;
+  box-shadow: none !important;
+}
+.home-catalog__viewmode svg,
+.home-catalog__sidebar-search svg { stroke: var(--ce-gray-700) !important; color: var(--ce-gray-700) !important; }
+.home-catalog__sidebar-search .apparel-titlebar__search-input { color: var(--ce-gray-900) !important; }
+.home-catalog__sidebar-search .apparel-titlebar__search-input::placeholder { color: var(--ce-gray-500) !important; }

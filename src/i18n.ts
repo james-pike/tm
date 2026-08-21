@@ -240,8 +240,8 @@ const translations = {
   "cat.Safety Jackets": { en: "Safety Jackets", fr: "Manteaux de sécurité" },
   "cat.Safety Shoes": { en: "Safety Shoes", fr: "Chaussures de sécurité" },
   "cat.Safety Boots": { en: "Safety Boots", fr: "Bottes de sécurité" },
-  "cat.SWAG": { en: "SWAG", fr: "SWAG" },
-  "cat.Swag": { en: "Swag", fr: "Swag" },
+  "cat.SWAG": { en: "Accessories", fr: "Accessoires" },
+  "cat.Swag": { en: "Accessories", fr: "Accessoires" },
   "cat.New Hire Kit": { en: "Office Kit", fr: "Trousse bureau" },
   "nav.newhirekit": { en: "Office Kit", fr: "Trousse bureau" },
 

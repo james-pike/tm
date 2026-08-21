@@ -464,6 +464,12 @@ interface CartItem {
   code?: string;
 }
 
+// Branded product shots that cross-fade behind the login form so visitors see
+// the catalog before signing in.
+const LOGIN_SLIDES = [
+  "/login-hero.jpg",
+];
+
 export default component$(() => {
   const loc = useLocation();
   const nav = useNavigate();
@@ -475,9 +481,25 @@ export default component$(() => {
 
   const showLogin = useSignal(false);
   const overlayFading = useSignal(false);
+  const loginSlide = useSignal(0);
+  // eslint-disable-next-line qwik/no-use-visible-task
+  useVisibleTask$(({ track, cleanup }) => {
+    track(() => showLogin.value);
+    if (!showLogin.value) return;
+    const id = setInterval(() => {
+      loginSlide.value = (loginSlide.value + 1) % LOGIN_SLIDES.length;
+    }, 3800);
+    cleanup(() => clearInterval(id));
+  });
   const menuOpen = useSignal(false);
   const savedLocale = useLocaleLoader();
   const locale = useSignal<Locale>(savedLocale.value);
+  // Flip EN <-> FR and persist the choice so it survives reloads.
+  const toggleLocale = $(() => {
+    const next = locale.value === "en" ? "fr" : "en";
+    locale.value = next;
+    document.cookie = `${LOCALE_COOKIE}=${next};path=/;max-age=31536000`;
+  });
 
   // Mobile/tablet apparel search lives in the header (not the catalog tab
   // strip). It relays keystrokes to the catalog via an "apparel-search" event.
@@ -957,7 +979,7 @@ export default component$(() => {
       {/* Login Modal */}
       {showLogin.value && (
         <div class={`login-overlay ${overlayFading.value ? "login-overlay--fading" : ""}`} onClick$={() => { if (auth.value.loggedIn) showLogin.value = false; }}>
-          <div class="login-modal" onClick$={(e) => e.stopPropagation()}>
+          <div class="login-modal login-modal--split" onClick$={(e) => e.stopPropagation()}>
             {auth.value.loggedIn && (
               <button
                 class="login-modal__close"
@@ -967,14 +989,15 @@ export default component$(() => {
                 &times;
               </button>
             )}
+            <div class="login-modal__form-pane">
+            <button type="button" class="login-modal__lang" onClick$={toggleLocale} aria-label="Toggle language">
+              {locale.value === "en" ? "Français" : "English"}
+            </button>
             <div class="login-modal__header">
               <div class="login-modal__brand login-modal__brand--img">
                 <img src="/tamarack-logo-white.png" alt="Tamarack" class="login-modal__logo-white" width="1451" height="250" />
                 <span class="brand-apparel">Apparel</span>
               </div>
-              <p class="login-modal__subtitle">
-                {t("login.subtitle", locale.value)}
-              </p>
             </div>
             <Form action={loginAction} reloadDocument class="login-modal__form">
               {loginAction.value?.failed && (
@@ -1006,6 +1029,28 @@ export default component$(() => {
                 {loginAction.isRunning ? t("login.submitting", locale.value) : t("login.submit", locale.value)}
               </button>
             </Form>
+            </div>
+            <div class="login-modal__carousel" aria-hidden="true">
+              {LOGIN_SLIDES.map((src, i) => (
+                <img
+                  key={src}
+                  src={src}
+                  alt=""
+                  width="820"
+                  height="1040"
+                  class={`login-modal__slide ${i === loginSlide.value ? "is-active" : ""}`}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                />
+              ))}
+              {LOGIN_SLIDES.length > 1 && (
+                <div class="login-modal__dots">
+                  {LOGIN_SLIDES.map((src, i) => (
+                    <span key={src} class={`login-modal__dot ${i === loginSlide.value ? "is-active" : ""}`} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -1114,6 +1159,11 @@ export default component$(() => {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
               </button>
             )}
+            <button type="button" class={`locale-btn ${locale.value === "en" ? "locale-btn--to-fr" : "locale-btn--to-en"}`} onClick$={toggleLocale} aria-label="Toggle language">
+              <span class="locale-btn__full">{locale.value === "en" ? "Français" : "English"}</span>
+              <span class="locale-btn__short">{locale.value === "en" ? "FR" : "EN"}</span>
+              <svg class="locale-btn__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            </button>
             <button class={`cart-btn ${cart.items.length > 0 ? "cart-btn--active" : ""}`} onClick$={() => { cartOpen.value = !cartOpen.value; if (cartOpen.value) menuOpen.value = false; if (!cartOpen.value) checkoutStep.value = "cart"; }}>
               <span class="cart-btn__label">{t("cart.mycart", locale.value)}</span>
               {cartOpen.value ? (
