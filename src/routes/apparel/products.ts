@@ -146,7 +146,7 @@ export const allProducts = [
   },
   {
     "sku": "TM-9",
-    "name": "Flexfit Mesh Back Trucker Cap",
+    "name": "Flexfit Mesh Back Cap",
     "category": "Hats",
     "sizes": "One Size",
     "badge": "New",
@@ -154,9 +154,9 @@ export const allProducts = [
       "#1a1a18"
     ],
     "price": 23.5,
-    "img": "/skus/i8502-black.png",
+    "img": "/skus/i8502-tamarack.png",
     "imgs": [
-      "/skus/i8502-black.png",
+      "/skus/i8502-tamarack.png",
       "/skus/i8502-black-side.png",
       "/skus/i8502-black-back.png"
     ],
@@ -173,9 +173,9 @@ export const allProducts = [
       "#1a1a18"
     ],
     "price": 18.5,
-    "img": "/skus/dk24-black.png",
+    "img": "/skus/DK24-tamarack.png",
     "imgs": [
-      "/skus/dk24-black.png"
+      "/skus/DK24-tamarack.png"
     ],
     "material": "100% Acrylic",
     "details": "Traditional knit hat with cuff, One size fits most, #DK24"

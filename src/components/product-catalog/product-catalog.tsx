@@ -439,7 +439,10 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
       .filter((s) => !SIZE_ORDER.includes(s))
       .sort((x, y) => Number(x) - Number(y));
     return {
-      genders: GENDER_ORDER.filter((g) => g === "Men" || genders.has(g)),
+      // "Men" is offered on the apparel categories (the men's items are named
+      // generically and read as Unisex, so force it) but NOT on Hats/Headwear,
+      // where everything is one-size unisex.
+      genders: GENDER_ORDER.filter((g) => (g === "Men" && activeCat.value !== "Hats") || genders.has(g)),
       sizes: [...SIZE_ORDER.filter((s) => sizes.has(s)), ...shoeSizes],
       brands: BRAND_LIST.filter((b) => brands.has(b)),
     };

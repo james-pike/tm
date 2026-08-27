@@ -1043,7 +1043,6 @@ export default component$(() => {
       <div class="tablet-notice" aria-live="polite">
         <img src="/tamarack-logo-white.png" alt="Tamarack" class="tablet-notice__logo" width="1451" height="250" />
         <span class="tablet-notice__title">Mobile &amp; tablet coming soon</span>
-        <span class="tablet-notice__sub">Please visit on a desktop for now.</span>
       </div>
 
       {(auth.value.loggedIn || (loginAction.value && !loginAction.value.failed)) && <>
@@ -1463,7 +1462,7 @@ export default component$(() => {
                   </span>
                   <button
                     class="btn btn--primary cart-drawer__order-btn"
-                    onClick$={() => { summaryOpen.value = cart.items.length <= 4; checkoutStep.value = "details"; }}
+                    onClick$={() => { summaryOpen.value = true; checkoutStep.value = "details"; }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
                     {t("cart.checkout", locale.value)}

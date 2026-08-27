@@ -7,6 +7,7 @@ import { allProducts, colorName, categoryLabel } from "../products";
 import { expandSizes, sizeGroups, sortColorsWhiteLast } from "../utils";
 import { LoginTypeContext } from "../../layout";
 import { ProductImage } from "../../../components/product-image/product-image";
+import { CLOTHING_CATEGORIES, SAFETY_CATEGORIES } from "../../../components/product-catalog/product-catalog";
 
 export default component$(() => {
   const locale = useContext(LocaleContext);
@@ -481,12 +482,13 @@ export default component$(() => {
         // Apparel" pulled from every visible category, instead of a
         // single-category list with a "cat.Pants" / "cat.Work Wear"
         // un-translated heading.
-        const visibleByLogin: Record<string, string[]> = {
-          clothing: ["Shirts", "Jackets", "Hats", "SWAG"],
-          tech: ["Work Wear"],
-          safety: ["Flame Resistant", "Shirts", "Hats"],
-        };
-        const visible = visibleByLogin[loginType.value] || visibleByLogin.clothing;
+        // Derive the visible categories from the SAME tab lists the catalog
+        // uses (minus "All"), so a product's category always matches its tab
+        // and the heading reads "More {that category}" instead of falling back
+        // to "More Apparel".
+        const clothingCats = CLOTHING_CATEGORIES.filter((c) => c !== "All");
+        const safetyCats = SAFETY_CATEGORIES.filter((c) => c !== "All");
+        const visible = loginType.value === "safety" ? safetyCats : clothingCats;
         const inVisible = visible.includes(p.category);
         const related = inVisible
           ? allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && r.category === p.category).slice(0, 8)

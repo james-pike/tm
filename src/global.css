@@ -1947,8 +1947,20 @@ body:has(.nav-drawer-overlay) .site-header {
    as the product-detail panel. */
 .doc-panel {
   background: var(--ce-off-white);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
+  /* Centre the narrow policy column on the page (was left-aligned/full-width) —
+     matches the sg layout. */
+  max-width: 820px;
+  margin-left: auto;
+  margin-right: auto;
   padding: 1.75rem 1.75rem 2.25rem;
+  /* Same white ring + drop shadow the cart / catalog / product cards carry, so
+     the panel floats on the greige surround instead of sitting flat. */
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.12),
+    0 0 0 var(--wt-ring) transparent,
+    0 0 0 calc(var(--wt-ring) + 1px) rgba(0, 0, 0, 0.14),
+    0 0 11px var(--wt-ring) rgba(0, 0, 0, 0.12);
 }
 .doc-panel .privacy-page__body { max-width: 68ch; }
 .privacy-page__title {
@@ -3435,19 +3447,24 @@ body:has(.nav-drawer-overlay) .site-header {
 }
 .login-modal--split .login-modal__brand--img .brand-apparel {
   margin-left: 0;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  letter-spacing: 0.3em;
+  /* Wider tracking so APPAREL spans closer to the fields/button width below. */
+  letter-spacing: 0.42em;
+  /* Nudge left so the extra right-side tracking stays optically centred. */
+  padding-left: 0.42em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.9);
-  /* Stretch the caps taller without widening the tracking. */
+  /* Stretch the caps taller without widening the tracking, and nudge right so
+     APPAREL sits under the "Tamarack" wordmark text (the logo's mountain mark
+     occupies the left, so a centred kicker reads shifted left of the word). */
   display: inline-block;
-  transform: scaleY(1.35);
+  transform: translateX(15px) scaleY(1.35);
   transform-origin: center;
 }
-.login-modal--split .login-modal__logo-white { height: 56px; }
+.login-modal--split .login-modal__logo-white { height: 62px; }
 .login-modal--split .login-modal__form {
-  padding: 1.1rem 1.75rem 1.9rem;
+  padding: 1.1rem 2.85rem 1.9rem;
   gap: 1.05rem;
 }
 .login-modal--split .login-modal__field label {
@@ -5323,15 +5340,23 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   padding: 5px;
   background: transparent;
   z-index: 2;
-  /* Hidden: fully clipped from the right edge inward (nothing shown). */
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-/* Press (touch/click) and the "Added" state wipe the mark in from the left.
-   Hover does NOT trigger it — only an actual press / the added state. */
-.product-modal__add--branded:not(:disabled):active .product-modal__add-logo,
-.product-modal__add--added .product-modal__add-logo {
+  /* At rest the mark is fully un-clipped but transparent. ENTRY wipes it in
+     (clip animation, below); EXIT is just an opacity fade-out — the clip stays
+     open so the whole mark fades rather than un-wiping. */
+  opacity: 0;
   clip-path: inset(0 0 0 0);
+  transition: opacity 0.35s ease;
+}
+/* The "Added" state wipes the mark in from the left — ONCE. (Triggering on
+   :active too made it wipe in twice: once on press, once when --added is set
+   just after. --added lands on the same click, so it alone is enough.) */
+.product-modal__add--added .product-modal__add-logo {
+  opacity: 1;
+  animation: add-logo-wipe-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes add-logo-wipe-in {
+  from { clip-path: inset(0 100% 0 0); opacity: 1; }
+  to   { clip-path: inset(0 0 0 0);    opacity: 1; }
 }
 /* Cart outline at the centre — always white, with a soft dark shadow so
    it stays crisp on the blue button at rest and over the colourful
@@ -5408,16 +5433,17 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   }
 }
 
-/* Add to Cart — filled, in the logo's blue→teal triangle palette */
+/* Add to Cart — solid Tamarack green (no gradient); hover lightens the green
+   rather than going dark/blue. */
 .product-modal__add.btn--primary {
-  background: linear-gradient(135deg, #1B6551 0%, #4689b3 100%);
+  background: var(--ce-green);
   color: var(--ce-white);
   border: none;
-  box-shadow: 0 6px 22px rgba(49,117,156,0.34);
+  box-shadow: 0 6px 22px rgba(27,101,81,0.30);
 }
 .product-modal__add.btn--primary:hover {
-  background: linear-gradient(135deg, #2c6890 0%, #4f95bf 100%);
-  box-shadow: 0 10px 30px rgba(49,117,156,0.42);
+  background: var(--ce-green-light);
+  box-shadow: 0 10px 30px rgba(27,101,81,0.36);
 }
 
 @media (min-width: 769px) {
@@ -8816,14 +8842,15 @@ details[open] > .cart-drawer__checkout-title::after {
   .site-header .site-header__logo--img .brand-apparel {
     position: relative !important;
     inset: auto !important;
-    top: 7px !important;
+    top: 9px !important; /* a touch lower */
     right: auto !important;
     bottom: auto !important;
-    font-family: var(--font-sans) !important;
-    font-weight: 400 !important;
-    font-size: 1.4rem !important;
-    letter-spacing: 0.02em !important;
-    margin-left: 0.6rem !important;
+    /* Serif to echo the Tamarack wordmark rather than the sans body font. */
+    font-family: 'Times New Roman', Times, Georgia, serif !important;
+    font-weight: 500 !important;
+    font-size: 1.32rem !important;
+    letter-spacing: 0.04em !important;
+    margin-left: 0.45rem !important; /* ~2-3px left */
     padding-left: 0 !important;
     border-left: none !important;
     align-self: center !important;
@@ -9197,7 +9224,7 @@ details[open] > .cart-drawer__checkout-title::after {
 }
 /* Idle tabs: white label + icon (icons use currentColor so they follow). */
 .home-catalog__tabs .apparel-titlebar__tab { color: #fff !important; font-weight: 500 !important; }
-.home-catalog__tabs .apparel-titlebar__tab:hover { background: rgba(255,255,255,0.10) !important; color: #fff !important; }
+.home-catalog__tabs .apparel-titlebar__tab:hover { background: rgba(0,0,0,0.04) !important; color: var(--ce-green) !important; }
 /* Active tab: the darker box shade — inverted against the orange bar so the
    selected tab reads as a recessed panel (2-shade system: orange + dark box,
    mirroring the header's own orange + button-box relationship). */
@@ -9214,7 +9241,7 @@ details[open] > .cart-drawer__checkout-title::after {
       var(--wt-orange) !important;
   }
   .home-catalog__tabs .apparel-titlebar__tab { margin: 0 !important; width: auto !important; border-radius: 0 !important; font-size: 1.05rem !important; color: #fff !important; }
-  .home-catalog__tabs .apparel-titlebar__tab:hover { background: rgba(255,255,255,0.10) !important; color: #fff !important; }
+  .home-catalog__tabs .apparel-titlebar__tab:hover { background: rgba(0,0,0,0.04) !important; color: var(--ce-green) !important; }
   /* Active tab: inset dark pill (like the breadcrumb's category pill) with
      the bar's lighter orange framing it — the inset matches the 6px white
      ring band around the header. */
@@ -9317,6 +9344,9 @@ details[open] > .cart-drawer__checkout-title::after {
     /* Attached to the content column above — its ring's top edge forms the
        sign's usual white slot at the junction instead of a floating gap. */
     margin-top: 0;
+    /* No greige strip below the footer — it sits flush at the page bottom. */
+    margin-bottom: 0;
+    border-radius: 0;
     box-shadow:
       0 0 0 1px rgba(0, 0, 0, 0.12),
       0 0 0 2px rgba(0, 0, 0, 0.04),
@@ -9333,17 +9363,17 @@ details[open] > .cart-drawer__checkout-title::after {
 /* Footer brand: the white wordmark lockup, same as the header. */
 .site-footer__brand--img { display: flex; align-items: center; }
 .site-footer__logo-white { height: 36px; width: auto; display: block; }
-/* APPAREL sits inline to the RIGHT of the wordmark, matching the header lockup
-   (same sans-serif treatment, centered, nudged to the baseline) rather than the
-   serif mark overlapping the wordmark's tail — scaled to the 36px footer logo. */
+/* APPAREL sits inline to the RIGHT of the wordmark, matching the HEADER lockup
+   exactly — same serif treatment and the same relation to the wordmark text,
+   scaled down to the 36px footer logo. */
 .site-footer__brand--img .brand-apparel {
   color: #fff;
-  font-family: var(--font-sans);
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  font-size: 1.15rem;
-  margin-left: 0;
-  top: 5px;
+  font-family: 'Times New Roman', Times, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  font-size: 1.08rem;
+  margin-left: 0.32rem;
+  top: 10px;
   align-self: center;
 }
 
@@ -9411,7 +9441,7 @@ details[open] > .cart-drawer__checkout-title::after {
 }
 .pdp-breadcrumb__back { color: #fff !important; }
 .pdp-breadcrumb__sku { color: rgba(255,255,255,0.82) !important; }
-.pdp-breadcrumb__link:hover { color: #fff !important; background: rgba(255,255,255,0.10) !important; }
+.pdp-breadcrumb__link:hover { color: var(--ce-green) !important; background: rgba(0,0,0,0.04) !important; }
 /* The product's category reads as the selected item — the same darker box
    overlay as the active catalog tab, inset as a pill so the bar's lighter
    orange shows around it. */
@@ -12644,6 +12674,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
 }
 /* The breadcrumb's current-category pill matches the active-tab pill. */
 .pdp-breadcrumb__cat { color: var(--ce-gray-900) !important; }
+.pdp-breadcrumb__cat:hover { color: var(--ce-green) !important; }
 .pdp-breadcrumb__cat::before { background: var(--wt-bar-hi) !important; }
 /* Dark labels / icons across the bars. */
 .home-catalog__tabs .apparel-titlebar__tab,
@@ -12658,7 +12689,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
 .pdp-breadcrumb svg,
 .nav-drawer__header svg,
 .cart-drawer__back-btn svg { stroke: var(--ce-gray-700) !important; }
-.home-catalog__tabs .apparel-titlebar__tab:hover { background: rgba(0, 0, 0, 0.05) !important; color: var(--ce-gray-900) !important; }
+.home-catalog__tabs .apparel-titlebar__tab:hover { background: rgba(0, 0, 0, 0.05) !important; color: var(--ce-green) !important; }
 /* Active tab = a gentle grey HIGHLIGHT with the dark tab text kept (bolded) —
    not white text, not the green sign colour. */
 .home-catalog__tabs .apparel-titlebar__tab.active { color: var(--ce-gray-900) !important; }
