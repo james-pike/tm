@@ -16,6 +16,7 @@ import { createClient } from "@libsql/client";
 import { LocaleContext, t } from "../i18n";
 import type { Locale, TranslationKey } from "../i18n";
 import { allProducts, colorName } from "./apparel/products";
+import { CLOTHING_CATEGORIES, SAFETY_CATEGORIES, CATEGORY_ICONS } from "../components/product-catalog/product-catalog";
 import { getGiftCard, giftContribution, deductGiftCard } from "../lib/giftcards";
 import { sendConfirmationEmail } from "../lib/orders";
 import type { OrderEmailData, PaymentMethod } from "../lib/orders";
@@ -27,7 +28,7 @@ const LOCALE_COOKIE = "ce_locale";
 // The home hero is temporarily disabled (see routes/index.tsx SHOW_HERO), so
 // the header's hero slide-in mode is off too — the header must be visible at
 // scrollY 0. Flip both back together when the hero returns.
-const SHOW_HERO_HEADER = true;   // Tamarack: hero carries its own floating header
+const SHOW_HERO_HEADER = false;  // No hero — the sticky site header shows at the top of the home page.
 
 // Canadian provincial sales tax rates (combined GST/HST/PST/QST)
 const PROVINCE_TAX: Record<string, number> = {
@@ -1055,11 +1056,13 @@ export default component$(() => {
         </div>
       )}
 
-      {/* Tablet widths aren't finished — CSS shows this over everything between
-          601px and 1024px, so only mobile and desktop render the site. */}
+      {/* Mobile + tablet are held behind a coming-soon cover for launch (desktop
+          only). The full mobile/tablet layout is built and ready behind it —
+          remove this block (and the .tablet-notice CSS gate) to enable them. */}
       <div class="tablet-notice" aria-live="polite">
-        <span class="tablet-notice__title">Tablet coming soon</span>
-        <span class="tablet-notice__sub">Please visit on mobile or desktop.</span>
+        <img src="/tamarack-logo-white.png" alt="Tamarack" class="tablet-notice__logo" width="1451" height="250" />
+        <span class="tablet-notice__title">Mobile &amp; tablet coming soon</span>
+        <span class="tablet-notice__sub">Please visit on a desktop for now.</span>
       </div>
 
       {(auth.value.loggedIn || (loginAction.value && !loginAction.value.failed)) && <>
@@ -1277,17 +1280,18 @@ export default component$(() => {
                 </Link>
               )}
               {loginType.value !== "tech" && (() => {
-                // Mirror the catalog tabs (CLOTHING_CATEGORIES in
-                // product-catalog.tsx, minus "All") so the menu's categories and
-                // labels always match the tab bar. "Footwear" is the tab that
-                // groups the Safety Boots / Safety Shoes data categories.
-                const NAV_CATS: { key: TranslationKey; cat: string; icon: string }[] = [
-                  { key: "cat.Work Wear", cat: "Work Wear", icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M4 6h16v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/><path d="M4 6l-2 4v2h4V8"/><path d="M20 6l2 4v2h-4V8"/></svg>' },
-                  { key: "cat.Jackets", cat: "Jackets", icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2l5 6v12a2 2 0 01-2 2h-3V12h-6v10H6a2 2 0 01-2-2V8l5-6"/><path d="M9 2a3 3 0 006 0"/><line x1="12" y1="12" x2="12" y2="22"/></svg>' },
-                  { key: "cat.Polos", cat: "Polos", icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3 4 6 2 9.5 5 12v9h14v-9l3-2.5L20 6l-4.5-3-1.3 1.7a3.4 3.4 0 0 1-4.4 0z"/><path d="M9 4.2c.9 1.2 4.1 1.2 5 0"/></svg>' },
-                  { key: "cat.T-Shirts", cat: "T-Shirts", icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>' },
-                  { key: "cat.Hats", cat: "Hats", icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 00-7 7c0 3 2 5 3 6h8c1-1 3-3 3-6a7 7 0 00-7-7z"/><path d="M5 15h14"/><path d="M6 18h12"/></svg>' },
-                ];
+                // Mirror the catalog tabs exactly (same CLOTHING_CATEGORIES /
+                // SAFETY_CATEGORIES source as product-catalog.tsx, minus "All"),
+                // so the menu's categories, order and labels can never drift from
+                // the tab bar. "Footwear" is the tab that groups the Safety
+                // Boots / Safety Shoes data categories.
+                const tabCats = loginType.value === "safety" ? SAFETY_CATEGORIES : CLOTHING_CATEGORIES;
+                const NAV_CATS: { key: TranslationKey; cat: string; icon: string }[] =
+                  tabCats.filter((c) => c !== "All").map((cat) => ({
+                    cat,
+                    key: `cat.${cat}` as TranslationKey,
+                    icon: CATEGORY_ICONS[cat] || "",
+                  }));
                 const catMatches = (pCat: string, tabCat: string) =>
                   tabCat === "Footwear"
                     ? (pCat === "Safety Boots" || pCat === "Safety Shoes")
@@ -1614,69 +1618,13 @@ export default component$(() => {
                     </div>
                   </div>
 
-                  {/* ---- Payment method ---- */}
+                  {/* ---- Payment: purchase order only (like mn2) ---- */}
                   <div class="checkout-modal__pay">
                     <h3 class="checkout-modal__form-title">{t("pay.title", locale.value)}</h3>
-                    <div class="checkout-modal__pay-options">
-                      {([
-                        { key: "po", label: t("pay.po", locale.value) },
-                        { key: "giftcard", label: t("pay.giftcard", locale.value) },
-                        { key: "giftcard_card", label: t("pay.giftcard_card", locale.value) },
-                        { key: "card", label: t("pay.card", locale.value) },
-                      ] as const).map((opt) => (
-                        <button
-                          key={opt.key}
-                          type="button"
-                          class={`checkout-modal__pay-opt ${payMethod.value === opt.key ? "active" : ""}`}
-                          onClick$={() => { payMethod.value = opt.key; formError.value = ""; }}
-                        >
-                          <span class="checkout-modal__pay-radio" />
-                          {opt.label}
-                        </button>
-                      ))}
+                    <div class={`checkout-modal__field ${formTouched.value && !empPO.value ? "checkout-modal__field--error" : ""}`}>
+                      <label>{t("cart.po", locale.value)}</label>
+                      <input type="text" value={empPO.value} onInput$={(_, el) => (empPO.value = el.value)} />
                     </div>
-
-                    {/* PO number — only for the invoice method. */}
-                    {payMethod.value === "po" && (
-                      <div class={`checkout-modal__field ${formTouched.value && !empPO.value ? "checkout-modal__field--error" : ""}`}>
-                        <label>{t("cart.po", locale.value)}</label>
-                        <input type="text" value={empPO.value} onInput$={(_, el) => (empPO.value = el.value)} />
-                      </div>
-                    )}
-
-                    {/* Gift card code + balance — for gift methods. */}
-                    {usesGift.value && (
-                      <div class="checkout-modal__gift">
-                        <div class="checkout-modal__gift-row">
-                          <div class={`checkout-modal__field ${giftError.value ? "checkout-modal__field--error" : ""}`}>
-                            <label>{t("pay.gift.label", locale.value)}</label>
-                            <input
-                              type="text"
-                              value={giftCode.value}
-                              placeholder={t("pay.gift.placeholder", locale.value)}
-                              onInput$={(_, el) => { giftCode.value = el.value; giftBalance.value = null; giftError.value = ""; }}
-                            />
-                          </div>
-                          <button type="button" class="btn checkout-modal__gift-apply" onClick$={checkGiftCard} disabled={giftChecking.value}>
-                            {giftChecking.value ? t("pay.gift.checking", locale.value) : t("pay.gift.apply", locale.value)}
-                          </button>
-                        </div>
-                        {giftError.value && <div class="checkout-modal__gift-msg checkout-modal__gift-msg--err">{giftError.value}</div>}
-                        {giftBalance.value != null && !giftError.value && (
-                          <div class="checkout-modal__gift-summary">
-                            <div><span>{t("pay.gift.balance", locale.value)}</span><span>${giftBalance.value.toFixed(2)}</span></div>
-                            <div><span>{t("pay.gift.applied", locale.value)}</span><span>-${giftCovers.value.toFixed(2)}</span></div>
-                            <div class="checkout-modal__gift-remaining">
-                              <span>{giftRemaining.value > 0 ? t("pay.gift.balance.due", locale.value) : t("pay.gift.covered", locale.value)}</span>
-                              <span>${giftRemaining.value.toFixed(2)}</span>
-                            </div>
-                            {giftRemaining.value > 0 && payMethod.value === "giftcard" && (
-                              <div class="checkout-modal__gift-msg checkout-modal__gift-msg--err">{t("pay.gift.short", locale.value)}</div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
                 {formError.value && (

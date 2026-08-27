@@ -15,14 +15,14 @@ const VIEW_MODES: { key: number | "list"; label: string; icon: string }[] = [
 ];
 
 
-const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Polos", "Sweaters", "Jackets", "Hats", "Swag"];
+export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Sweaters", "Polos", "Hats"];
 
 // Safety catalog: every MNFR-* item plus a small allowlist of standard SKUs,
 // minus a deny list for FR items we don't carry yet.
 const SAFETY_SKU_PREFIX = "MNFR-";
 const SAFETY_EXTRA_SKUS = new Set(["MN-2", "MN-3", "MN-5", "MN-6"]);
 const SAFETY_HIDDEN_SKUS = new Set(["MNFR-5", "MNFR-6"]); // FR Insulated Bib & Jacket
-const SAFETY_CATEGORIES = ["All", "Flame Resistant", "Shirts", "Hats"];
+export const SAFETY_CATEGORIES = ["All", "Flame Resistant", "Shirts", "Hats"];
 // Explicit display order for the Safety "All" view: FR shirt + hoodies,
 // FR pants, then the standard-SKU allowlist (short-sleeve tee,
 // long-sleeve tee, ball cap, toque).
@@ -33,8 +33,9 @@ const isSafetyProduct = (sku: string) =>
 // Colors hidden from catalog-card swatches (still visible on product detail page).
 const CARD_HIDDEN_COLORS = new Set(["#c0392b", "#1e40af", "#6b3fa0"]);
 
-const CATEGORY_ICONS: Record<string, string> = {
+export const CATEGORY_ICONS: Record<string, string> = {
   "All": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+  "T-Shirts": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>',
   "Work Wear": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M4 6h16v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/><path d="M4 6l-2 4v2h4V8"/><path d="M20 6l2 4v2h-4V8"/></svg>',
   "Jackets": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2l5 6v12a2 2 0 01-2 2h-3V12h-6v10H6a2 2 0 01-2-2V8l5-6"/><path d="M9 2a3 3 0 006 0"/><line x1="12" y1="12" x2="12" y2="22"/></svg>',
   "Shirts": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>',
@@ -106,11 +107,20 @@ function sizesOf(p: Product): string[] {
 }
 // Brands recognizable in product names (word-boundary matched).
 const BRAND_LIST = [
-  "ATC", "Blundstone", "Coal Harbour", "Columbia", "Core365", "Devon & Jones",
-  "Harriton", "New Balance", "Nike", "Roots", "The North Face", "Timberland",
+  "ATC", "Canada Sportswear", "Blundstone", "Coal Harbour", "Columbia", "Core365", "Devon & Jones",
+  "DML", "Flexfit", "Harriton", "New Balance", "Nike", "Roots", "The North Face", "Timberland",
   "Under Armour",
 ];
+// Brand overrides for products whose brand isn't in the display name (identified
+// from the product spec / style code). Everything else is matched by name
+// against BRAND_LIST.
+const BRAND_BY_SKU: Record<string, string> = {
+  "TM-3": "Canada Sportswear", // Surfer Full-Zip hoodie #L00555 (CSW L-series)
+  "TM-7": "Canada Sportswear", // Women's Lakeview Full-Zip hoodie #L00671 (CSW)
+  "TM-8": "Canada Sportswear", // Lakeview Adult Full-Zip hoodie #L00670 (CSW)
+};
 function brandOf(p: Product): string | null {
+  if (BRAND_BY_SKU[p.sku]) return BRAND_BY_SKU[p.sku];
   const n = p.name.toLowerCase();
   for (const b of BRAND_LIST) if (n.includes(b.toLowerCase())) return b;
   return null;
@@ -429,7 +439,7 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
       .filter((s) => !SIZE_ORDER.includes(s))
       .sort((x, y) => Number(x) - Number(y));
     return {
-      genders: GENDER_ORDER.filter((g) => genders.has(g)),
+      genders: GENDER_ORDER.filter((g) => g === "Men" || genders.has(g)),
       sizes: [...SIZE_ORDER.filter((s) => sizes.has(s)), ...shoeSizes],
       brands: BRAND_LIST.filter((b) => brands.has(b)),
     };

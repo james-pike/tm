@@ -39,16 +39,19 @@ export default component$(() => {
   // Hero temporarily disabled so the catalog (and its sticky tab strip) sits at
   // the top of the page by default. Flip to true to restore — and re-enable the
   // header's hero slide-in in layout.tsx (search "SHOW_HERO") to match.
-  const SHOW_HERO = true;   // Tamarack: full-width hero cover (as in the mn project)
+  const SHOW_HERO = false;  // Hero removed — the catalog + its sticky tab strip sits at the top.
 
   return (
     <div class="home-page">
       {/* Hero */}
       {SHOW_HERO && (
       <section class="hero">
-        {/* Upper 2/3: the green iron-textured "sign" surface (same as the header
-            / login sign), with an enlarged centered brand logo. */}
-        <div class="hero__upper hero__upper--brand">
+        {/* Split hero that mirrors the login split panel exactly (see
+            .login-modal--split): green iron "sign" pane on the left 1/3 carrying
+            the brand lockup, brand photo on the right 2/3. Because it matches the
+            login panel's geometry and logo placement 1:1, logging in fades the
+            form out and the catalog in WITHOUT the logo moving or re-rendering. */}
+        <div class="hero__upper hero__upper--split">
           {/* Floating nav header */}
           <div class="hero-card-header">
             <a href="/" class="hero-card-header__logo" aria-label="Home" />
@@ -88,14 +91,21 @@ export default component$(() => {
             </div>
           </div>
 
-          {/* Brand lockup — same side-by-side format as the header (Tamarack
-              wordmark + APPAREL overlapping its tail), scaled up for the hero. */}
-          <div class="hero__text hero__text--wills">
-            <div class="hero__brand-lockup">
-              <img class="hero__brand-logo" src="/tamarack-logo-white.png" alt="Tamarack" width="1451" height="250" fetchPriority="high" decoding="sync" />
-              <span class="hero__brand-apparel">{t("logo.apparel", locale.value).toUpperCase()}</span>
+          {/* Left 1/3: green iron "sign" pane. The brand is stacked and top-
+              anchored at the same padding as the login form-pane's header, so the
+              logo occupies the identical spot across the login→home transition. */}
+          <div class="hero__pane">
+            <div class="hero__pane-header">
+              <div class="hero__pane-brand">
+                <img src="/tamarack-logo-white.png" alt="Tamarack" class="login-modal__logo-white" width="1451" height="250" fetchPriority="high" decoding="sync" />
+                <span class="brand-apparel">Apparel</span>
+              </div>
             </div>
-            <p class="hero__tagline">{t("hero.subtitle", locale.value)}</p>
+          </div>
+
+          {/* Right 2/3: brand photo — same image and crop as the login carousel. */}
+          <div class="hero__media">
+            <img class="hero__photo" src="/login-hero.jpg" alt="Tamarack Apparel" fetchPriority="high" decoding="sync" />
           </div>
         </div>
       </section>

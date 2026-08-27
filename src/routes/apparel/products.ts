@@ -14,10 +14,9 @@ export const allProducts = [
       "#b6e021"
     ],
     "price": 4,
-    "img": "/skus/ATC1000.webp",
+    "img": "/skus/ATC1000-tamarack.png",
     "imgs": [
-      "/skus/ATC1000.webp",
-      "/skus/ATC1000-sg.jpg"
+      "/skus/ATC1000-tamarack.png"
     ],
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000"
@@ -33,8 +32,10 @@ export const allProducts = [
       "#b6e021"
     ],
     "price": 6.8,
-    "img": "",
-    "imgs": [],
+    "img": "/skus/ATC1015-tamarack.png",
+    "imgs": [
+      "/skus/ATC1015-tamarack.png"
+    ],
     "material": "100% cotton",
     "details": "100% cotton, 185 gsm, Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, 1x1 rib knit collar, Rib knit cuffs, Double needle cover stitch at sleeve & bottom hem, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1015"
   },
@@ -48,8 +49,10 @@ export const allProducts = [
       "#1a1a18"
     ],
     "price": 18.5,
-    "img": "",
-    "imgs": [],
+    "img": "/skus/L00555-tamarack.png",
+    "imgs": [
+      "/skus/L00555-tamarack.png"
+    ],
     "material": "280 gsm, 8.3 oz/yd² (14 oz/lin. yd), 70% ring-spun combed cotton / 30% polyester fleece (heathers 60/40)",
     "details": "100% ring-spun combed cotton face for a superior print surface, Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555"
   },
@@ -64,14 +67,16 @@ export const allProducts = [
       "#a5e82c"
     ],
     "price": 6,
-    "img": "",
-    "imgs": [],
+    "img": "/skus/S350-tamarack.png",
+    "imgs": [
+      "/skus/S350-tamarack.png"
+    ],
     "material": "100% performance polyester interlock",
     "details": "100% performance polyester interlock with wicking technology, No Bleed Fabric (NBF) cationic dye process for easy printing, Side seamed, Breathable, Tagless, Classic fit, #S350"
   },
   {
     "sku": "TM-5",
-    "name": "ATC Pro Team Short Sleeve Ladies' Tee",
+    "name": "Women's ATC Pro Team Short Sleeve Tee",
     "category": "T-Shirts",
     "sizes": "XS - 4XL",
     "badge": "",
@@ -80,14 +85,16 @@ export const allProducts = [
       "#a5e82c"
     ],
     "price": 6,
-    "img": "",
-    "imgs": [],
+    "img": "/skus/L350-tamarack.png",
+    "imgs": [
+      "/skus/L350-tamarack.png"
+    ],
     "material": "100% performance polyester interlock",
     "details": "128 gsm, 100% performance polyester interlock with wicking technology, No Bleed Fabric (NBF) cationic dye process for easy printing, Side seamed, Contoured fit, Breathable, Tagless, Classic fit, #L350"
   },
   {
     "sku": "TM-6",
-    "name": "ATC Everyday Cotton Ladies' Tee",
+    "name": "Women's ATC Everyday Cotton Tee",
     "category": "T-Shirts",
     "sizes": "XS - 4XL",
     "badge": "",
@@ -96,23 +103,82 @@ export const allProducts = [
       "#a5e82c"
     ],
     "price": 4,
-    "img": "",
-    "imgs": [],
+    "img": "/skus/ATC1000L-tamarack.png",
+    "imgs": [
+      "/skus/ATC1000L-tamarack.png"
+    ],
     "material": "100% cotton",
     "details": "100% cotton, 185 gsm, Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, Contoured fit, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000L"
   },
   {
     "sku": "TM-7",
-    "name": "Lakeview Ladies' Full-Zip Hooded Sweatshirt",
+    "name": "Women's Lakeview Full-Zip Hooded Sweatshirt",
     "category": "Sweaters",
     "sizes": "XS - 2XL",
     "badge": "",
-    "colors": [],
+    "colors": [
+      "#1a1a18"
+    ],
     "price": 32.5,
-    "img": "",
-    "imgs": [],
+    "img": "/skus/L00671-tamarack.png",
+    "imgs": [
+      "/skus/L00671-tamarack.png"
+    ],
     "material": "80% cotton / 20% recycled polyester fleece, 330 gsm",
     "details": "330 gsm, 9.7 oz/yd², 80% cotton / 20% recycled polyester fleece, 3-ply fleece, 100% cotton face for superior print surface, Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, DTG printer friendly, #L00671"
+  },
+  {
+    "sku": "TM-8",
+    "name": "Lakeview Adult Full-Zip Hooded Sweatshirt",
+    "category": "Sweaters",
+    "sizes": "S - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 32.5,
+    "img": "/skus/L00670-tamarack.png",
+    "imgs": [
+      "/skus/L00670-tamarack.png"
+    ],
+    "material": "80% cotton / 20% recycled polyester fleece, 3-ply fleece",
+    "details": "100% cotton face for superior print surface, Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, DTG - direct to garment printer friendly, #L00670"
+  },
+  {
+    "sku": "TM-9",
+    "name": "Flexfit Mesh Back Trucker Cap",
+    "category": "Hats",
+    "sizes": "One Size",
+    "badge": "New",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 23.5,
+    "img": "/skus/i8502-black.png",
+    "imgs": [
+      "/skus/i8502-black.png",
+      "/skus/i8502-black-side.png",
+      "/skus/i8502-black-back.png"
+    ],
+    "material": "Poly/spandex with performance mesh",
+    "details": "Structured mid-profile 6-panel Flexfit 110®, Shapeable pre-curved visor, Plastic snapback closure, UV protection, Moisture wicking, Contrasting grey undervisor, #i8502"
+  },
+  {
+    "sku": "TM-10",
+    "name": "DML Flip Toque",
+    "category": "Hats",
+    "sizes": "One Size",
+    "badge": "New",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 18.5,
+    "img": "/skus/dk24-black.png",
+    "imgs": [
+      "/skus/dk24-black.png"
+    ],
+    "material": "100% Acrylic",
+    "details": "Traditional knit hat with cuff, One size fits most, #DK24"
   }
 ];
 
