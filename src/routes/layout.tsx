@@ -478,7 +478,6 @@ export default component$(() => {
   const loginAction = useLogin();
   const logoutAction = useLogout();
   const orderAction = useSubmitOrder();
-  const giftCheckAction = useCheckGiftCard();
 
   const showLogin = useSignal(false);
   const overlayFading = useSignal(false);
@@ -549,30 +548,12 @@ export default component$(() => {
   const payMethod = useSignal<"po" | "giftcard" | "giftcard_card" | "card">("po");
   const giftCode = useSignal("");
   const giftBalance = useSignal<number | null>(null); // null = not yet checked
-  const giftChecking = useSignal(false);
   const giftError = useSignal("");
   const usesGift = useComputed$(() => payMethod.value === "giftcard" || payMethod.value === "giftcard_card");
 
-  const checkGiftCard = $(async () => {
-    giftError.value = "";
-    if (!giftCode.value.trim()) { giftError.value = t("pay.gift.enter", locale.value); return; }
-    giftChecking.value = true;
-    try {
-      const res = await giftCheckAction.submit({ code: giftCode.value.trim() });
-      const v = res?.value as any;
-      if (v?.valid) {
-        giftBalance.value = Number(v.balance) || 0;
-      } else {
-        giftBalance.value = null;
-        giftError.value = t("pay.gift.invalid", locale.value);
-      }
-    } catch {
-      giftBalance.value = null;
-      giftError.value = t("pay.gift.invalid", locale.value);
-    } finally {
-      giftChecking.value = false;
-    }
-  });
+  // Gift-card checking was removed with the PO-only checkout — the gift signals
+  // below are retained only for the (now unreachable) validation guards in
+  // submitOrder, so the payment flow stays correct if gift cards return.
 
   const cartCount = useComputed$(() => {
     const count = cart.items.reduce((sum, i) => sum + i.quantity, 0);
