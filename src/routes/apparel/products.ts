@@ -37,7 +37,7 @@ export const allProducts = [
       "/skus/ATC1015-tamarack.png"
     ],
     "material": "100% cotton",
-    "details": "100% cotton, 185 gsm, Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, 1x1 rib knit collar, Rib knit cuffs, Double needle cover stitch at sleeve & bottom hem, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1015"
+    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, 1x1 rib knit collar, Rib knit cuffs, Double needle cover stitch at sleeve & bottom hem, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1015"
   },
   {
     "sku": "TM-3",
@@ -53,8 +53,8 @@ export const allProducts = [
     "imgs": [
       "/skus/L00555-tamarack.png"
     ],
-    "material": "280 gsm, 8.3 oz/yd² (14 oz/lin. yd), 70% ring-spun combed cotton / 30% polyester fleece (heathers 60/40)",
-    "details": "100% ring-spun combed cotton face for a superior print surface, Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555"
+    "material": "70% ring-spun combed cotton / 30% polyester fleece",
+    "details": "Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555"
   },
   {
     "sku": "TM-4",
@@ -72,7 +72,7 @@ export const allProducts = [
       "/skus/S350-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
-    "details": "100% performance polyester interlock with wicking technology, No Bleed Fabric (NBF) cationic dye process for easy printing, Side seamed, Breathable, Tagless, Classic fit, #S350"
+    "details": "Wicking technology, No Bleed Fabric (NBF) cationic dye process for easy printing, Side seamed, Breathable, Classic fit, #S350"
   },
   {
     "sku": "TM-5",
@@ -90,7 +90,7 @@ export const allProducts = [
       "/skus/L350-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
-    "details": "128 gsm, 100% performance polyester interlock with wicking technology, No Bleed Fabric (NBF) cationic dye process for easy printing, Side seamed, Contoured fit, Breathable, Tagless, Classic fit, #L350"
+    "details": "Wicking technology, No Bleed Fabric (NBF) cationic dye process for easy printing, Side seamed, Contoured fit, Breathable, #L350"
   },
   {
     "sku": "TM-6",
@@ -108,7 +108,7 @@ export const allProducts = [
       "/skus/ATC1000L-tamarack.png"
     ],
     "material": "100% cotton",
-    "details": "100% cotton, 185 gsm, Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, Contoured fit, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000L"
+    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, OEKO-TEX® STANDARD 100 certified, #ATC1000L"
   },
   {
     "sku": "TM-7",
@@ -124,8 +124,8 @@ export const allProducts = [
     "imgs": [
       "/skus/L00671-tamarack.png"
     ],
-    "material": "80% cotton / 20% recycled polyester fleece, 330 gsm",
-    "details": "330 gsm, 9.7 oz/yd², 80% cotton / 20% recycled polyester fleece, 3-ply fleece, 100% cotton face for superior print surface, Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, DTG printer friendly, #L00671"
+    "material": "80% cotton / 20% recycled polyester fleece",
+    "details": "3-ply fleece, cotton face for superior print surface, Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper,  #L00671"
   },
   {
     "sku": "TM-8",
