@@ -8857,7 +8857,7 @@ details[open] > .cart-drawer__checkout-title::after {
   }
   /* A little more breathing room to the left of the logo. (Higher specificity
      than the unscoped `margin: 0 auto 0 0 !important` shorthand that resets it.) */
-  .site-header .site-header__logo--img { margin-left: 18px !important; }
+  .site-header .site-header__logo--img { margin-left: 12px !important; }
   /* Tighten the My Cart -> logout gap so it matches the FR -> cart gap. */
   .site-header .logout-form { margin-left: -2px !important; }
 }
