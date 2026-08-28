@@ -74,7 +74,17 @@ function categoryForQuery(query: string, products: Product[]): string {
 // ---- Filter-sidebar facets (desktop) ----
 // The data has no explicit gender/fit field, so derive it from the name.
 // Check "women"/"ladies" first: "women's" contains "men's" as a substring.
+// Fit overrides for products whose men's cut isn't reflected in the display
+// name (they read as generic → Unisex otherwise). Their women's counterparts
+// are named "Women's ..." and classify correctly by name.
+const GENDER_BY_SKU: Record<string, string> = {
+  "TM-1": "Men", // ATC Everyday Cotton Tee
+  "TM-2": "Men", // ATC Everyday Cotton Long Sleeve Tee
+  "TM-4": "Men", // ATC Pro Team Short Sleeve Tee
+  "TM-8": "Men", // Lakeview Adult Full-Zip Hooded Sweatshirt
+};
 function genderOf(p: Product): string {
+  if (GENDER_BY_SKU[p.sku]) return GENDER_BY_SKU[p.sku];
   const n = p.name.toLowerCase();
   if (/\bwomen['’]?s?\b|ladies/.test(n)) return "Women";
   if (/\bmen['’]?s?\b/.test(n)) return "Men";
@@ -439,10 +449,10 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
       .filter((s) => !SIZE_ORDER.includes(s))
       .sort((x, y) => Number(x) - Number(y));
     return {
-      // "Men" is offered on the apparel categories (the men's items are named
-      // generically and read as Unisex, so force it) but NOT on Hats/Headwear,
-      // where everything is one-size unisex.
-      genders: GENDER_ORDER.filter((g) => (g === "Men" && activeCat.value !== "Hats") || genders.has(g)),
+      // Each fit is offered only where products of that fit actually exist —
+      // the men's SKUs are classified via GENDER_BY_SKU, so "Men" shows on the
+      // apparel categories and stays off Hats (all one-size unisex) on its own.
+      genders: GENDER_ORDER.filter((g) => genders.has(g)),
       sizes: [...SIZE_ORDER.filter((s) => sizes.has(s)), ...shoeSizes],
       brands: BRAND_LIST.filter((b) => brands.has(b)),
     };
