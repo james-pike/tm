@@ -22,7 +22,7 @@ import { sendConfirmationEmail } from "../lib/orders";
 import type { OrderEmailData, PaymentMethod } from "../lib/orders";
 import { createCheckoutSession } from "../lib/stripe";
 
-const AUTH_COOKIE = "ce_auth"; // v2: orders persist to db
+const AUTH_COOKIE = "tm_auth"; // Tamarack-specific (isolated from sibling sites)
 const LOCALE_COOKIE = "ce_locale";
 
 // The home hero has been removed — "/" is now the catalog itself, so the header
@@ -1257,6 +1257,7 @@ export default component$(() => {
             }}
           >
             <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
+            <span class="brand-cluster__apparel">Apparel</span>
           </Link>
           <nav class="site-header__categories">
             <Link href="/" class={loc.url.pathname === "/" ? "active" : ""}>{t("nav.home", locale.value)}</Link>
@@ -1551,6 +1552,7 @@ export default component$(() => {
         <div class="site-footer__inner">
           <div class="site-footer__brand brand-cluster">
             <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
+            <span class="brand-cluster__apparel">Apparel</span>
           </div>
           <div class="site-footer__col">
           {loginType.value === "safety" && (

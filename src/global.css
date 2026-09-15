@@ -15050,3 +15050,16 @@ html { background: rgb(223, 226, 230) !important; }
 .site-footer__brand .brand-cluster__logo { height: 40px; }
 .login-card__brand .brand-cluster__logo { height: 66px; margin: 0 auto; }
 .mobile-coming-soon__brand .brand-cluster__logo { height: 54px; margin: 0 auto; }
+
+/* ── "Apparel" wordmark suffix (header + footer) ────────────────────────── */
+.site-header__logo.brand-cluster,
+.site-footer__brand.brand-cluster { gap: 0.5rem; align-items: center; }
+.brand-cluster__apparel {
+  align-self: center;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1;
+}
+.site-header__logo .brand-cluster__apparel { font-size: 1.05rem; }
+.site-footer__brand .brand-cluster__apparel { font-size: 1rem; }

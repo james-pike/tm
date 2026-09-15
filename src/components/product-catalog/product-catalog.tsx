@@ -189,7 +189,7 @@ const EAGER_CARDS = 4;
 const ProductCard = component$<{ item: Product; sku: string; index: number }>(({ item, sku, index }) => {
   const locale = useContext(LocaleContext);
   const loginType = useContext(LoginTypeContext);
-  const isTech = loginType.value === "tech";
+  const isTech = false; // Tamarack: single catalog, always show prices
   const eager = index < EAGER_CARDS;
 
   // Fit-to-one-line: keep the title at its full size, but scale it down just
@@ -388,10 +388,13 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
   // any deeper path under this (shop) layout is a product page. The sidebar +
   // header stay mounted, so there is no shift between the catalog and PDP.
   const isPdp = useComputed$(() => loc.url.pathname.replace(/\/+$/, "") !== "");
-  const isTech = useComputed$(() => loginType.value === "tech");
-  const isSafety = useComputed$(() => loginType.value === "safety");
-  const isElectrical = useComputed$(() => loginType.value === "electrical");
-  const isSingleCat = useComputed$(() => isTech.value);
+  // Tamarack is a single open catalog — no portal/division filtering. These stay
+  // false regardless of the auth cookie value (so a stray "electrical"/"tech"
+  // cookie from a sibling site on localhost can't hide the catalog).
+  const isTech = useComputed$(() => false);
+  const isSafety = useComputed$(() => false);
+  const isElectrical = useComputed$(() => false);
+  const isSingleCat = useComputed$(() => false);
   const activeCat = useSignal("All");
   const searchQuery = useSignal("");
   // Mobile tab strip: true once scrolled to the end (flips the chevron cue).
