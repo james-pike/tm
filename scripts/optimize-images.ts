@@ -25,6 +25,7 @@ const MANIFEST = "public/.image-manifest.json";
 const RULES: { dir: string; maxWidth: number }[] = [
   { dir: "public/wt", maxWidth: 880 },
   { dir: "public/sku", maxWidth: 880 },
+  { dir: "public/swag", maxWidth: 880 },
   { dir: "public", maxWidth: 1600 },
 ];
 

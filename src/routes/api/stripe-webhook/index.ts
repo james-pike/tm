@@ -94,7 +94,7 @@ export const onPost: RequestHandler = async ({ request, env, json }) => {
     let items: OrderItem[] = [];
     try { items = JSON.parse(String(row.items || "[]")); } catch { items = []; }
     const fromAddress = env.get("RESEND_FROM") || env.get("VITE_RESEND_FROM") || "Tamarack <onboarding@resend.dev>";
-    const staffAddresses = (env.get("ORDER_NOTIFY_TO") || env.get("VITE_ORDER_NOTIFY_TO") || "cs@safetyhouse.ca")
+    const staffAddresses = (env.get("ORDER_NOTIFY_TO") || env.get("VITE_ORDER_NOTIFY_TO") || "info@tamarackapparel.ca")
       .split(",").map((a) => a.trim()).filter(Boolean);
     const emailData: OrderEmailData = {
       orderNumber: m.order_number || "",
@@ -106,6 +106,9 @@ export const onPost: RequestHandler = async ({ request, env, json }) => {
         department: m.department || "",
         provinceName: m.province_name || "",
         provinceCode: m.province_code || "",
+        address1: m.address1 || "",
+        city: m.city || "",
+        postal: m.postal || "",
         po: m.po || "",
       },
       items,

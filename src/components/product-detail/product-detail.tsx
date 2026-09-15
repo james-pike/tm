@@ -1,28 +1,42 @@
-import { component$, useSignal, useComputed$, useTask$, useVisibleTask$, $, useContext } from "@builder.io/qwik";
+import { component$, useSignal, useComputed$, useTask$, useVisibleTask$, $, useContext, type QRL } from "@builder.io/qwik";
 import { Carousel } from "@qwik-ui/headless";
-import { Link, useLocation, useNavigate } from "@builder.io/qwik-city";
-import type { DocumentHead } from "@builder.io/qwik-city";
-import { LocaleContext, t } from "../../../i18n";
-import { allProducts, colorName, categoryLabel } from "../products";
-import { expandSizes, sizeGroups, sortColorsWhiteLast } from "../utils";
-import { LoginTypeContext } from "../../layout";
-import { ProductImage } from "../../../components/product-image/product-image";
-import { CLOTHING_CATEGORIES, SAFETY_CATEGORIES } from "../../../components/product-catalog/product-catalog";
+import { Link } from "@builder.io/qwik-city";
+import { LocaleContext, t } from "../../i18n";
+import { allProducts, colorName, categoryLabel } from "../../routes/apparel/products";
+import { expandSizes, sizeGroups, sortColorsWhiteLast } from "../../routes/apparel/utils";
+import { LoginTypeContext } from "../../routes/layout";
+import { ELECTRICAL_SKUS } from "../product-catalog/product-catalog";
+import { ProductImage } from "../product-image/product-image";
 
-export default component$(() => {
+// Tall sizes are rendered on their own row, separate from the regular sizes.
+const TALL_SIZES = new Set(["ST", "MT", "LT", "XLT", "2XLT", "3XLT", "4XLT", "5XLT"]);
+
+interface ProductDetailPanelProps {
+  /** SKU to render (from the route param, or the in-frame catalog overlay). */
+  sku: string;
+  /** In-frame overlay mode: when set, renders a close button instead of the
+      breadcrumb, and related items switch the panel in place instead of navigating. */
+  onClose$?: QRL<() => void>;
+  onSelectSku$?: QRL<(sku: string) => void>;
+}
+
+/**
+ * The product-detail view — image carousel, size/colour/variant pickers, add-to-
+ * cart and the related-items carousel. Rendered both as the /apparel/[sku]/ route
+ * (full page) and as the catalog's in-frame overlay panel; the two never diverge
+ * because they share this one component. `sku` comes from a prop rather than the
+ * route so the same logic drives both.
+ */
+export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) => {
   const locale = useContext(LocaleContext);
   const loginType = useContext(LoginTypeContext);
   const hidePrice = loginType.value === "tech";
-  const loc = useLocation();
-  const nav = useNavigate();
+  const inFrame = !!props.onClose$;
 
-  // Read loc.params.sku *inside* the computed so it re-tracks on client-side
-  // navigation between two [sku] pages. That's the same route, so Qwik reuses
-  // this component instance and never re-runs setup — a captured `const sku`
-  // would stay stale and the page would keep showing the previous product
-  // (the "stuck" related-carousel bug). The reset task below re-inits per-
-  // product UI state (image index, size/colour) on each sku change.
-  const product = useComputed$(() => allProducts.find((p) => p.sku === loc.params.sku) || null);
+  // Reference props.sku directly inside computed/tasks so they re-track when the
+  // panel is pointed at a different product (route [sku]→[sku] nav, or the
+  // in-frame overlay switching products via a related item).
+  const product = useComputed$(() => allProducts.find((p) => p.sku === props.sku) || null);
 
   const imgIndex = useSignal(0);
   const touchStartX = useSignal(0);
@@ -35,16 +49,8 @@ export default component$(() => {
   const added = useSignal(false);
   const addedInfo = useSignal("");
   const imgFullscreen = useSignal(false);
-  // Mobile image layout: "rail" = catalog style with the preview column on the
-  // right; "full" = full-width image (previews hidden, dots for paging).
-  // Toggled from the breadcrumb bar.
   const imgLayout = useSignal<"rail" | "full">("rail");
 
-  // How many related-carousel slides are shown per view. Qwik UI marks every
-  // slide *outside* the [currentIndex, currentIndex + slidesPerView) window as
-  // `inert` (unclickable). Desktop CSS shows 4 slides but the JS prop was a
-  // fixed 2, so the 3rd/4th visible slides were inert — clicks did nothing.
-  // Track the viewport so the prop matches the CSS: 4 on desktop, 2 elsewhere.
   const relatedPerView = useSignal(2);
   // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(({ cleanup }) => {
@@ -55,18 +61,8 @@ export default component$(() => {
     cleanup(() => mq.removeEventListener("change", apply));
   });
 
-  // SKUs that use the waist x inseam size picker instead of a S–4XL run.
-  // Carhartt 102291 Rigby Dungaree (MN-1) and the FR pants (MNFR-1) ship
-  // in the same waist/inseam matrix.
-  const waistLengthSkus = new Set(["CAR-12", "CAR-14", "MN-1", "MNFR-1"]);
-  // Per-SKU variant options. Each entry maps the variant label to the list
-  // of sizes available *for that variant* — different lengths on the same
-  // bib can carry different size runs (e.g. Carhartt 106672 Short comes
-  // M-4XL, Regular S-5XL, Tall M-4XL).
+  const waistLengthSkus = new Set(["CAR-12", "CAR-14", "MN-1", "MNFR-1", "MN-36"]);
   const variantSizesBySku: Record<string, Record<string, string[]>> = {
-    // MN-3 tee ships S-4XL regular plus a tall run (LT-4XLT). Tall starts at
-    // L, so the size labels stay plain (L-4XL) and the tall-ness is carried
-    // by the variant pick — same as the rest of the catalog.
     "MN-3": {
       "Regular": ["S", "M", "L", "XL", "2XL", "3XL", "4XL"],
       "Tall": ["L", "XL", "2XL", "3XL", "4XL"],
@@ -87,26 +83,19 @@ export default component$(() => {
   };
   const variantSkus = new Set(Object.keys(variantSizesBySku));
   const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL"];
-  // Per-SKU waist + inseam runs. MN-1 (Carhartt 102291 Rigby) and MNFR-1
-  // (Carhartt 104204 FR Rigby) carry different waist/length grids.
-  // Carhartt CAR-12 / CAR-14 don't have a specific entry — they fall back
-  // to the default (full union) range.
   const waistOptionsBySku: Record<string, string[]> = {
     "MN-1": ["28", "29", "30", "31", "32", "33", "34", "35", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54"],
     "MNFR-1": ["30", "31", "32", "33", "34", "35", "36", "38", "40", "42", "44", "46"],
+    "MN-36": ["30", "31", "32", "33", "34", "35", "36", "38", "40", "42", "44", "46", "48", "52"],
   };
   const lengthOptionsBySku: Record<string, string[]> = {
     "MN-1": ["28", "30", "32", "34", "36"],
     "MNFR-1": ["30", "32", "34", "36"],
+    "MN-36": ["30", "32", "34", "36"],
   };
-  // Default (CAR-12 / CAR-14, or any new waist-length SKU without an
-  // explicit entry above) — full union range.
   const waistOptions = ["28", "29", "30", "31", "32", "33", "34", "35", "36", "38", "40", "42", "44", "46", "48", "50"];
   const lengthOptions = ["30", "32", "34", "36"];
 
-  // Sizes shown in the size picker. For per-variant SKUs the list narrows
-  // to whatever the currently selected variant carries; before a variant
-  // is picked, show the union (sorted) so the user sees the full pool.
   const sizeOptions = useComputed$<string[]>(() => {
     const p = product.value;
     if (!p) return [];
@@ -122,11 +111,11 @@ export default component$(() => {
     return expandSizes(p.sizes);
   });
 
-  // If the user switches variant and their previously-picked size isn't
-  // offered in the new variant, clear it so they re-select consciously.
   // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(({ track }) => {
     track(() => selectedVariant.value);
+    const p = product.value;
+    if (p && waistLengthSkus.has(p.sku)) return;
     if (!selectedSize.value) return;
     if (!sizeOptions.value.includes(selectedSize.value)) {
       selectedSize.value = "";
@@ -188,14 +177,8 @@ export default component$(() => {
     setTimeout(() => { added.value = false; }, 1300);
   });
 
-  // Re-initialise per-product UI state whenever the SKU changes. Because the
-  // component instance is reused across [sku]→[sku] navigation, image index and
-  // size/colour selections would otherwise carry over from the previous product
-  // — a stale imgIndex past the new product's image count shows a blank main
-  // image ("image doesn't load"). Tracking loc.params.sku re-runs this on every
-  // navigation (and once during SSR for the first paint).
   useTask$(({ track }) => {
-    track(() => loc.params.sku);
+    track(() => props.sku);
     imgIndex.value = 0;
     imgFullscreen.value = false;
     selectedQty.value = 1;
@@ -210,9 +193,6 @@ export default component$(() => {
     if (waistLengthSkus.has(p0.sku)) {
       selectedSize.value = "W/L";
     } else if (variantSkus.has(p0.sku)) {
-      // Variant SKUs always start on a selected variant — "Regular" when
-      // available, otherwise the first variant — so the picker is never
-      // left blank. Size is then chosen from that variant's run (prefer L).
       const variantMap = variantSizesBySku[p0.sku];
       const variantKeys = Object.keys(variantMap);
       const defVariant = variantKeys.includes("Regular") ? "Regular" : variantKeys[0];
@@ -232,9 +212,6 @@ export default component$(() => {
       <div class="apparel-catalog" id="products">
         <div class="product-detail">
           <p style={{ padding: "2rem", textAlign: "center" }}>{t("product.notfound", locale.value)}</p>
-          <button class="btn btn--primary" onClick$={() => nav("/apparel/")} style={{ margin: "0 auto", display: "block" }}>
-            {t("apparel.title", locale.value)}
-          </button>
         </div>
       </div>
     );
@@ -242,12 +219,7 @@ export default component$(() => {
 
   const p = product.value;
   const pdf = (p as any).pdf as string | undefined;
-  // The breadcrumb category must read as the TAB the product lives under, not
-  // its raw data category: the catalog remaps Safety Boots / Safety Shoes into
-  // the "Footwear" tab (see product-catalog.tsx), so the crumb has to remap the
-  // same way — otherwise a boot showed "Safety Shoes" while its tab said
-  // "Safety Footwear". categoryLabel() then gives the identical label the tab
-  // uses, so the two can't drift (the old per-category overrides did drift).
+  const hasMultipleImgs = (p.imgs && p.imgs.length ? p.imgs : [p.img]).length > 1;
   const isFootwear = (c: string) => c === "Safety Boots" || c === "Safety Shoes" || c === "Footwear";
   const tabCategory = isFootwear(p.category) ? "Footwear" : p.category;
   const catHash = tabCategory.toLowerCase().replace(/\s+/g, "-");
@@ -255,30 +227,41 @@ export default component$(() => {
   const catLabel = categoryLabel(tabCategory, locale.value);
 
   return (
-    <div class="apparel-catalog" id="products">
-      <nav class="pdp-breadcrumb" aria-label="Breadcrumb">
-        <Link href="/apparel/" class="pdp-breadcrumb__link pdp-breadcrumb__back">
-          <svg class="pdp-breadcrumb__arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          <span>{backLabel}</span>
-        </Link>
-        <Link href={`/apparel/#${catHash}`} class="pdp-breadcrumb__link pdp-breadcrumb__cat">{catLabel}</Link>
-        <span class="pdp-breadcrumb__sku">{p.sku}</span>
-        {/* Mobile: toggle between full-width image and the right preview rail.
-            The icon shows the view you'll switch TO. */}
-        <button
-          class="pdp-breadcrumb__view"
-          aria-label={imgLayout.value === "rail" ? "Full-width image" : "Show image previews"}
-          onClick$={() => (imgLayout.value = imgLayout.value === "rail" ? "full" : "rail")}
-        >
-          {imgLayout.value === "rail" ? (
-            // next: full-width image — expand-corners icon
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-          ) : (
-            // next: preview rail — panel-right icon
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
-          )}
+    <div class={`apparel-catalog ${inFrame ? "apparel-catalog--inframe" : ""}`} id={inFrame ? undefined : "products"}>
+      {inFrame ? (
+        <button class="product-detail__close" aria-label="Close" onClick$={() => props.onClose$?.()}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
         </button>
-      </nav>
+      ) : (
+        <nav class="pdp-breadcrumb" aria-label="Breadcrumb">
+          <Link href="/" class="pdp-breadcrumb__link pdp-breadcrumb__back">
+            <svg class="pdp-breadcrumb__arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>{backLabel}</span>
+          </Link>
+          <Link href={`/#${catHash}`} class="pdp-breadcrumb__link pdp-breadcrumb__cat">
+            {tabCategory === "New Hire Kit" ? (
+              <>
+                <span class="pdp-breadcrumb__cat-full">{catLabel}</span>
+                <span class="pdp-breadcrumb__cat-short">{t("cat.newhirekit.short", locale.value)}</span>
+              </>
+            ) : catLabel}
+          </Link>
+          <span class="pdp-breadcrumb__sku">{p.sku}</span>
+          {hasMultipleImgs && (
+            <button
+              class="pdp-breadcrumb__view"
+              aria-label={imgLayout.value === "rail" ? "Full-width image" : "Show image previews"}
+              onClick$={() => (imgLayout.value = imgLayout.value === "rail" ? "full" : "rail")}
+            >
+              {imgLayout.value === "rail" ? (
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+              ) : (
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+              )}
+            </button>
+          )}
+        </nav>
+      )}
       <div class={`product-detail ${imgLayout.value === "full" ? "product-detail--imgfull" : ""}`}>
         <div class="product-modal__layout">
           <div class="product-image-row">
@@ -370,9 +353,9 @@ export default component$(() => {
             )}
             {!waistLengthSkus.has(p.sku) && (
             <div class="product-modal__field">
-              <label class="product-modal__label">{t("modal.size", locale.value)}{variantSkus.has(p.sku) && selectedVariant.value && <span class="product-modal__color-inline"> — {selectedVariant.value}</span>}</label>
+              <label class="product-modal__label">{t("modal.size", locale.value)}{variantSkus.has(p.sku) && selectedVariant.value && <span class="product-modal__color-inline"> — {t(`variant.${selectedVariant.value}` as any, locale.value)}</span>}{!variantSkus.has(p.sku) && sizeOptions.value.some((s) => TALL_SIZES.has(s)) && selectedSize.value && <span class="product-modal__color-inline"> — {t(TALL_SIZES.has(selectedSize.value) ? "variant.Tall" : "variant.Regular", locale.value)}</span>}</label>
               <div class="product-modal__options">
-                {sizeOptions.value.map((size) => (
+                {sizeOptions.value.filter((s) => !TALL_SIZES.has(s)).map((size) => (
                   <button
                     key={size}
                     class={`product-modal__option ${selectedSize.value === size ? "active" : ""}`}
@@ -382,6 +365,19 @@ export default component$(() => {
                   </button>
                 ))}
               </div>
+              {sizeOptions.value.some((s) => TALL_SIZES.has(s)) && (
+                <div class="product-modal__options product-modal__options--tall">
+                  {sizeOptions.value.filter((s) => TALL_SIZES.has(s)).map((size) => (
+                    <button
+                      key={size}
+                      class={`product-modal__option ${selectedSize.value === size ? "active" : ""}`}
+                      onClick$={() => (selectedSize.value = size)}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             )}
             {variantSkus.has(p.sku) && (
@@ -394,7 +390,7 @@ export default component$(() => {
                       class={`product-modal__option ${selectedVariant.value === v ? "active" : ""}`}
                       onClick$={() => (selectedVariant.value = v)}
                     >
-                      {v}
+                      {t(`variant.${v}` as any, locale.value)}
                     </button>
                   ))}
                 </div>
@@ -466,9 +462,18 @@ export default component$(() => {
                   <span class="product-modal__add-label-text product-modal__add-label-text--added">{t("modal.added", locale.value)}</span>
                 </span>
                 <span class="product-modal__add-mark" aria-hidden="true">
+                  <svg class="product-modal__add-pinwheel" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="50,50 50,0 100,0" fill="#ffe2a6" />
+                    <polygon points="50,50 100,0 100,50" fill="#ae1f2a" />
+                    <polygon points="50,50 100,50 100,100" fill="#d43950" />
+                    <polygon points="50,50 100,100 50,100" fill="#9ec069" />
+                    <polygon points="50,50 50,100 0,100" fill="#7fa244" />
+                    <polygon points="50,50 0,100 0,50" fill="#4689b3" />
+                    <polygon points="50,50 0,50 0,0" fill="#31759c" />
+                    <polygon points="50,50 0,0 50,0" fill="#ffd25b" />
+                  </svg>
                   <svg class="product-modal__add-glyph product-modal__add-glyph--cart" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-                  {/* Tamarack mark (white, transparent) — wipes in from the left when the item is added. */}
-                  <img class="product-modal__add-logo" src="/footer-mark.png" alt="" width="40" height="40" decoding="async" />
+                  <svg class="product-modal__add-glyph product-modal__add-glyph--check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
                 </span>
               </button>
             </div>
@@ -476,84 +481,89 @@ export default component$(() => {
         </div>
       </div>
       {(() => {
-        // Same visibility map as the breadcrumb above — when the product's
-        // category isn't a tab in the current login's catalog (e.g.
-        // clothing user on MN-1 Pants), fall back to broader "More
-        // Apparel" pulled from every visible category, instead of a
-        // single-category list with a "cat.Pants" / "cat.Work Wear"
-        // un-translated heading.
-        // Derive the visible categories from the SAME tab lists the catalog
-        // uses (minus "All"), so a product's category always matches its tab
-        // and the heading reads "More {that category}" instead of falling back
-        // to "More Apparel".
-        const clothingCats = CLOTHING_CATEGORIES.filter((c) => c !== "All");
-        const safetyCats = SAFETY_CATEGORIES.filter((c) => c !== "All");
-        const visible = loginType.value === "safety" ? safetyCats : clothingCats;
+        const visibleByLogin: Record<string, string[]> = {
+          clothing: ["Jackets", "Sweaters", "Shirts", "Polos", "Hats", "SWAG", "New Hire Kit"],
+          tech: ["Work Wear"],
+          safety: ["Flame Resistant", "Shirts", "Hats"],
+        };
+        const isElectrical = loginType.value === "electrical";
+        const visible = visibleByLogin[loginType.value] || visibleByLogin.clothing;
         const inVisible = visible.includes(p.category);
-        const related = inVisible
+        // Electrical: the "more products" row is just the rest of the Electrical
+        // lineup — not the full catalog.
+        const related = isElectrical
+          ? allProducts.filter((r) => r.sku !== p.sku && ELECTRICAL_SKUS.includes(r.sku)).slice(0, 8)
+          : inVisible
           ? allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && r.category === p.category).slice(0, 8)
           : allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && visible.includes(r.category)).slice(0, 8);
-        const headingSuffix = inVisible ? catLabel : t("nav.apparel", locale.value);
+        const headingSuffix = isElectrical ? t("login.portal.electrical", locale.value) : inVisible ? catLabel : t("nav.apparel", locale.value);
+        // Card inner markup, shared by the grid + carousel below (inline, not a
+        // component, to keep it a plain render helper).
+        const cardInner = (item: typeof related[number], loading: "eager" | "lazy") => (
+          <>
+            <div class="product-card__image">
+              <ProductImage src={item.img} alt={item.name} width={440} height={440} loading={loading} />
+            </div>
+            <div class="product-card__info">
+              <div class="product-card__name-row">
+                <div class="product-card__name">{item.name}</div>
+                <div class="product-card__price-group">
+                  {!hidePrice && <div class="product-card__price">${(Number(item.price) || 0).toFixed(2)}</div>}
+                  <span class="product-card__sizes">
+                    {(item.sizes === "One Size" ? [t("modal.onesize", locale.value)] : sizeGroups(item.sizes)).map((g) => (
+                      <span key={g} class="product-card__sizes-line">{g}</span>
+                    ))}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </>
+        );
         return (
           <div class="related-items">
-            {/* Heading above the related carousel — "More {Category}". */}
             <h3 class="related-items__title">{t("product.more", locale.value)} {headingSuffix}</h3>
-            {/* Desktop grid */}
+            {/* In-frame: related items switch the panel in place (button + onSelectSku$).
+                Route: they navigate (Link). */}
             <div class="related-items__grid">
               {related.slice(0, 4).map((item) => (
-                <Link key={item.sku} href={`/apparel/${item.sku}/`} class="product-card product-card-link">
-                  <div class="product-card__image">
-                    <ProductImage src={item.img} alt={item.name} width={440} height={440} loading="eager" />
-                  </div>
-                  <div class="product-card__info">
-                    <div class="product-card__name-row">
-                      <div class="product-card__name">{item.name}</div>
-                      <div class="product-card__price-group">
-                        {!hidePrice && <div class="product-card__price">${(Number(item.price) || 0).toFixed(2)}</div>}
-                        <span class="product-card__sizes">
-                          {(item.sizes === "One Size" ? [t("modal.onesize", locale.value)] : sizeGroups(item.sizes)).map((g) => (
-                            <span key={g} class="product-card__sizes-line">{g}</span>
-                          ))}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                inFrame ? (
+                  <button key={item.sku} type="button" class="product-card product-card-link" onClick$={() => props.onSelectSku$?.(item.sku)}>
+                    {cardInner(item, "eager")}
+                  </button>
+                ) : (
+                  <Link key={item.sku} href={`/${item.sku}/`} class="product-card product-card-link">
+                    {cardInner(item, "eager")}
+                  </Link>
+                )
               ))}
             </div>
-            {/* Mobile carousel */}
             <Carousel.Root class="related-carousel" slidesPerView={relatedPerView.value} gap={0.4} align="start" sensitivity={{ touch: 1.5, mouse: 1.5 }} rewind>
               <div class="related-carousel__wrapper">
+                {related.length > relatedPerView.value && (
                 <Carousel.Previous class="related-carousel__arrow related-carousel__arrow--prev">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 </Carousel.Previous>
+                )}
                 <Carousel.Scroller class="related-carousel__scroller">
                   {related.map((item) => (
                     <Carousel.Slide key={item.sku} class="related-carousel__slide">
-                      <Link href={`/apparel/${item.sku}/`} class="product-card product-card-link">
-                        <div class="product-card__image">
-                          <ProductImage src={item.img} alt={item.name} width={440} height={440} loading="lazy" />
-                        </div>
-                        <div class="product-card__info">
-                          <div class="product-card__name-row">
-                            <div class="product-card__name">{item.name}</div>
-                            <div class="product-card__price-group">
-                              {!hidePrice && <div class="product-card__price">${(Number(item.price) || 0).toFixed(2)}</div>}
-                              <span class="product-card__sizes">
-                          {(item.sizes === "One Size" ? [t("modal.onesize", locale.value)] : sizeGroups(item.sizes)).map((g) => (
-                            <span key={g} class="product-card__sizes-line">{g}</span>
-                          ))}
-                        </span>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
+                      {inFrame ? (
+                        <button type="button" class="product-card product-card-link" onClick$={() => props.onSelectSku$?.(item.sku)}>
+                          {cardInner(item, "lazy")}
+                        </button>
+                      ) : (
+                        <Link href={`/${item.sku}/`} class="product-card product-card-link">
+                          {cardInner(item, "lazy")}
+                        </Link>
+                      )}
                     </Carousel.Slide>
                   ))}
                 </Carousel.Scroller>
+                {related.length > relatedPerView.value && (
                 <Carousel.Next class="related-carousel__arrow related-carousel__arrow--next">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </Carousel.Next>
+                )}
               </div>
             </Carousel.Root>
           </div>
@@ -576,10 +586,3 @@ export default component$(() => {
     </div>
   );
 });
-
-export const head: DocumentHead = ({ params }) => {
-  const product = allProducts.find((p) => p.sku === params.sku);
-  return {
-    title: product ? `${product.name} - Tamarack Apparel` : "Product - Tamarack Apparel",
-  };
-};

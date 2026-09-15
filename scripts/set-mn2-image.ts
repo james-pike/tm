@@ -13,7 +13,7 @@ const NEW_IMG = "/K126-model.png"; // new primary (latest version)
 const ORDER = ["/K126-model.png", "/sku/sleeve.png"];
 
 const before = await db.execute({
-  sql: "SELECT sku, name, img, imgs FROM products WHERE vendor='modernniagara' AND sku=?",
+  sql: "SELECT sku, name, img, imgs FROM products WHERE vendor='tamarack' AND sku=?",
   args: [SKU],
 });
 console.log("Before:");
@@ -25,12 +25,12 @@ if (before.rows.length !== 1) {
 }
 
 await db.execute({
-  sql: "UPDATE products SET img=?, imgs=? WHERE vendor='modernniagara' AND sku=?",
+  sql: "UPDATE products SET img=?, imgs=? WHERE vendor='tamarack' AND sku=?",
   args: [NEW_IMG, JSON.stringify(ORDER), SKU],
 });
 
 const after = await db.execute({
-  sql: "SELECT sku, name, img, imgs FROM products WHERE vendor='modernniagara' AND sku=?",
+  sql: "SELECT sku, name, img, imgs FROM products WHERE vendor='tamarack' AND sku=?",
   args: [SKU],
 });
 console.log("After:");

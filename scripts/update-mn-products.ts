@@ -3,7 +3,7 @@ import { config } from "dotenv";
 
 config({ path: new URL("../.env", import.meta.url).pathname });
 
-const VENDOR = "modernniagara";
+const VENDOR = "tamarack";
 
 type Update = {
   sku: string;

@@ -17,30 +17,38 @@ async function fetchAndWrite() {
     url,
     authToken: process.env.TURSO_AUTH_TOKEN || process.env.VITE_TURSO_AUTH_TOKEN || undefined,
   });
+  // Display overrides applied on top of the DB rows. The DB is the source of
+  // truth for most fields, but these title/category tweaks live here so they
+  // survive every regeneration — editing products.ts directly does NOT persist
+  // (this script overwrites it on every build). Update the DB to retire one.
+  const OVERRIDES: Record<string, Partial<{ name: string; category: string; sizes: string }>> = {};
+
+  // Tamarack carries no footwear or safetywear — exclude those categories.
+  const EXCLUDE_CATEGORIES = new Set([
+    "Safety Boots", "Safety Shoes", "Footwear", "Flame Resistant",
+  ]);
+
   try {
     const result = await db.execute(
       "SELECT * FROM products WHERE vendor = 'tamarack' ORDER BY sort_order ASC"
     );
 
-    // Tamarack carries no footwear or safetywear — drop those rows so a
-    // regeneration from the shared database can't reintroduce them.
-    const EXCLUDED_CATEGORIES = new Set(["Safety Boots", "Safety Shoes", "Footwear", "Flame Resistant"]);
     const products = result.rows
-      .filter((row: any) => !EXCLUDED_CATEGORIES.has(row.category))
+      .filter((row: any) => !EXCLUDE_CATEGORIES.has(row.category))
       .map((row: any) => ({
-      sku: row.sku,
-      name: row.name,
-      category: row.category,
-      sizes: row.sizes,
-      badge: row.badge,
-      colors: JSON.parse(row.colors || "[]"),
-      price: row.price,
-      img: row.img,
-      imgs: JSON.parse(row.imgs || "[]"),
-      material: row.material,
-      details: row.details,
-      pdf: row.pdf || undefined,
-    }));
+        sku: row.sku,
+        name: row.name,
+        category: row.category,
+        sizes: row.sizes,
+        badge: row.badge,
+        colors: JSON.parse(row.colors || "[]"),
+        price: row.price,
+        img: row.img,
+        imgs: JSON.parse(row.imgs || "[]"),
+        material: row.material,
+        details: row.details,
+        pdf: row.pdf || undefined,
+      })).map((p) => ({ ...p, ...OVERRIDES[p.sku] }));
 
     const output = `// AUTO-GENERATED — do not edit manually. Updated from database at build time.
 import { t } from "../../i18n";
@@ -60,7 +68,6 @@ export function badgeClass(badge: string) {
 const colorNames: Record<string, Record<string, string>> = {
   "#00703c": { en: "Green", fr: "Vert" },
   "#1a1a18": { en: "Black", fr: "Noir" },
-  "#a5e82c": { en: "Lime Shock", fr: "Lime éclatant" },
   "#ffffff": { en: "White", fr: "Blanc" },
   "#2c3e50": { en: "Navy", fr: "Marine" },
   "#6e6e6e": { en: "Grey", fr: "Gris" },
@@ -68,6 +75,9 @@ const colorNames: Record<string, Record<string, string>> = {
   "#94a3b8": { en: "Silver", fr: "Argent" },
   "#4a4a4a": { en: "Charcoal", fr: "Charbon" },
   "#6b8bb0": { en: "Solace Blue", fr: "Bleu Solace" },
+  "#517fa4": { en: "Copen Blue", fr: "Bleu Copen" }, // Travis Mathew Heater Polo (MN-32)
+  "#9caf88": { en: "Green Bay", fr: "Green Bay" }, // Travis Mathew Final Drive View Polo (MN-34)
+  "#3b4657": { en: "Heather Navy", fr: "Marine chiné" }, // Travis Mathew Tour Ready 1/4 Zip (MN-35)
   "#7dd3fc": { en: "Light Blue", fr: "Bleu clair" },
   "#b8b8b8": { en: "Grey Heather", fr: "Gris chiné" },
   "#6b3fa0": { en: "Purple", fr: "Violet" },
@@ -124,6 +134,7 @@ const colorNames: Record<string, Record<string, string>> = {
   "#b0b0b0": { en: "Grey", fr: "Gris" },
   "#b6e021": { en: "Safety Green", fr: "Vert sécurité" },
   "#b8ad97": { en: "Khaki", fr: "Kaki" },
+  "#ab8f66": { en: "Dark Khaki", fr: "Kaki foncé" },
   "#b98b8b": { en: "Rose", fr: "Rose" },
   "#bf5700": { en: "Burnt Orange", fr: "Orange brûlé" },
   "#c2a878": { en: "Tan", fr: "Beige" },

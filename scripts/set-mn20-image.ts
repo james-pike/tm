@@ -14,7 +14,7 @@ const OLD_IMG = "/sku/mens-jacket.webp";
 
 // Show current state
 const before = await db.execute({
-  sql: "SELECT sku, name, img, imgs FROM products WHERE vendor='modernniagara' AND sku=?",
+  sql: "SELECT sku, name, img, imgs FROM products WHERE vendor='tamarack' AND sku=?",
   args: [SKU],
 });
 console.log("Before:");
@@ -33,12 +33,12 @@ const newImgs = [NEW_IMG, ...rest];
 if (!newImgs.includes(OLD_IMG)) newImgs.splice(1, 0, OLD_IMG);
 
 await db.execute({
-  sql: "UPDATE products SET img=?, imgs=? WHERE vendor='modernniagara' AND sku=?",
+  sql: "UPDATE products SET img=?, imgs=? WHERE vendor='tamarack' AND sku=?",
   args: [NEW_IMG, JSON.stringify(newImgs), SKU],
 });
 
 const after = await db.execute({
-  sql: "SELECT sku, name, img, imgs FROM products WHERE vendor='modernniagara' AND sku=?",
+  sql: "SELECT sku, name, img, imgs FROM products WHERE vendor='tamarack' AND sku=?",
   args: [SKU],
 });
 console.log("After:");

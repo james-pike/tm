@@ -3,7 +3,7 @@ import { config } from "dotenv";
 
 config({ path: new URL("../.env", import.meta.url).pathname });
 
-const VENDOR = "modernniagara";
+const VENDOR = "tamarack";
 const NAVY = "#2c3e50";
 const LIGHT_BLUE = "#7dd3fc";
 const BLACK = "#1a1a18";

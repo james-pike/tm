@@ -9,7 +9,7 @@ const db = createClient({
 });
 
 const product = {
-  vendor: "modernniagara",
+  vendor: "tamarack",
   sku: "MN-30",
   name: "Noodle Easy Distance Golf Balls (12) - White",
   category: "SWAG",

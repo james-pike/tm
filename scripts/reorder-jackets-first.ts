@@ -20,19 +20,19 @@ const JACKET_ORDER: Record<string, number> = {
 
 console.log("Before:");
 const before = await db.execute(
-  "SELECT sku, category, sort_order FROM products WHERE vendor='modernniagara' AND category IN ('Jackets','Shirts') ORDER BY sort_order ASC"
+  "SELECT sku, category, sort_order FROM products WHERE vendor='tamarack' AND category IN ('Jackets','Shirts') ORDER BY sort_order ASC"
 );
 for (const r of before.rows as any[]) console.log(`  ${String(r.sort_order).padStart(3)}  ${r.sku} ${r.category}`);
 
 for (const [sku, order] of Object.entries(JACKET_ORDER)) {
   await db.execute({
-    sql: "UPDATE products SET sort_order=? WHERE vendor='modernniagara' AND sku=?",
+    sql: "UPDATE products SET sort_order=? WHERE vendor='tamarack' AND sku=?",
     args: [order, sku],
   });
 }
 
 console.log("\nAfter:");
 const after = await db.execute(
-  "SELECT sku, category, sort_order FROM products WHERE vendor='modernniagara' AND category IN ('Jackets','Shirts') ORDER BY sort_order ASC"
+  "SELECT sku, category, sort_order FROM products WHERE vendor='tamarack' AND category IN ('Jackets','Shirts') ORDER BY sort_order ASC"
 );
 for (const r of after.rows as any[]) console.log(`  ${String(r.sort_order).padStart(3)}  ${r.sku} ${r.category}`);

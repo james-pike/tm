@@ -9,6 +9,7 @@
  * privacy policy.
  */
 import { Resend } from "resend";
+import { colorName as colorLabel } from "../routes/apparel/products";
 
 export type PaymentMethod = "po" | "giftcard" | "giftcard_card" | "card";
 
@@ -25,6 +26,10 @@ export interface OrderItem {
 export interface OrderEmailData {
   orderNumber: string;
   date: string;
+  /** Absolute URL to the logo image shown in the email banner (e.g.
+   *  https://site/favicon-512.png). Emails can't render the header's inline
+   *  SVG, so we point at a hosted raster. Falls back to text if absent. */
+  logoUrl?: string;
   employee: {
     name: string;
     email?: string;
@@ -32,6 +37,9 @@ export interface OrderEmailData {
     department?: string;
     provinceName: string;
     provinceCode: string;
+    address1?: string;
+    city?: string;
+    postal?: string;
     po?: string;
   };
   items: OrderItem[];
@@ -47,15 +55,10 @@ export interface OrderEmailData {
   };
 }
 
-const COLOR_NAMES: Record<string, string> = {
-  "#00703c": "Green", "#1a1a18": "Black", "#ffffff": "White",
-  "#2c3e50": "Navy", "#94a3b8": "Silver", "#4a4a4a": "Charcoal",
-  "#8d5f18": "Bronze", "#c0392b": "Red", "#6b3fa0": "Purple",
-  "#C97B0C": "Royal", "#b8b8b8": "Grey Heather", "#7dd3fc": "Light Blue",
-  "#6b8bb0": "Solace Blue", "#8a5d3b": "Carhartt Brown",
-  "#6e6e6e": "Grey", "#ff6600": "Safety Orange",
-};
-const colorName = (hex: string) => COLOR_NAMES[hex] || hex;
+// Use the app's authoritative colour map (the same one the storefront/cart use)
+// so every hex resolves to its label — e.g. "#ab8f66" -> "Dark Khaki" — instead
+// of leaking a raw hex code into the email. English labels for the email.
+const colorName = (hex: string) => colorLabel(hex, "en");
 
 export function esc(s: string | undefined | null): string {
   if (s == null) return "";
@@ -63,13 +66,6 @@ export function esc(s: string | undefined | null): string {
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
-
-const PAYMENT_LABEL: Record<PaymentMethod, string> = {
-  po: "Purchase order / invoice",
-  giftcard: "Gift card",
-  giftcard_card: "Gift card + credit card",
-  card: "Credit card",
-};
 
 export function buildOrderEmailHtml(o: OrderEmailData): string {
   const itemRows = o.items.map((i) =>
@@ -98,22 +94,32 @@ export function buildOrderEmailHtml(o: OrderEmailData): string {
 
   return `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
-      <div style="background:#2D4841;padding:18px 24px;border-radius:8px 8px 0 0">
-        <div style="font-family:sans-serif;color:#fff;font-size:20px;font-weight:700;letter-spacing:0.03em;line-height:1.15">TAMARACK <span style="color:#AECBC3;font-weight:400;letter-spacing:0.14em">APPAREL</span></div>
-        ${o.orderNumber ? `<p style="color:#AECBC3;margin:10px 0 0;font-size:13px;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>` : ""}
+      <div style="background:#12463a;padding:18px 24px;border-radius:8px 8px 0 0">
+        ${o.logoUrl
+          ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td style="vertical-align:middle;padding-right:12px"><img src="${o.logoUrl}" width="46" height="46" alt="Tamarack" style="display:block;width:46px;height:46px;border:0" /></td>
+              <td style="vertical-align:middle;font-family:sans-serif">
+                <div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:0.02em;line-height:1.15">TAMARACK</div>
+                <div style="color:#fff;font-size:15px;font-weight:600;letter-spacing:0.02em;line-height:1.15">APPAREL</div>
+                <div style="color:#cfe0ec;font-size:15px;font-weight:500;letter-spacing:0.16em;line-height:1.15">APPAREL</div>
+              </td>
+            </tr></table>`
+          : `<h1 style="color:#fff;margin:0;font-size:20px">Tamarack Apparel</h1>`}
+        ${o.orderNumber ? `<p style="color:#cfe0ec;margin:10px 0 0;font-size:13px;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>` : ""}
       </div>
       <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
-        ${o.orderNumber ? `<p style="margin:0 0 4px"><strong>Order #:</strong> ${esc(o.orderNumber)}</p>` : ""}
+        <p style="margin:0 0 16px;font-size:16px">Thank you for your order!</p>
         <p style="margin:0 0 4px"><strong>Date:</strong> ${esc(o.date)}</p>
-        <p style="margin:0 0 4px"><strong>Employee:</strong> ${esc(o.employee.name)}</p>
+        <p style="margin:0 0 4px"><strong>Name:</strong> ${esc(o.employee.name)}</p>
         ${o.employee.email ? `<p style="margin:0 0 4px"><strong>Email:</strong> <a href="mailto:${esc(o.employee.email)}">${esc(o.employee.email)}</a></p>` : ""}
         ${o.employee.phone ? `<p style="margin:0 0 4px"><strong>Phone:</strong> ${esc(o.employee.phone)}</p>` : ""}
-        ${o.employee.department ? `<p style="margin:0 0 4px"><strong>Location:</strong> ${esc(o.employee.department)}</p>` : ""}
+        ${o.employee.address1 ? `<p style="margin:0 0 4px"><strong>Street:</strong> ${esc(o.employee.address1)}</p>` : ""}
+        ${o.employee.city ? `<p style="margin:0 0 4px"><strong>City:</strong> ${esc(o.employee.city)}</p>` : ""}
         <p style="margin:0 0 4px"><strong>Province:</strong> ${esc(o.employee.provinceName)}</p>
+        ${o.employee.postal ? `<p style="margin:0 0 4px"><strong>Postal Code:</strong> ${esc(o.employee.postal)}</p>` : ""}
         ${o.employee.po ? `<p style="margin:0 0 4px"><strong>PO #:</strong> ${esc(o.employee.po)}</p>` : ""}
-        <p style="margin:0 0 4px"><strong>Payment:</strong> ${esc(PAYMENT_LABEL[o.payment.method])}</p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0">
-        <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:16px">
           <thead>
             <tr style="background:#f9fafb">
               <th style="padding:8px 12px;text-align:left">Product</th>
@@ -134,7 +140,7 @@ export function buildOrderEmailHtml(o: OrderEmailData): string {
             </tr>
             <tr>
               <td colspan="3" style="padding:10px 12px;text-align:right;font-weight:700">Total</td>
-              <td style="padding:10px 12px;text-align:right;font-weight:700;color:#1B6551">$${o.total.toFixed(2)}</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:700;color:#12463a">$${o.total.toFixed(2)}</td>
             </tr>
             ${payRows.join("")}
           </tfoot>
@@ -165,7 +171,7 @@ export async function sendConfirmationEmail(cfg: SendEmailConfig, o: OrderEmailD
       from: cfg.from,
       to: toAddresses,
       ...(bccAddresses.length ? { bcc: bccAddresses } : {}),
-      subject: `Tamarack Apparel — Order${o.orderNumber ? ` #${o.orderNumber}` : ""} — ${o.employee.name}`,
+      subject: `${o.orderNumber ? `#${o.orderNumber} — ` : ""}Tamarack Apparel Order — ${o.employee.name} — ${o.date}`,
       html: buildOrderEmailHtml(o),
     });
   } catch (err) {

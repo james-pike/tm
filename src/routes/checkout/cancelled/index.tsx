@@ -18,7 +18,7 @@ export default component$(() => {
           No charge was made and your cart is still saved. You can return to your
           cart and try again whenever you're ready.
         </p>
-        <Link href="/apparel/" class="btn btn--primary">Back to apparel</Link>
+        <Link href="/" class="btn btn--primary">Back to apparel</Link>
       </div>
     </div>
   );

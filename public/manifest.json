@@ -1,15 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
-  "name": "Wills Transfer Apparel",
-  "short_name": "Wills Transfer",
+  "name": "Tamarack Apparel",
+  "short_name": "Tamarack",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#C97B0C",
-  "theme_color": "#C97B0C",
-  "description": "Internal apparel ordering for Wills Transfer staff.",
+  "background_color": "#1B6551",
+  "theme_color": "#1B6551",
+  "description": "Internal apparel ordering for Tamarack staff.",
   "icons": [
     {
-      "src": "/wills-logo.png",
+      "src": "/logo.png",
       "sizes": "200x200",
       "type": "image/png",
       "purpose": "any"

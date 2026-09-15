@@ -9,7 +9,7 @@ const db = createClient({
 });
 
 const product = {
-  vendor: "modernniagara",
+  vendor: "tamarack",
   sku: "MN-27",
   name: "Srixon Q-Star Tour Golf Balls (6) - White",
   category: "SWAG",

@@ -1,5 +1,5 @@
-import { component$, useSignal, useComputed$, useContext, $, useVisibleTask$ } from "@builder.io/qwik";
-import { Link } from "@builder.io/qwik-city";
+import { component$, useSignal, useComputed$, useContext, $, useVisibleTask$, Slot } from "@builder.io/qwik";
+import { Link, useLocation, useNavigate } from "@builder.io/qwik-city";
 import { LocaleContext, t } from "../../i18n";
 import { allProducts, categoryLabel, colorName } from "../../routes/apparel/products";
 import type { Product } from "../../routes/apparel/products";
@@ -15,7 +15,17 @@ const VIEW_MODES: { key: number | "list"; label: string; icon: string }[] = [
 ];
 
 
-export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Sweaters", "Polos", "Hats"];
+export const CLOTHING_CATEGORIES = ["All", "Jackets", "Sweaters", "Shirts", "Polos", "Hats", "SWAG", "New Hire Kit"];
+
+// Electrical portal: shows ONLY these SKUs (the small Electrical-division lineup).
+// Add/replace the Electrical SKU codes here — order is preserved in the grid.
+// MN-36 = Carhartt FR Rigby Pants (104204), MN-37 = Carhartt FR Full Zip Hoodie
+// (104982) — renamed off the old MNFR- prefix to match the catalog's MN- numbering.
+// The FR Dearborn LS Tee (100235) isn't in the catalog yet — add it to the DB,
+// then drop its SKU in here.
+// Display order: T-Shirts, Sweaters, Pants, Headwear (matches the sidebar).
+export const ELECTRICAL_SKUS: string[] = ["MN-38", "MN-40", "MN-36", "MN-39"];
+const ELECTRICAL_SKU_SET = new Set(ELECTRICAL_SKUS);
 
 // Safety catalog: every MNFR-* item plus a small allowlist of standard SKUs,
 // minus a deny list for FR items we don't carry yet.
@@ -26,16 +36,20 @@ export const SAFETY_CATEGORIES = ["All", "Flame Resistant", "Shirts", "Hats"];
 // Explicit display order for the Safety "All" view: FR shirt + hoodies,
 // FR pants, then the standard-SKU allowlist (short-sleeve tee,
 // long-sleeve tee, ball cap, toque).
-const SAFETY_SKU_ORDER = ["MNFR-2", "MNFR-3", "MNFR-4", "MNFR-1", "MN-3", "MN-2", "MN-5", "MN-6"];
-const isSafetyProduct = (sku: string) =>
+export const SAFETY_SKU_ORDER = ["MNFR-2", "MNFR-3", "MNFR-4", "MNFR-1", "MN-3", "MN-2", "MN-5", "MN-6"];
+export const isSafetyProduct = (sku: string) =>
   !SAFETY_HIDDEN_SKUS.has(sku) && (sku.startsWith(SAFETY_SKU_PREFIX) || SAFETY_EXTRA_SKUS.has(sku));
 
 // Colors hidden from catalog-card swatches (still visible on product detail page).
 const CARD_HIDDEN_COLORS = new Set(["#c0392b", "#1e40af", "#6b3fa0"]);
+// SKUs exempt from CARD_HIDDEN_COLORS: products where a normally-decluttered
+// accent colour (e.g. red) is a first-class option and must show on the card.
+// MN-33 offers Black / Red / White, so its red swatch stays.
+const CARD_SHOW_ALL_COLORS = new Set(["MN-33"]);
+const EMPTY_COLOR_SET = new Set<string>();
 
 export const CATEGORY_ICONS: Record<string, string> = {
   "All": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
-  "T-Shirts": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>',
   "Work Wear": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M4 6h16v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/><path d="M4 6l-2 4v2h4V8"/><path d="M20 6l2 4v2h-4V8"/></svg>',
   "Jackets": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2l5 6v12a2 2 0 01-2 2h-3V12h-6v10H6a2 2 0 01-2-2V8l5-6"/><path d="M9 2a3 3 0 006 0"/><line x1="12" y1="12" x2="12" y2="22"/></svg>',
   "Shirts": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>',
@@ -46,11 +60,13 @@ export const CATEGORY_ICONS: Record<string, string> = {
   "SWAG": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>',
   "New Hire Kit": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
   "Flame Resistant": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>',
+  "Pants": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12l1 20h-5l-2-11-2 11H5L6 2z"/><path d="M6 2h12"/></svg>',
+  "Headwear": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M4 18a8 8 0 0116 0"/><path d="M2 18h20"/></svg>',
 };
 
 // Longer category names shown ONLY in the desktop sidebar column; mobile/tablet
 // tabs keep the short cat.* labels (see the --short/--full spans + CSS).
-const FULL_CAT_KEYS: Record<string, string> = {};
+export const FULL_CAT_KEYS: Record<string, string> = {};
 
 // Search matcher for name/sku/category, with a simple plural fallback so
 // "boots" still hits "Safety Boot" (names are singular, and the footwear
@@ -74,17 +90,7 @@ function categoryForQuery(query: string, products: Product[]): string {
 // ---- Filter-sidebar facets (desktop) ----
 // The data has no explicit gender/fit field, so derive it from the name.
 // Check "women"/"ladies" first: "women's" contains "men's" as a substring.
-// Fit overrides for products whose men's cut isn't reflected in the display
-// name (they read as generic → Unisex otherwise). Their women's counterparts
-// are named "Women's ..." and classify correctly by name.
-const GENDER_BY_SKU: Record<string, string> = {
-  "TM-1": "Men", // ATC Everyday Cotton Tee
-  "TM-2": "Men", // ATC Everyday Cotton Long Sleeve Tee
-  "TM-4": "Men", // ATC Pro Team Short Sleeve Tee
-  "TM-8": "Men", // Lakeview Adult Full-Zip Hooded Sweatshirt
-};
 function genderOf(p: Product): string {
-  if (GENDER_BY_SKU[p.sku]) return GENDER_BY_SKU[p.sku];
   const n = p.name.toLowerCase();
   if (/\bwomen['’]?s?\b|ladies/.test(n)) return "Women";
   if (/\bmen['’]?s?\b/.test(n)) return "Men";
@@ -115,19 +121,27 @@ function sizesOf(p: Product): string[] {
   if (s.length) return s;
   return p.sizes === "One Size" ? ["One Size"] : [];
 }
-// Brands recognizable in product names (word-boundary matched).
+// Brands carried, in sidebar display order. A brand must be listed here to show
+// up as a filter (the facet list is BRAND_LIST ∩ brands-present).
 const BRAND_LIST = [
-  "ATC", "Canada Sportswear", "Blundstone", "Coal Harbour", "Columbia", "Core365", "Devon & Jones",
-  "DML", "Flexfit", "Harriton", "New Balance", "Nike", "Roots", "The North Face", "Timberland",
-  "Under Armour",
+  // Clothing brands first...
+  "Atlas", "Carhartt", "Coal Harbour", "Flexfit", "FootJoy", "Gildan",
+  "Travis Mathew", "Under Armour",
+  // ...then non-clothing brands (bags, golf, towels, tech, headwear).
+  "Nexgen", "Nomad", "Srixon", "Titleist", "Tranzip", "Cap America",
+  // Yeti (drinkware/coolers) and 2 Buds (earbuds) pinned last per request.
+  "Yeti", "2 Buds",
 ];
 // Brand overrides for products whose brand isn't in the display name (identified
-// from the product spec / style code). Everything else is matched by name
-// against BRAND_LIST.
+// from the product spec). Everything else is matched by name against BRAND_LIST.
 const BRAND_BY_SKU: Record<string, string> = {
-  "TM-3": "Canada Sportswear", // Surfer Full-Zip hoodie #L00555 (CSW L-series)
-  "TM-7": "Canada Sportswear", // Women's Lakeview Full-Zip hoodie #L00671 (CSW)
-  "TM-8": "Canada Sportswear", // Lakeview Adult Full-Zip hoodie #L00670 (CSW)
+  "MN-3": "Gildan", // 6oz US cotton, 18 singles, no optical brighteners, tear-away label
+  "MN-5": "Cap America", // Cap America supplier; Flexfit 110 trucker style
+
+  "MN-11": "FootJoy", // Men's Speckle Print Polo
+  "MN-12": "FootJoy", // Women's Speckle Print Polo
+  "MN-29": "Nexgen",  // Microfiber Waffle Towel
+  "MN-24": "2 Buds", // 2 Buds Pro Wireless ANC Earbuds (ANC = feature, not brand)
 };
 function brandOf(p: Product): string | null {
   if (BRAND_BY_SKU[p.sku]) return BRAND_BY_SKU[p.sku];
@@ -150,20 +164,25 @@ function scrollProductsBelowBar() {
     // more than once. A stale constant here doesn't fail loudly — it just
     // parks the grid a few px under the tab bar, which reads as the bar
     // getting shorter on every tab switch.
-    // stickyTop() is the header's pinned BOTTOM edge, so the tab bar's height
-    // is all that's left to add. (offsetHeight on the header would miss the
-    // 4px the header is pinned down by on desktop.)
+    // Pin the grid to the tab bar's REAL pinned bottom = its own resolved `top`
+    // plus its height. The bar pins at var(--wt-header-pin) - 1px on the home
+    // route (a 1px seam overlap with the header), which is 1px ABOVE stickyTop()
+    // (the header's bottom edge). Reconstructing barsBottom from stickyTop()
+    // overshot by that 1px, landing the scroll a hair short of the pin — so the
+    // bar un-stuck a fraction on every tab click (the visible desktop shift).
+    // Reading the bar's own top absorbs the seam no matter how it's set.
     const bar = document.querySelector('.home-catalog__header') as HTMLElement | null;
-    const barsBottom = headerH + (bar?.offsetHeight ?? 50);
+    const barPin = bar ? (parseFloat(getComputedStyle(bar).top) || headerH) : headerH;
+    const barsBottom = barPin + (bar?.offsetHeight ?? 50);
     const gridTop = grid ? grid.getBoundingClientRect().top + window.scrollY - barsBottom : 0;
     const needsScrollUp = gridTop < window.scrollY;
     window.scrollTo({ top: gridTop, behavior: needsScrollUp ? 'instant' : 'smooth' });
   } else {
     const catalog = document.querySelector('.home-catalog');
     const catalogTop = catalog ? catalog.getBoundingClientRect().top + window.scrollY : 0;
-    // +2px keeps the tab strip pinned flush under the site header without
-    // clipping the first row of product images.
-    const stickyPos = catalogTop - headerH + 2;
+    // No extra offset — land exactly at the catalog's pinned top so there's no
+    // few-px downward shift versus the initial (unscrolled) position.
+    const stickyPos = catalogTop - headerH;
     window.scrollTo({ top: stickyPos, behavior: 'instant' });
   }
 }
@@ -180,8 +199,69 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
   const isTech = loginType.value === "tech";
   const eager = index < EAGER_CARDS;
 
+  // Fit-to-one-line: keep the title at its full size, but scale it down just
+  // enough to avoid wrapping to a second line. If it still can't fit even at the
+  // floor, fall back to wrapping rather than clipping.
+  const nameRef = useSignal<HTMLElement>();
+  // eslint-disable-next-line qwik/no-use-visible-task
+  useVisibleTask$(({ cleanup }) => {
+    const el = nameRef.value;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = "";
+      el.style.whiteSpace = "nowrap";
+      el.style.overflow = "hidden";
+      const base = parseFloat(getComputedStyle(el).fontSize);
+      let px = base;
+      const min = base * 0.62;
+      let guard = 0;
+      while (el.scrollWidth > el.clientWidth + 0.5 && px > min && guard++ < 40) {
+        px -= 0.5;
+        el.style.fontSize = `${px}px`;
+      }
+      if (el.scrollWidth > el.clientWidth + 0.5) {
+        el.style.whiteSpace = "";
+        el.style.overflow = "";
+        el.style.fontSize = "";
+      }
+    };
+    // Measure only after the grid has laid out and web fonts have loaded —
+    // measuring too early reports no overflow and the title stays wrapped.
+    const run = () => requestAnimationFrame(() => requestAnimationFrame(fit));
+    run();
+    if ((document as any).fonts?.ready) (document as any).fonts.ready.then(run);
+    window.addEventListener("resize", run);
+    cleanup(() => window.removeEventListener("resize", run));
+  });
+
+  // Effective hidden-colour set for THIS product — empty when the SKU is exempt
+  // (so all its colours render), otherwise the global declutter set.
+  const hiddenColors = CARD_SHOW_ALL_COLORS.has(sku) ? EMPTY_COLOR_SET : CARD_HIDDEN_COLORS;
+
+  const allColors = item.colors || [];
+  const shownColors = allColors.filter((c) => !hiddenColors.has(c));
+  const visibleColors = sortColorsWhiteLast(shownColors.length ? shownColors : allColors);
+  const singleColorName =
+    visibleColors.length === 1
+      ? (visibleColors[0].startsWith("#") ? colorName(visibleColors[0], locale.value) : visibleColors[0])
+      : null;
+  // The product name is authored in English, so strip the trailing "- Colour"
+  // using the ENGLISH label — singleColorName may be localized (e.g. French),
+  // which wouldn't match the English suffix and left the colour on the title.
+  const singleColorEn =
+    visibleColors.length === 1
+      ? (visibleColors[0].startsWith("#") ? colorName(visibleColors[0], "en") : visibleColors[0])
+      : null;
+  // Title: drop the model code, the gender prefix, and — when there's a single
+  // colour — the trailing "- Colour" (it's shown beside the swatch instead).
+  let displayName = item.name.replace(/#\S+/g, "").replace(/^(men|women|ladies|unisex)['’]?s?\s+/i, "");
+  if (singleColorEn) {
+    displayName = displayName.replace(new RegExp(`\\s*[-–]\\s*${singleColorEn.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "i"), "");
+  }
+  displayName = displayName.trim();
+
   return (
-    <Link href={`/apparel/${sku}/`} class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}>
+    <Link href={`/${sku}/`} class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}>
       <div class="product-card__image">
         <ProductImage
           src={item.img}
@@ -194,12 +274,33 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
       </div>
       <div class="product-card__info">
         <div class="product-card__name-row">
-          <div class="product-card__name">
-            <span class="product-card__name-text">{item.name.replace(/#\S+/g, '').trim()}</span>
+          <div class="product-card__name" ref={nameRef}>
+            {(() => {
+              const g = genderOf(item);
+              // Desktop-only gender prefix on the title (CSS hides it below 1025
+              // and hides the sizes-row gender span above it). Mobile/tablet keep
+              // the gender in the sizes row exactly as before.
+              return g === "Men" || g === "Women" ? (
+                <span class="product-card__name-gender">{t(g === "Men" ? "gender.mens" : "gender.womens", locale.value)} </span>
+              ) : null;
+            })()}
+            <span class="product-card__name-text">{displayName}</span>
             <span class="product-card__name-code">{(item.name.match(/#\S+/) || [''])[0]}</span>
           </div>
           <div class="product-card__price-group">
-            {!isTech && <div class="product-card__price">${(Number(item.price) || 0).toFixed(2)}</div>}
+            {!isTech && (() => {
+              const p = Number(item.price) || 0;
+              const dollars = Math.floor(p);
+              const cents = Math.round((p - dollars) * 100).toString().padStart(2, "0");
+              return (
+                <div class="product-card__price">
+                  ${dollars}
+                  {cents !== "00" && (
+                    <span class="product-card__price-cents">.{cents}</span>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
         {item.name === "New Hire Kit" ? (
@@ -216,7 +317,7 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
           <div class="product-card__color-size-row">
             {(() => {
               const all = item.colors || [];
-              const shown = all.filter((c) => !CARD_HIDDEN_COLORS.has(c));
+              const shown = all.filter((c) => !hiddenColors.has(c));
               // If every colour got hidden (e.g. a single-colour product whose one
               // colour is in the declutter list, like the Royal-blue notebook),
               // fall back to the product's own colours so its swatch still shows.
@@ -240,11 +341,17 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                   {extra > 0 && (
                     <span class="product-card__color-more" aria-label={`+${extra} more colours`}>+{extra}</span>
                   )}
+                  {singleColorName && <span class="product-card__color-name">{singleColorName}</span>}
                 </div>
               ) : <span />;
             })()}
-            {/* One line per fit, so a product stocked in regular AND tall shows
-                both instead of a single run-on list (see sizeGroups). */}
+            {(() => {
+              const g = genderOf(item);
+              return g === "Men" || g === "Women" ? <span class="product-card__gender">{t(g === "Men" ? "gender.mens" : "gender.womens", locale.value)}</span> : null;
+            })()}
+            {/* Fits shown beside each other on one line — regular plus any extra
+                variant (Tall/Short) the SKU carries. The " / " separator between
+                lines comes from CSS (.product-card__sizes-line + …::before). */}
             <span class="product-card__sizes">
               {(item.sizes === "One Size" ? [t("modal.onesize", locale.value)] : sizeGroups(item.sizes)).map((g) => (
                 <span key={g} class="product-card__sizes-line">{g}</span>
@@ -255,12 +362,19 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                 empty and swatches would be lost against the small thumbnail. */}
             {(() => {
               const all = item.colors || [];
-              const shown = all.filter((c) => !CARD_HIDDEN_COLORS.has(c));
+              const shown = all.filter((c) => !hiddenColors.has(c));
               const visible = sortColorsWhiteLast(shown.length ? shown : all);
               if (!visible.length) return null;
+              // List up to 4 colour names; if there are more, a ", +N" indicator
+              // stands in for the rest rather than a truncated run-on list.
+              const MAX_NAMES = 4;
+              const names = visible
+                .slice(0, MAX_NAMES)
+                .map((c) => (c.startsWith("#") ? colorName(c, locale.value) : c));
+              const extra = visible.length - MAX_NAMES;
               return (
                 <span class="product-card__colors-text">
-                  {visible.map((c) => (c.startsWith("#") ? colorName(c, locale.value) : c)).join(", ")}
+                  {names.join(", ")}{extra > 0 ? `, +${extra}` : ""}
                 </span>
               );
             })()}
@@ -274,8 +388,16 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
 export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) => {
   const locale = useContext(LocaleContext);
   const loginType = useContext(LoginTypeContext);
+  const loc = useLocation();
+  const nav = useNavigate();
+  // On a product route (/<sku>/) the shared shell shows the routed product
+  // detail (<Slot/>) in the main column instead of the grid. The catalog is "/";
+  // any deeper path under this (shop) layout is a product page. The sidebar +
+  // header stay mounted, so there is no shift between the catalog and PDP.
+  const isPdp = useComputed$(() => loc.url.pathname.replace(/\/+$/, "") !== "");
   const isTech = useComputed$(() => loginType.value === "tech");
   const isSafety = useComputed$(() => loginType.value === "safety");
+  const isElectrical = useComputed$(() => loginType.value === "electrical");
   const isSingleCat = useComputed$(() => isTech.value);
   const activeCat = useSignal("All");
   const searchQuery = useSignal("");
@@ -292,14 +414,56 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
   });
   const searchOpen = useSignal(false); // tablet: search field opens over the tab bar
   const tabletCols = useSignal<number | "list">(3);
+  // Desktop grid density: false = default (5 per row), true = Catalog view (8 per
+  // row). Toggled from the sidebar; ignored on mobile/tablet.
+  const denseGrid = useSignal(false);
+  // Persist the density choice (shared with the PDP sidebar's toggle) so it
+  // survives navigation between the catalog and the product pages.
+  const densityLoaded = useSignal(false);
+  // eslint-disable-next-line qwik/no-use-visible-task
+  useVisibleTask$(({ track }) => {
+    const v = track(() => denseGrid.value);
+    if (!densityLoaded.value) {
+      densityLoaded.value = true;
+      try { const s = localStorage.getItem("ce_grid_density"); if (s) denseGrid.value = s === "catalog"; } catch { /* ignore */ }
+      return;
+    }
+    try { localStorage.setItem("ce_grid_density", v ? "catalog" : "standard"); } catch { /* ignore */ }
+  });
 
   const HASH_TO_CAT: Record<string, string> = isSingleCat.value
     ? {}
     : isSafety.value
       ? { "shirts": "Shirts", "hats": "Hats", "fr": "Flame Resistant" }
-      : { "new-hire-kit": "New Hire Kit", "shirts": "Shirts", "jackets": "Jackets", "hats": "Hats", "swag": "SWAG" };
+      // Derive from the tab list so EVERY clothing category (Polos, Sweaters, …)
+      // is reachable by hash — the old hardcoded map omitted Polos/Sweaters, so
+      // the breadcrumb crumb (#polos) found no match and fell back to All. Keyed
+      // exactly the way the crumb builds its hash: lower-case, spaces → hyphens.
+      : Object.fromEntries(
+          CLOTHING_CATEGORIES
+            .filter((c) => c !== "All")
+            .map((c) => [c.toLowerCase().replace(/\s+/g, "-"), c])
+        );
 
   const baseProducts = useComputed$(() => {
+    if (isElectrical.value) {
+      // Electrical membership is DB-driven (products.portals includes
+      // "electrical"), falling back to the legacy hardcoded ELECTRICAL_SKUS so
+      // nothing breaks until every row is backfilled. Order: legacy SKUs keep
+      // their curated ELECTRICAL_SKUS order first; DB-only additions follow in
+      // sort_order (their order in allProducts).
+      const inElectrical = (p: (typeof allProducts)[number]) =>
+        (p as { portals?: string[] }).portals?.includes("electrical") ||
+        ELECTRICAL_SKU_SET.has(p.sku);
+      const rank = (sku: string) => {
+        const i = ELECTRICAL_SKUS.indexOf(sku);
+        return i === -1 ? ELECTRICAL_SKUS.length : i;
+      };
+      return allProducts
+        .filter(inElectrical)
+        .slice()
+        .sort((a, b) => rank(a.sku) - rank(b.sku));
+    }
     if (isTech.value) return allProducts.filter((p) => p.category === "Work Wear");
     if (isSafety.value) {
       const rank = (sku: string) => {
@@ -315,7 +479,8 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
     // the "Footwear" tab so they show when it's selected.
     const isFootwear = (c: string) => c === "Safety Boots" || c === "Safety Shoes" || c === "Footwear";
     return allProducts
-      .filter((p) => p.category !== "Flame Resistant")
+      // Exclude FR items and the Electrical-only SKUs from the full (Service) catalog.
+      .filter((p) => p.category !== "Flame Resistant" && !ELECTRICAL_SKU_SET.has(p.sku))
       .map((p) => (isFootwear(p.category) ? { ...p, category: "Footwear" } : p));
   });
 
@@ -361,8 +526,13 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
       const catalog = document.querySelector(".home-catalog") as HTMLElement | null;
       if (!catalog) return;
       const headerH = window.innerWidth < 601 ? 64 : window.innerWidth <= 1024 ? 67 : 66;
-      const stickyPos = catalog.getBoundingClientRect().top + window.scrollY - headerH + 2;
-      if (window.scrollY < stickyPos - 1) {
+      const stickyPos = catalog.getBoundingClientRect().top + window.scrollY - headerH;
+      // Only scroll for a MEANINGFUL gap (the hero case). The hardcoded headerH
+      // drifts a few px from the catalog's real pinned top, so the old +2 fudge
+      // and 1px threshold nudged the page ~5px on every open on /apparel/, where
+      // the strip is already pinned. An 8px threshold absorbs that drift; the
+      // genuine hero reposition is far larger and still fires.
+      if (window.scrollY < stickyPos - 8) {
         requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo({ top: stickyPos, behavior: "instant" })));
       }
     };
@@ -415,6 +585,15 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
 
   const visibleCategories = useComputed$(() => {
     if (isTech.value) return ["Work Wear"];
+    // Electrical: show every category its products actually span (not limited to
+    // the standard clothing tabs).
+    if (isElectrical.value) {
+      const order = ["Shirts", "Sweaters", "Pants", "Headwear", "Work Wear", "Jackets", "Polos", "Hats", "SWAG", "Flame Resistant"];
+      const present = new Set(baseProducts.value.map((p) => p.category));
+      const cats = order.filter((c) => present.has(c));
+      for (const c of present) if (!cats.includes(c)) cats.push(c);
+      return ["All", ...cats];
+    }
     // Safety still hides empty categories; the clothing catalog shows its full
     // curated tab list regardless of current stock.
     if (isSafety.value) {
@@ -422,6 +601,34 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
       return SAFETY_CATEGORIES.filter((c) => ALWAYS_SHOW.has(c) || present.has(c));
     }
     return CLOTHING_CATEGORIES;
+  });
+
+  // SKU count per category (from the unfiltered base set) for the sidebar
+  // count pills; "All" is the total.
+  const categoryCounts = useComputed$(() => {
+    const counts: Record<string, number> = { All: baseProducts.value.length };
+    for (const p of baseProducts.value) counts[p.category] = (counts[p.category] ?? 0) + 1;
+    return counts;
+  });
+
+  // Select a category from the desktop sidebar nav (no tab-strip centering — the
+  // vertical list is always fully visible). Mirrors the horizontal tab onClick.
+  const selectCat = $(async (cat: string) => {
+    if (isSingleCat.value) return;
+    window.dispatchEvent(new CustomEvent("apparel-search-clear"));
+    searchOpen.value = false;
+    searchQuery.value = "";
+    if (isPdp.value) {
+      // On a product page the grid isn't shown. Go to the catalog filtered to
+      // this category — ProductCatalog stays mounted (shared shell), so setting
+      // activeCat here carries the selection over to the grid.
+      activeCat.value = cat;
+      await nav("/");
+      return;
+    }
+    if (activeCat.value === cat) { activeCat.value = "All"; scrollProductsBelowBar(); return; }
+    activeCat.value = cat;
+    scrollProductsBelowBar();
   });
 
 
@@ -448,11 +655,11 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
     const shoeSizes = [...sizes]
       .filter((s) => !SIZE_ORDER.includes(s))
       .sort((x, y) => Number(x) - Number(y));
+    // Headwear (Hats) and the Office/New Hire Kit have no gendered fit, so the
+    // Fit facet is suppressed for those categories.
+    const NO_FIT_CATS = new Set(["Hats", "New Hire Kit"]);
     return {
-      // Each fit is offered only where products of that fit actually exist —
-      // the men's SKUs are classified via GENDER_BY_SKU, so "Men" shows on the
-      // apparel categories and stays off Hats (all one-size unisex) on its own.
-      genders: GENDER_ORDER.filter((g) => genders.has(g)),
+      genders: NO_FIT_CATS.has(activeCat.value) ? [] : GENDER_ORDER.filter((g) => genders.has(g)),
       sizes: [...SIZE_ORDER.filter((s) => sizes.has(s)), ...shoeSizes],
       brands: BRAND_LIST.filter((b) => brands.has(b)),
     };
@@ -482,7 +689,7 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
   });
 
   return (
-    <section class={`home-catalog ${cls || ""}`}>
+    <section class={`home-catalog ${isElectrical.value ? "home-catalog--electrical" : ""} ${cls || ""}`}>
       <div class="home-catalog__inner">
         <div class={`home-catalog__header ${tabsAtEnd.value ? "home-catalog__header--tabs-end" : ""}`}>
           <h2 class="home-catalog__title">{t("nav.apparel", locale.value)}</h2>
@@ -493,10 +700,15 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
             class="home-catalog__viewmode"
             aria-label={`Show ${(tabletCols.value === "list" ? VIEW_MODES[0] : VIEW_MODES[1]).label.toLowerCase()} view`}
             title={`${(tabletCols.value === "list" ? VIEW_MODES[0] : VIEW_MODES[1]).label} view`}
-            onClick$={() => { tabletCols.value = tabletCols.value === "list" ? 3 : "list"; }}
+            onClick$={() => {
+              tabletCols.value = tabletCols.value === "list" ? 3 : "list";
+              // The card heights change between modes, so the old scroll offset
+              // lands mid-product — re-pin the grid to the top of the list.
+              requestAnimationFrame(() => requestAnimationFrame(() => scrollProductsBelowBar()));
+            }}
           >
             <span class="home-catalog__viewmode-icon" dangerouslySetInnerHTML={(tabletCols.value === "list" ? VIEW_MODES[0] : VIEW_MODES[1]).icon} />
-            <span class="home-catalog__viewmode-label">{(tabletCols.value === "list" ? VIEW_MODES[0] : VIEW_MODES[1]).label}</span>
+            <span class="home-catalog__viewmode-label">{tabletCols.value === "list" ? t("viewmode.gallery", locale.value) : t("viewmode.catalog", locale.value)}</span>
           </button>
           <div class="home-catalog__sidebar-search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
@@ -540,6 +752,9 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
                 {cat === "All" ? t("apparel.all", locale.value) : (
                   <>
                     <span class="apparel-titlebar__tab-short">{categoryLabel(cat, locale.value)}</span>
+                    {/* Tablet-only label: shorter for "New Hire Kit" (Office Kit)
+                        so it fits the tablet tab row; same as short elsewhere. */}
+                    <span class="apparel-titlebar__tab-tablet">{categoryLabel(cat, locale.value)}</span>
                     <span class="apparel-titlebar__tab-full">{FULL_CAT_KEYS[cat] ? t(FULL_CAT_KEYS[cat] as any, locale.value) : categoryLabel(cat, locale.value)}</span>
                   </>
                 )}
@@ -563,19 +778,19 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
             {/* Tablet column-count toggle. The mobile/tablet search input now
                 lives in the site header (see layout.tsx) so it no longer
                 crowds the category tab strip. */}
-            {/* Tablet view toggle cycles 3-per-row → list → 2-per-row → 3…
+            {/* Tablet view toggle: 3-per-row ↔ list (catalog) only — no 2-per-row.
                 The icon shown is the view you'll switch TO next. */}
             <button
               class="apparel-titlebar__action apparel-titlebar__action--tablet-cols"
-              aria-label={tabletCols.value === 3 ? "Show list view" : tabletCols.value === "list" ? "Show 2 per row" : "Show 3 per row"}
-              onClick$={() => { tabletCols.value = tabletCols.value === 3 ? "list" : tabletCols.value === "list" ? 2 : 3; }}
+              aria-label={tabletCols.value === 3 ? "Show list view" : "Show 3 per row"}
+              onClick$={() => {
+                tabletCols.value = tabletCols.value === 3 ? "list" : 3;
+                requestAnimationFrame(() => requestAnimationFrame(() => scrollProductsBelowBar()));
+              }}
             >
               {tabletCols.value === 3 ? (
                 // next: list view — rows with a thumbnail + detail lines
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="4" height="4"/><line x1="10" y1="6" x2="21" y2="6"/><rect x="3" y="10" width="4" height="4"/><line x1="10" y1="12" x2="21" y2="12"/><rect x="3" y="16" width="4" height="4"/><line x1="10" y1="18" x2="21" y2="18"/></svg>
-              ) : tabletCols.value === "list" ? (
-                // next: 2 per row
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="18"/><rect x="13" y="3" width="8" height="18"/></svg>
               ) : (
                 // next: 3 per row
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18"/><rect x="9.5" y="3" width="5" height="18"/><rect x="16" y="3" width="5" height="18"/></svg>
@@ -611,9 +826,59 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
           <span class="home-catalog__seam" aria-hidden="true" />
         </div>
         <aside class="home-catalog__filters" aria-label="Filter products">
-          {facetOptions.value.genders.length >= 1 && (
+          {/* Desktop category nav — the collection titles moved out of the
+              horizontal tab strip into a vertical sidebar list (sm-style), each
+              with a SKU count pill. The tab strip stays for mobile/tablet. */}
+          {!isSingleCat.value && (
+            <nav class="home-catalog__catnav" aria-label="Collections">
+              <div class="home-catalog__catnav-head">
+                <div class="home-catalog__catnav-title">{isElectrical.value ? t("login.portal.electrical", locale.value) : t("filter.collections", locale.value)}</div>
+                {/* Grid-density toggle, inline on the right of the Collections
+                    label — icon-only (Standard 5-up / Catalog 8-up). Hidden for
+                    the Electrical shop — too few products to need it. */}
+                {!isElectrical.value && (
+                <div class="home-catalog__density home-catalog__density--inline" role="group" aria-label="Grid density">
+                  <button
+                    type="button"
+                    class={`home-catalog__density-btn ${!denseGrid.value ? "active" : ""}`}
+                    aria-pressed={!denseGrid.value}
+                    aria-label={t("viewmode.standard", locale.value)}
+                    onClick$={() => { denseGrid.value = false; }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                  </button>
+                  <button
+                    type="button"
+                    class={`home-catalog__density-btn ${denseGrid.value ? "active" : ""}`}
+                    aria-pressed={denseGrid.value}
+                    aria-label={t("viewmode.catalog", locale.value)}
+                    onClick$={() => { denseGrid.value = true; }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="4" height="4"/><rect x="10" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="17" y="10" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><rect x="10" y="17" width="4" height="4"/><rect x="17" y="17" width="4" height="4"/></svg>
+                  </button>
+                </div>
+                )}
+              </div>
+              {visibleCategories.value.map((cat) => (
+                <button
+                  key={cat}
+                  class={`home-catalog__catnav-item ${activeCat.value === cat ? "active" : ""}`}
+                  onClick$={() => selectCat(cat)}
+                >
+                  <span class="home-catalog__catnav-icon" dangerouslySetInnerHTML={CATEGORY_ICONS[cat]} />
+                  <span class="home-catalog__catnav-label">
+                    {cat === "All"
+                      ? t("apparel.all", locale.value)
+                      : (FULL_CAT_KEYS[cat] ? t(FULL_CAT_KEYS[cat] as any, locale.value) : categoryLabel(cat, locale.value))}
+                  </span>
+                  <span class="home-catalog__catnav-count">{categoryCounts.value[cat] ?? 0}</span>
+                </button>
+              ))}
+            </nav>
+          )}
+          {!isPdp.value && !isElectrical.value && facetOptions.value.genders.length >= 1 && (
             <div class="home-catalog__filter-group">
-              <div class="home-catalog__filter-title">Fit</div>
+              <div class="home-catalog__filter-title">{t("filter.fit", locale.value)}</div>
               {facetOptions.value.genders.map((g) => (
                 <button
                   key={g}
@@ -624,17 +889,18 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
                       ...f,
                       genders: f.genders.includes(g) ? f.genders.filter((x) => x !== g) : [...f.genders, g],
                     };
+                    scrollProductsBelowBar();
                   }}
                 >
                   <span class="home-catalog__filter-check" />
-                  {g}
+                  {t(`fit.${g.toLowerCase()}` as any, locale.value)}
                 </button>
               ))}
             </div>
           )}
-          {facetOptions.value.brands.length >= 1 && (
+          {!isPdp.value && facetOptions.value.brands.length >= 1 && (
             <div class="home-catalog__filter-group">
-              <div class="home-catalog__filter-title">Brand</div>
+              <div class="home-catalog__filter-title">{t("filter.brand", locale.value)}</div>
               {facetOptions.value.brands.map((b) => (
                 <button
                   key={b}
@@ -645,6 +911,7 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
                       ...f,
                       brands: f.brands.includes(b) ? f.brands.filter((x) => x !== b) : [...f.brands, b],
                     };
+                    scrollProductsBelowBar();
                   }}
                 >
                   <span class="home-catalog__filter-check" />
@@ -653,44 +920,27 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
               ))}
             </div>
           )}
-          {facetOptions.value.sizes.length >= 1 && (
-            <div class="home-catalog__filter-group">
-              <div class="home-catalog__filter-title">Size</div>
-              <div class="home-catalog__filter-sizes">
-                {facetOptions.value.sizes.map((s) => (
-                  <button
-                    key={s}
-                    class={`home-catalog__filter-size ${effFilters.value.sizes.includes(s) ? "active" : ""}`}
-                    onClick$={() => {
-                      const f = effFilters.value;
-                      filters.value = {
-                        ...f,
-                        sizes: f.sizes.includes(s) ? f.sizes.filter((x) => x !== s) : [...f.sizes, s],
-                      };
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          {(effFilters.value.genders.length > 0 || effFilters.value.sizes.length > 0 || effFilters.value.brands.length > 0) && (
+          {!isPdp.value && (effFilters.value.genders.length > 0 || effFilters.value.sizes.length > 0 || effFilters.value.brands.length > 0) && (
             <button
               class="home-catalog__filter-clear"
               onClick$={() => {
                 filters.value = { cat: activeCat.value, genders: [], sizes: [], brands: [] };
+                scrollProductsBelowBar();
               }}
             >
-              Clear filters
+              {t("filter.clear", locale.value)}
             </button>
           )}
         </aside>
-        <div class={`apparel-grid ${tabletCols.value === "list" ? "apparel-grid--list" : `apparel-grid--cols-${tabletCols.value}`}`}>
-          {filtered.value.map((item, i) => (
-            <ProductCard key={item.sku} item={item} sku={item.sku} index={i} />
-          ))}
-        </div>
+        {isPdp.value ? (
+          <div class="home-catalog__pdp-main"><Slot /></div>
+        ) : (
+          <div class={`apparel-grid ${denseGrid.value ? "apparel-grid--dense" : ""} ${tabletCols.value === "list" ? "apparel-grid--list" : `apparel-grid--cols-${tabletCols.value}`}`}>
+            {filtered.value.map((item, i) => (
+              <ProductCard key={item.sku} item={item} sku={item.sku} index={i} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

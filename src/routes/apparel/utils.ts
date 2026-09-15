@@ -9,8 +9,9 @@ export function sortColorsWhiteLast(colors: readonly string[]): string[] {
   });
 }
 
-const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL"];
-const TALL_ORDER = ["LT", "XLT", "2XLT", "3XLT", "4XLT", "5XLT"];
+const SIZE_ORDER = ["XXS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL"];
+const TALL_ORDER = ["ST", "MT", "LT", "XLT", "2XLT", "3XLT", "4XLT", "5XLT"];
+const SHORT_ORDER = ["SS", "MS", "LS", "XLS", "2XLS", "3XLS", "4XLS", "5XLS"];
 
 export function expandSizes(sizes: string): string[] {
   if (sizes === "One Size") return ["One Size"];
@@ -21,7 +22,8 @@ export function expandSizes(sizes: string): string[] {
     if (!m) return [range.trim()];
     const inReg = order.indexOf(m[1]) !== -1 && order.indexOf(m[2]) !== -1;
     const inTall = tallOrder.indexOf(m[1]) !== -1 && tallOrder.indexOf(m[2]) !== -1;
-    const arr = inReg ? order : inTall ? tallOrder : null;
+    const inShort = SHORT_ORDER.indexOf(m[1]) !== -1 && SHORT_ORDER.indexOf(m[2]) !== -1;
+    const arr = inReg ? order : inTall ? tallOrder : inShort ? SHORT_ORDER : null;
     if (!arr) return [range.trim()];
     return arr.slice(arr.indexOf(m[1]), arr.indexOf(m[2]) + 1);
   };
@@ -49,6 +51,7 @@ export function expandSizes(sizes: string): string[] {
 // as a single entry.
 export function sizeGroups(sizes: string): string[] {
   const reg: number[] = [];
+  const short: number[] = [];
   const tall: number[] = [];
 
   for (const raw of sizes.split("/")) {
@@ -58,6 +61,8 @@ export function sizeGroups(sizes: string): string[] {
     const [from, to] = range ? [range[1], range[2]] : [part, part];
     const scale = SIZE_ORDER.indexOf(from) !== -1 && SIZE_ORDER.indexOf(to) !== -1
       ? { order: SIZE_ORDER, into: reg }
+      : SHORT_ORDER.indexOf(from) !== -1 && SHORT_ORDER.indexOf(to) !== -1
+        ? { order: SHORT_ORDER, into: short }
       : TALL_ORDER.indexOf(from) !== -1 && TALL_ORDER.indexOf(to) !== -1
         ? { order: TALL_ORDER, into: tall }
         : null;
@@ -84,6 +89,7 @@ export function sizeGroups(sizes: string): string[] {
 
   const groups: string[] = [];
   if (reg.length) groups.push(condense(reg, SIZE_ORDER));
+  if (short.length) groups.push(condense(short, SHORT_ORDER));
   if (tall.length) groups.push(condense(tall, TALL_ORDER));
   return groups.length ? groups : [sizes];
 }
