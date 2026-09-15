@@ -1148,11 +1148,7 @@ export default component$(() => {
       <div class="mobile-coming-soon" aria-hidden="true">
         <div class="mobile-coming-soon__inner">
           <div class="mobile-coming-soon__brand brand-cluster">
-            <img class="brand-cluster__mark" src="/logo.png" alt="Tamarack" width="200" height="200" />
-            <div class="brand-cluster__words">
-              <span class="brand-cluster__word">TAMARACK</span>
-              <span class="brand-cluster__word brand-cluster__word--muted">{t("logo.apparel", locale.value).toUpperCase()}</span>
-            </div>
+            <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
           </div>
           <h1 class="mobile-coming-soon__title">Mobile &amp; Tablet<br />Coming Soon</h1>
         </div>
@@ -1178,11 +1174,7 @@ export default component$(() => {
             <div class="login-modal__form-pane">
               <div class="login-card">
                 <div class="login-card__brand brand-cluster">
-                  <img class="brand-cluster__mark" src="/logo.png" alt="Tamarack" width="200" height="200" />
-                  <div class="brand-cluster__words">
-                    <span class="brand-cluster__word">TAMARACK</span>
-                    <span class="brand-cluster__word brand-cluster__word--muted">{t("logo.apparel", locale.value).toUpperCase()}</span>
-                  </div>
+                  <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
                 </div>
                 <Form
                   action={loginAction}
@@ -1264,11 +1256,7 @@ export default component$(() => {
               }
             }}
           >
-            <img class="brand-cluster__mark" src="/logo.png" alt="Tamarack" width="200" height="200" />
-            <div class="brand-cluster__words">
-              <span class="brand-cluster__word">TAMARACK</span>
-              <span class="brand-cluster__word brand-cluster__word--muted">{t("logo.apparel", locale.value).toUpperCase()}</span>
-            </div>
+            <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
           </Link>
           <nav class="site-header__categories">
             <Link href="/" class={loc.url.pathname === "/" ? "active" : ""}>{t("nav.home", locale.value)}</Link>
@@ -1562,11 +1550,7 @@ export default component$(() => {
       <footer class="site-footer">
         <div class="site-footer__inner">
           <div class="site-footer__brand brand-cluster">
-            <img class="brand-cluster__mark" src="/logo.png" alt="Tamarack" width="200" height="200" />
-            <div class="brand-cluster__words">
-              <span class="brand-cluster__word">TAMARACK</span>
-              <span class="brand-cluster__word brand-cluster__word--muted">{t("logo.apparel", locale.value).toUpperCase()}</span>
-            </div>
+            <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
           </div>
           <div class="site-footer__col">
           {loginType.value === "safety" && (

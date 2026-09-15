@@ -1888,7 +1888,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 /* ===== Home Catalog Section ===== */
 /* Site Footer */
 .site-footer {
-  background: #1e40af;
+  background: #2D4841;
   color: rgba(255,255,255,0.7);
   padding: 2rem 1rem 1.5rem;
   flex-shrink: 0;
@@ -1957,7 +1957,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   margin: 0;
 }
 .privacy-page__contact-link {
-  color: #1e40af;
+  color: #2D4841;
   text-decoration: underline;
   font-weight: 500;
 }
@@ -9206,7 +9206,7 @@ details[open] > .cart-drawer__checkout-title::after {
 }
 
 /* ============================================================
-   Blue brand theme — Tamarack header colour (#1e3a8a)
+   Blue brand theme — Tamarack header colour (#1B6551)
    with the white "Wills" wordmark logo.
    Applies to every device header, the mobile menu drawer, and the
    login modal. Appended last so it wins over the stateful rules above.
@@ -9635,7 +9635,7 @@ details[open] > .cart-drawer__checkout-title::after {
 }
 
 /* ---- Catalog tabs tie into the orange header ---- */
-/* A mid orange BETWEEN the header orange (#1e3a8a) and the darker box overlay
+/* A mid orange BETWEEN the header orange (#1B6551) and the darker box overlay
    (~#ab5c18): an ~18% black overlay over the header orange. Distinct from the
    header while staying in the family; the active tab is the bright header
    orange, the buttons/logo boxes are the darker shade. */
@@ -15043,3 +15043,10 @@ html { background: rgb(223, 226, 230) !important; }
 .checkout-page .cart-drawer__back-btn { margin: 0 !important; }
 .checkout-page .checkout-modal__pay { margin-top: 14px !important; }
 .checkout-page .cart-drawer__footer { border-radius: 0 !important; }
+
+/* ── Tamarack wordmark logo (replaces the mn2 mark+words lockup) ─────────── */
+.brand-cluster__logo { display: block; width: auto; height: auto; max-width: 100%; object-fit: contain; }
+.site-header__logo .brand-cluster__logo { height: 30px; }
+.site-footer__brand .brand-cluster__logo { height: 40px; }
+.login-card__brand .brand-cluster__logo { height: 66px; margin: 0 auto; }
+.mobile-coming-soon__brand .brand-cluster__logo { height: 54px; margin: 0 auto; }

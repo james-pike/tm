@@ -15,7 +15,7 @@ const VIEW_MODES: { key: number | "list"; label: string; icon: string }[] = [
 ];
 
 
-export const CLOTHING_CATEGORIES = ["All", "Jackets", "Sweaters", "Shirts", "Polos", "Hats", "SWAG", "New Hire Kit"];
+export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Sweaters", "Polos", "Hats"];
 
 // Electrical portal: shows ONLY these SKUs (the small Electrical-division lineup).
 // Add/replace the Electrical SKU codes here — order is preserved in the grid.
@@ -124,24 +124,17 @@ function sizesOf(p: Product): string[] {
 // Brands carried, in sidebar display order. A brand must be listed here to show
 // up as a filter (the facet list is BRAND_LIST ∩ brands-present).
 const BRAND_LIST = [
-  // Clothing brands first...
-  "Atlas", "Carhartt", "Coal Harbour", "Flexfit", "FootJoy", "Gildan",
-  "Travis Mathew", "Under Armour",
-  // ...then non-clothing brands (bags, golf, towels, tech, headwear).
-  "Nexgen", "Nomad", "Srixon", "Titleist", "Tranzip", "Cap America",
-  // Yeti (drinkware/coolers) and 2 Buds (earbuds) pinned last per request.
-  "Yeti", "2 Buds",
+  "ATC", "Canada Sportswear", "Blundstone", "Coal Harbour", "Columbia", "Core365", "Devon & Jones",
+  "DML", "Flexfit", "Harriton", "New Balance", "Nike", "Roots", "The North Face", "Timberland",
+  "Under Armour",
 ];
 // Brand overrides for products whose brand isn't in the display name (identified
-// from the product spec). Everything else is matched by name against BRAND_LIST.
+// from the product spec / style code). Everything else is matched by name
+// against BRAND_LIST.
 const BRAND_BY_SKU: Record<string, string> = {
-  "MN-3": "Gildan", // 6oz US cotton, 18 singles, no optical brighteners, tear-away label
-  "MN-5": "Cap America", // Cap America supplier; Flexfit 110 trucker style
-
-  "MN-11": "FootJoy", // Men's Speckle Print Polo
-  "MN-12": "FootJoy", // Women's Speckle Print Polo
-  "MN-29": "Nexgen",  // Microfiber Waffle Towel
-  "MN-24": "2 Buds", // 2 Buds Pro Wireless ANC Earbuds (ANC = feature, not brand)
+  "TM-3": "Canada Sportswear", // Surfer Full-Zip hoodie #L00555 (CSW L-series)
+  "TM-7": "Canada Sportswear", // Women's Lakeview Full-Zip hoodie #L00671 (CSW)
+  "TM-8": "Canada Sportswear", // Lakeview Adult Full-Zip hoodie #L00670 (CSW)
 };
 function brandOf(p: Product): string | null {
   if (BRAND_BY_SKU[p.sku]) return BRAND_BY_SKU[p.sku];
