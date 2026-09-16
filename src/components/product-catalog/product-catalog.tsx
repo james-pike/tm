@@ -50,6 +50,7 @@ const EMPTY_COLOR_SET = new Set<string>();
 
 export const CATEGORY_ICONS: Record<string, string> = {
   "All": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+  "T-Shirts": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l4-2 1.6 1.8a3.2 3.2 0 004.8 0L16 3l4 2-2.2 4.2-1.8-1V21H8V8.2l-1.8 1L4 5z"/></svg>',
   "Work Wear": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M4 6h16v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/><path d="M4 6l-2 4v2h4V8"/><path d="M20 6l2 4v2h-4V8"/></svg>',
   "Jackets": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2l5 6v12a2 2 0 01-2 2h-3V12h-6v10H6a2 2 0 01-2-2V8l5-6"/><path d="M9 2a3 3 0 006 0"/><line x1="12" y1="12" x2="12" y2="22"/></svg>',
   "Shirts": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>',
@@ -689,23 +690,7 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
       <div class="home-catalog__inner">
         <div class={`home-catalog__header ${tabsAtEnd.value ? "home-catalog__header--tabs-end" : ""}`}>
           <h2 class="home-catalog__title">{t("nav.apparel", locale.value)}</h2>
-          {/* Desktop view mode: Catalog (tall photo-led cards) vs Gallery (short
-              horizontal rows, thumbnail left). Two modes, so a toggle — the
-              button shows the mode it will switch to. */}
-          <button
-            class="home-catalog__viewmode"
-            aria-label={`Show ${(tabletCols.value === "list" ? VIEW_MODES[0] : VIEW_MODES[1]).label.toLowerCase()} view`}
-            title={`${(tabletCols.value === "list" ? VIEW_MODES[0] : VIEW_MODES[1]).label} view`}
-            onClick$={() => {
-              tabletCols.value = tabletCols.value === "list" ? 3 : "list";
-              // The card heights change between modes, so the old scroll offset
-              // lands mid-product — re-pin the grid to the top of the list.
-              requestAnimationFrame(() => requestAnimationFrame(() => scrollProductsBelowBar()));
-            }}
-          >
-            <span class="home-catalog__viewmode-icon" dangerouslySetInnerHTML={(tabletCols.value === "list" ? VIEW_MODES[0] : VIEW_MODES[1]).icon} />
-            <span class="home-catalog__viewmode-label">{tabletCols.value === "list" ? t("viewmode.gallery", locale.value) : t("viewmode.catalog", locale.value)}</span>
-          </button>
+          {/* Catalog/list view mode removed — Tamarack uses the gallery grid only. */}
           <div class="home-catalog__sidebar-search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
             <input
@@ -774,24 +759,7 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
             {/* Tablet column-count toggle. The mobile/tablet search input now
                 lives in the site header (see layout.tsx) so it no longer
                 crowds the category tab strip. */}
-            {/* Tablet view toggle: 3-per-row ↔ list (catalog) only — no 2-per-row.
-                The icon shown is the view you'll switch TO next. */}
-            <button
-              class="apparel-titlebar__action apparel-titlebar__action--tablet-cols"
-              aria-label={tabletCols.value === 3 ? "Show list view" : "Show 3 per row"}
-              onClick$={() => {
-                tabletCols.value = tabletCols.value === 3 ? "list" : 3;
-                requestAnimationFrame(() => requestAnimationFrame(() => scrollProductsBelowBar()));
-              }}
-            >
-              {tabletCols.value === 3 ? (
-                // next: list view — rows with a thumbnail + detail lines
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="4" height="4"/><line x1="10" y1="6" x2="21" y2="6"/><rect x="3" y="10" width="4" height="4"/><line x1="10" y1="12" x2="21" y2="12"/><rect x="3" y="16" width="4" height="4"/><line x1="10" y1="18" x2="21" y2="18"/></svg>
-              ) : (
-                // next: 3 per row
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18"/><rect x="9.5" y="3" width="5" height="18"/><rect x="16" y="3" width="5" height="18"/></svg>
-              )}
-            </button>
+            {/* Tablet list/catalog view toggle removed — gallery grid only. */}
             {/* Tablet: search icon opens a field over the tab bar (cm-style),
                 so search no longer needs a slot in the site header. */}
             <button class="apparel-titlebar__action apparel-titlebar__action--tabbar-search" aria-label="Search" onClick$={() => (searchOpen.value = true)}>

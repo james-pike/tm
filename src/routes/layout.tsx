@@ -1175,6 +1175,7 @@ export default component$(() => {
               <div class="login-card">
                 <div class="login-card__brand brand-cluster">
                   <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
+                  <span class="brand-cluster__apparel">Apparel</span>
                 </div>
                 <Form
                   action={loginAction}
