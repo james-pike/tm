@@ -15,7 +15,7 @@ const VIEW_MODES: { key: number | "list"; label: string; icon: string }[] = [
 ];
 
 
-export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Sweaters", "Polos", "Hats"];
+export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Sweaters", "Hats"];
 
 // Electrical portal: shows ONLY these SKUs (the small Electrical-division lineup).
 // Add/replace the Electrical SKU codes here — order is preserved in the grid.
@@ -126,7 +126,7 @@ function sizesOf(p: Product): string[] {
 // up as a filter (the facet list is BRAND_LIST ∩ brands-present).
 const BRAND_LIST = [
   "ATC", "Canada Sportswear", "Blundstone", "Coal Harbour", "Columbia", "Core365", "Devon & Jones",
-  "DML", "Flexfit", "Harriton", "New Balance", "Nike", "Roots", "The North Face", "Timberland",
+  "Cap America", "Flexfit", "Harriton", "New Balance", "Nike", "Roots", "The North Face", "Timberland",
   "Under Armour",
 ];
 // Brand overrides for products whose brand isn't in the display name (identified
@@ -193,6 +193,11 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
   const isTech = false; // Tamarack: single catalog, always show prices
   const eager = index < EAGER_CARDS;
 
+  // Card-level colour preview: clicking a swatch swaps the card image to that
+  // colour's variant (imgs[i] lines up with colors[i]) without leaving the
+  // gallery. Reset to the primary image if a colour has no dedicated image.
+  const activeImg = useSignal(item.img);
+
   // Fit-to-one-line: keep the title at its full size, but scale it down just
   // enough to avoid wrapping to a second line. If it still can't fit even at the
   // floor, fall back to wrapping rather than clipping.
@@ -258,7 +263,7 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
     <Link href={`/${sku}/`} class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}>
       <div class="product-card__image">
         <ProductImage
-          src={item.img}
+          src={activeImg.value}
           alt={item.name}
           width={440}
           height={440}
@@ -269,15 +274,7 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
       <div class="product-card__info">
         <div class="product-card__name-row">
           <div class="product-card__name" ref={nameRef}>
-            {(() => {
-              const g = genderOf(item);
-              // Desktop-only gender prefix on the title (CSS hides it below 1025
-              // and hides the sizes-row gender span above it). Mobile/tablet keep
-              // the gender in the sizes row exactly as before.
-              return g === "Men" || g === "Women" ? (
-                <span class="product-card__name-gender">{t(g === "Men" ? "gender.mens" : "gender.womens", locale.value)} </span>
-              ) : null;
-            })()}
+            {/* Gender moved off the title into the sizes row ("Women's XS - 3XL"). */}
             <span class="product-card__name-text">{displayName}</span>
             <span class="product-card__name-code">{(item.name.match(/#\S+/) || [''])[0]}</span>
           </div>
@@ -328,8 +325,16 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                     <span
                       key={c}
                       class="product-card__color-dot"
-                      style={{ background: c }}
-                      aria-hidden="true"
+                      style={{ background: c, cursor: "pointer" }}
+                      role="button"
+                      title={c.startsWith("#") ? colorName(c, locale.value) : c}
+                      onClick$={(e) => {
+                        // Preview this colour in the card; don't follow the card link.
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const i = (item.colors || []).indexOf(c);
+                        activeImg.value = i >= 0 && item.imgs && item.imgs[i] ? item.imgs[i] : item.img;
+                      }}
                     />
                   ))}
                   {extra > 0 && (
@@ -339,14 +344,17 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                 </div>
               ) : <span />;
             })()}
-            {(() => {
-              const g = genderOf(item);
-              return g === "Men" || g === "Women" ? <span class="product-card__gender">{t(g === "Men" ? "gender.mens" : "gender.womens", locale.value)}</span> : null;
-            })()}
             {/* Fits shown beside each other on one line — regular plus any extra
                 variant (Tall/Short) the SKU carries. The " / " separator between
-                lines comes from CSS (.product-card__sizes-line + …::before). */}
+                lines comes from CSS (.product-card__sizes-line + …::before).
+                The gender is prefixed here (e.g. "Women's XS - 3XL"). */}
             <span class="product-card__sizes">
+              {(() => {
+                const g = genderOf(item);
+                return g === "Men" || g === "Women" ? (
+                  <span class="product-card__sizes-gender">{t(g === "Men" ? "gender.mens" : "gender.womens", locale.value)}{" "}</span>
+                ) : null;
+              })()}
               {(item.sizes === "One Size" ? [t("modal.onesize", locale.value)] : sizeGroups(item.sizes)).map((g) => (
                 <span key={g} class="product-card__sizes-line">{g}</span>
               ))}

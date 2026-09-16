@@ -11485,10 +11485,10 @@ details[open] > .cart-drawer__checkout-title::after {
    defaults above, so it wins in both ranges (the 6-up rule is placed last so it
    wins over 8-up within the narrow range). */
 @media (min-width: 1025px) {
-  .home-catalog .apparel-grid.apparel-grid--dense { grid-template-columns: repeat(8, 1fr) !important; }
+  .home-catalog .apparel-grid.apparel-grid--dense { grid-template-columns: repeat(4, 1fr) !important; }
 }
 @media (min-width: 1025px) and (max-width: 1599px) {
-  .home-catalog .apparel-grid.apparel-grid--dense { grid-template-columns: repeat(6, 1fr) !important; }
+  .home-catalog .apparel-grid.apparel-grid--dense { grid-template-columns: repeat(4, 1fr) !important; }
 }
 
 /* Desktop: ONE outline around the whole product card, not just its image.

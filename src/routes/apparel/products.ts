@@ -24,7 +24,7 @@ export const allProducts = [
   },
   {
     "sku": "TM-2",
-    "name": "ATC Everyday Cotton Long Sleeve Tee",
+    "name": "ATC Everyday Cotton LS Tee",
     "category": "T-Shirts",
     "sizes": "S - 4XL",
     "badge": "",
@@ -133,7 +133,7 @@ export const allProducts = [
   },
   {
     "sku": "TM-8",
-    "name": "Lakeview Adult Full-Zip Hooded Sweatshirt",
+    "name": "Lakeview Full-Zip Hooded Sweatshirt",
     "category": "Sweaters",
     "sizes": "S - 4XL",
     "badge": "",
@@ -169,7 +169,7 @@ export const allProducts = [
   },
   {
     "sku": "TM-10",
-    "name": "DML Flip Toque",
+    "name": "Cap America Flip Toque",
     "category": "Hats",
     "sizes": "One Size",
     "badge": "New",
