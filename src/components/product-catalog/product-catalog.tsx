@@ -1,5 +1,5 @@
 import { component$, useSignal, useComputed$, useContext, $, useVisibleTask$, Slot } from "@builder.io/qwik";
-import { Link, useLocation, useNavigate } from "@builder.io/qwik-city";
+import { useLocation, useNavigate } from "@builder.io/qwik-city";
 import { LocaleContext, t } from "../../i18n";
 import { allProducts, categoryLabel, colorName } from "../../routes/apparel/products";
 import type { Product } from "../../routes/apparel/products";
@@ -196,6 +196,7 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
   // colour's variant (imgs[i] lines up with colors[i]) without leaving the
   // gallery. Reset to the primary image if a colour has no dedicated image.
   const activeImg = useSignal(item.img);
+  const nav = useNavigate();
 
   // Fit-to-one-line: keep the title at its full size, but scale it down just
   // enough to avoid wrapping to a second line. If it still can't fit even at the
@@ -259,7 +260,14 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
   displayName = displayName.trim();
 
   return (
-    <Link href={`/${sku}/`} class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}>
+    <div
+      role="link"
+      tabIndex={0}
+      style={{ cursor: "pointer" }}
+      class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}
+      onClick$={() => nav(`/${sku}/`)}
+      onKeyDown$={(e) => { if (e.key === "Enter") nav(`/${sku}/`); }}
+    >
       <div class="product-card__image">
         {/* Bound directly to the activeImg signal so a swatch click updates the
             src in place (a nested component wouldn't react to the prop change). */}
@@ -335,11 +343,8 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                       style={{ background: c, cursor: "pointer" }}
                       role="button"
                       title={c.startsWith("#") ? colorName(c, locale.value) : c}
-                      preventdefault:click
-                      stoppropagation:click
-                      onClick$={() => {
-                        // Preview this colour in the card; the card link is
-                        // suppressed synchronously by the prevent/stop attrs above.
+                      onClick$={(e) => {
+                        e.stopPropagation();
                         const i = (item.colors || []).indexOf(c);
                         activeImg.value = i >= 0 && item.imgs && item.imgs[i] ? item.imgs[i] : item.img;
                       }}
@@ -391,7 +396,7 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
           </div>
         )}
       </div>
-    </Link>
+    </div>
   );
 });
 
