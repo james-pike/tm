@@ -15073,3 +15073,24 @@ html { background: rgb(223, 226, 230) !important; }
 
 /* ── Old tm chevron texture on the footer (subtle grain over the green) ──── */
 .site-footer { background-image: var(--wt-iron); background-repeat: repeat; }
+
+/* ── Header bar: Tamarack green (match the footer) so the white wordmark +
+      labels are legible. Overrides the off-white header fill in all states. ── */
+.site-header,
+.site-header--solid,
+.site-header--hero-hidden,
+.site-header--hero-hidden.site-header--hero-visible,
+body:has(.home-catalog) .site-header,
+body:has(.home-catalog__header, .apparel-titlebar, .pdp-breadcrumb) .site-header {
+  background-color: #1B6551 !important;
+  background-image: none !important;
+}
+
+/* White header text/links on the green header bar */
+.site-header__categories a,
+.site-header__nav a { color: rgba(255, 255, 255, 0.9) !important; }
+.site-header__categories a.active,
+.site-header__nav a.active { color: #ffffff !important; }
+.site-header__categories a:hover,
+.site-header__nav a:hover { color: var(--ce-gold) !important; }
+.site-header .locale-btn { color: rgba(255, 255, 255, 0.88) !important; border-color: rgba(255, 255, 255, 0.28) !important; background: transparent !important; }
