@@ -14938,9 +14938,11 @@ html { background: rgb(223, 226, 230) !important; }
    letters of "Tamarack" rather than trailing it as a suffix. Both use the same
    40px logo scale, so the identical absolute placement lines up in each. */
 .site-header__logo.brand-cluster,
-.site-footer__brand.brand-cluster { position: relative; }
+.site-footer__brand.brand-cluster,
+.mobile-coming-soon__brand.brand-cluster { position: relative; }
 .site-header__logo .brand-cluster__apparel,
-.site-footer__brand .brand-cluster__apparel {
+.site-footer__brand .brand-cluster__apparel,
+.mobile-coming-soon__brand .brand-cluster__apparel {
   position: absolute;
   left: 70%;
   top: 22%;
@@ -14952,6 +14954,8 @@ html { background: rgb(223, 226, 230) !important; }
   color: #fff;
   pointer-events: none;
 }
+/* Coming-soon logo runs larger (54px), so scale the overlay to match its scale. */
+.mobile-coming-soon__brand .brand-cluster__apparel { font-size: 1.2rem; }
 /* Login: "Apparel" sits UNDER the wordmark, centered. */
 .login-card__brand.brand-cluster { flex-direction: column; }
 .login-card__brand .brand-cluster__apparel { font-size: 1.15rem; margin-top: 0.55rem; }

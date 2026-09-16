@@ -1131,6 +1131,7 @@ export default component$(() => {
         <div class="mobile-coming-soon__inner">
           <div class="mobile-coming-soon__brand brand-cluster">
             <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
+            <span class="brand-cluster__apparel">{t("brand.apparel", locale.value)}</span>
           </div>
           <h1 class="mobile-coming-soon__title">Mobile &amp; Tablet<br />Coming Soon</h1>
         </div>
