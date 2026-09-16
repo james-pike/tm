@@ -813,31 +813,7 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
             <nav class="home-catalog__catnav" aria-label="Collections">
               <div class="home-catalog__catnav-head">
                 <div class="home-catalog__catnav-title">{isElectrical.value ? t("login.portal.electrical", locale.value) : t("filter.collections", locale.value)}</div>
-                {/* Grid-density toggle, inline on the right of the Collections
-                    label — icon-only (Standard 5-up / Catalog 8-up). Hidden for
-                    the Electrical shop — too few products to need it. */}
-                {!isElectrical.value && (
-                <div class="home-catalog__density home-catalog__density--inline" role="group" aria-label="Grid density">
-                  <button
-                    type="button"
-                    class={`home-catalog__density-btn ${!denseGrid.value ? "active" : ""}`}
-                    aria-pressed={!denseGrid.value}
-                    aria-label={t("viewmode.standard", locale.value)}
-                    onClick$={() => { denseGrid.value = false; }}
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                  </button>
-                  <button
-                    type="button"
-                    class={`home-catalog__density-btn ${denseGrid.value ? "active" : ""}`}
-                    aria-pressed={denseGrid.value}
-                    aria-label={t("viewmode.catalog", locale.value)}
-                    onClick$={() => { denseGrid.value = true; }}
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="4" height="4"/><rect x="10" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="17" y="10" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><rect x="10" y="17" width="4" height="4"/><rect x="17" y="17" width="4" height="4"/></svg>
-                  </button>
-                </div>
-                )}
+                {/* Grid-density toggle removed — Tamarack uses one gallery grid. */}
               </div>
               {visibleCategories.value.map((cat) => (
                 <button

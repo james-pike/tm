@@ -10353,7 +10353,7 @@ details[open] > .cart-drawer__checkout-title::after {
     text-align: left;
     font-size: 1.02rem;
     color: var(--ce-gray-700);
-    border-radius: 4px;
+    border-radius: 0;
     transition: background 0.12s ease, color 0.12s ease;
   }
   .home-catalog__catnav-item:hover { background: rgba(0, 0, 0, 0.04); color: var(--ce-gray-900); }
