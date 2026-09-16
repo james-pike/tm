@@ -328,10 +328,11 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                       style={{ background: c, cursor: "pointer" }}
                       role="button"
                       title={c.startsWith("#") ? colorName(c, locale.value) : c}
-                      onClick$={(e) => {
-                        // Preview this colour in the card; don't follow the card link.
-                        e.preventDefault();
-                        e.stopPropagation();
+                      preventdefault:click
+                      stoppropagation:click
+                      onClick$={() => {
+                        // Preview this colour in the card; the card link is
+                        // suppressed synchronously by the prevent/stop attrs above.
                         const i = (item.colors || []).indexOf(c);
                         activeImg.value = i >= 0 && item.imgs && item.imgs[i] ? item.imgs[i] : item.img;
                       }}
