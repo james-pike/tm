@@ -16,7 +16,8 @@ export const allProducts = [
     "price": 10,
     "img": "/skus/ATC1000-tamarack.png",
     "imgs": [
-      "/skus/ATC1000-tamarack.png"
+      "/skus/ATC1000-tamarack.png",
+      "/skus/ATC1000-safetygreen-tamarack.png"
     ],
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000"
@@ -34,7 +35,8 @@ export const allProducts = [
     "price": 6.8,
     "img": "/skus/ATC1015-tamarack.png",
     "imgs": [
-      "/skus/ATC1015-tamarack.png"
+      "/skus/ATC1015-tamarack.png",
+      "/skus/ATC1015-safetygreen-tamarack.png"
     ],
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, 1x1 rib knit collar, Rib knit cuffs, Double needle cover stitch at sleeve & bottom hem, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1015"
@@ -69,7 +71,8 @@ export const allProducts = [
     "price": 6,
     "img": "/skus/S350-tamarack.png",
     "imgs": [
-      "/skus/S350-tamarack.png"
+      "/skus/S350-tamarack.png",
+      "/skus/S350-limeshock-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
     "details": "Wicking technology, No Bleed Fabric (NBF) cationic dye process for easy printing, Side seamed, Breathable, Classic fit, #S350"
@@ -87,7 +90,8 @@ export const allProducts = [
     "price": 6,
     "img": "/skus/L350-tamarack.png",
     "imgs": [
-      "/skus/L350-tamarack.png"
+      "/skus/L350-tamarack.png",
+      "/skus/L350-limeshock-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
     "details": "Wicking technology, No Bleed Fabric (NBF) cationic dye process for easy printing, Side seamed, Contoured fit, Breathable, #L350"
@@ -258,6 +262,7 @@ const colorNames: Record<string, Record<string, string>> = {
   "#a8c4d8": { en: "Light Blue", fr: "Bleu clair" },
   "#a9682f": { en: "Brown", fr: "Brun" },
   "#b0b0b0": { en: "Grey", fr: "Gris" },
+  "#a5e82c": { en: "Lime Shock", fr: "Vert lime" },
   "#b6e021": { en: "Safety Green", fr: "Vert sécurité" },
   "#b8ad97": { en: "Khaki", fr: "Kaki" },
   "#ab8f66": { en: "Dark Khaki", fr: "Kaki foncé" },

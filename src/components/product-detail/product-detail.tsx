@@ -207,6 +207,19 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
     }
   });
 
+  // Selecting a colour swatch switches the shown image to that colour's photo.
+  // Only when imgs are colour-aligned (one image per colour, same order as the
+  // DB `colors` array); otherwise imgs is a plain carousel and we leave it be.
+  useTask$(({ track }) => {
+    const color = track(() => selectedColor.value);
+    const p0 = product.value;
+    if (!p0 || !color) return;
+    const imgs = p0.imgs && p0.imgs.length ? p0.imgs : [p0.img];
+    if (imgs.length !== p0.colors.length) return;
+    const idx = p0.colors.indexOf(color);
+    if (idx >= 0) imgIndex.value = idx;
+  });
+
   if (!product.value) {
     return (
       <div class="apparel-catalog" id="products">

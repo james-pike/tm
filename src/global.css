@@ -10146,6 +10146,9 @@ details[open] > .cart-drawer__checkout-title::after {
    Filters apply within the selected category; the component tags them with
    the category so switching tabs discards them automatically. */
 .home-catalog__filters { display: none; }
+/* On a product page the sidebar acts as a "back to catalog" target. */
+.home-catalog__filters--pdp-back { cursor: pointer; }
+.home-catalog__pdp-main { cursor: default; }
 @media (min-width: 1025px) {
   .home-catalog__filters {
     display: block;
@@ -15094,3 +15097,41 @@ body:has(.home-catalog__header, .apparel-titlebar, .pdp-breadcrumb) .site-header
 .site-header__categories a:hover,
 .site-header__nav a:hover { color: var(--ce-gold) !important; }
 .site-header .locale-btn { color: rgba(255, 255, 255, 0.88) !important; border-color: rgba(255, 255, 255, 0.28) !important; background: transparent !important; }
+
+/* ── Force the header green in every state (beats --white/--tabs-stuck) ──── */
+html body header.site-header,
+html body header.site-header--white,
+html body header.site-header--tabs-stuck {
+  background: #1B6551 !important;
+  background-image: none !important;
+}
+/* Footer: white link/text (email, privacy, localization) */
+.site-footer, .site-footer a, .site-footer .locale-btn, .site-footer__col a { color: rgba(255,255,255,0.9) !important; }
+.site-footer a:hover, .site-footer .locale-btn:hover { color: var(--ce-gold) !important; }
+.site-footer .locale-btn { border-color: rgba(255,255,255,0.3) !important; }
+/* A touch of breathing room below the footer */
+.site-footer { margin-bottom: 1.25rem; }
+
+/* ── The header bar is painted by .site-header::before (a white panel). Repaint
+      it Tamarack green so the bar actually turns green. ────────────────────── */
+html body header.site-header::before { background: #1B6551 !important; }
+/* Footer icons (email, etc.) white to match the text */
+.site-footer svg { stroke: rgba(255, 255, 255, 0.9) !important; color: rgba(255, 255, 255, 0.9) !important; }
+.site-footer svg [fill]:not([fill="none"]) { fill: rgba(255, 255, 255, 0.9) !important; }
+
+/* The header's inner bar had its own grey gradient — clear it so the green
+   header bar shows through. */
+html body .site-header .site-header__inner { background: transparent !important; background-image: none !important; }
+
+/* ── White text + icons across the green header ─────────────────────────── */
+.site-header svg { stroke: #ffffff !important; }
+.site-header .site-header__search { background: rgba(255, 255, 255, 0.14) !important; border-color: rgba(255, 255, 255, 0.3) !important; }
+.site-header .site-header__search input { color: #ffffff !important; }
+.site-header .site-header__search input::placeholder { color: rgba(255, 255, 255, 0.7) !important; }
+.site-header__login--logout,
+.site-header .logout-btn,
+.site-header .locale-btn { color: #ffffff !important; }
+
+/* Faint chevron texture on the header (same as the footer) */
+html body header.site-header::before { background-image: var(--wt-iron) !important; background-repeat: repeat !important; }
+html body header.site-header { background-image: var(--wt-iron) !important; background-repeat: repeat !important; }

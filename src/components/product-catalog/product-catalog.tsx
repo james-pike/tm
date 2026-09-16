@@ -789,7 +789,15 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
               needs its own node. */}
           <span class="home-catalog__seam" aria-hidden="true" />
         </div>
-        <aside class="home-catalog__filters" aria-label="Filter products">
+        <aside
+          class={`home-catalog__filters${isPdp.value ? " home-catalog__filters--pdp-back" : ""}`}
+          aria-label="Filter products"
+          onClick$={() => {
+            // On a product page the sidebar has no grid to filter, so any click
+            // in it returns to the catalog (SPA nav keeps the shell mounted).
+            if (isPdp.value) nav("/");
+          }}
+        >
           {/* Desktop category nav — the collection titles moved out of the
               horizontal tab strip into a vertical sidebar list (sm-style), each
               with a SKU count pill. The tab strip stays for mobile/tablet. */}
@@ -897,7 +905,19 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
           )}
         </aside>
         {isPdp.value ? (
-          <div class="home-catalog__pdp-main"><Slot /></div>
+          <div
+            class="home-catalog__pdp-main"
+            onClick$={(e, el) => {
+              // Clicking the empty gutter/margin around the detail panel returns
+              // to the catalog. Only the structural containers' own areas count
+              // (this column's gutter, or the .apparel-catalog padding/backdrop),
+              // never the panel content, breadcrumb, or related-item links inside.
+              const t = e.target as HTMLElement;
+              if (t === el || t.classList.contains("apparel-catalog")) nav("/");
+            }}
+          >
+            <Slot />
+          </div>
         ) : (
           <div class={`apparel-grid ${denseGrid.value ? "apparel-grid--dense" : ""} ${tabletCols.value === "list" ? "apparel-grid--list" : `apparel-grid--cols-${tabletCols.value}`}`}>
             {filtered.value.map((item, i) => (
