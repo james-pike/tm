@@ -14605,7 +14605,7 @@ body .site-header__inner { border-top-left-radius: 0 !important; border-top-righ
   /* One smooth expression (no breakpoint jump, so browser zoom stays monotonic):
      near full-width on laptops, and once the viewport passes the 1728px cap the
      content plateaus and wide desktop monitors get real side margins. */
-  :root { --site-max: min(calc(100vw - 2rem), 1728px); }
+  :root { --site-max: min(calc(100vw - 2rem), 1600px); }
   /* Bring the sticky header bar in to the same width as the content column. */
   .site-header { max-width: var(--site-max); margin-inline: auto; }
 }
@@ -15135,3 +15135,6 @@ html body .site-header .site-header__inner { background: transparent !important;
 /* Faint chevron texture on the header (same as the footer) */
 html body header.site-header::before { background-image: var(--wt-iron) !important; background-repeat: repeat !important; }
 html body header.site-header { background-image: var(--wt-iron) !important; background-repeat: repeat !important; }
+
+/* Tamarack mark fits the add-to-cart / order-confirm chips */
+img.product-modal__add-pinwheel, img.order-confirm__pinwheel { object-fit: contain; }

@@ -428,16 +428,7 @@ export default component$(() => {
         <Modal.Panel class="modal-overlay">
           <div class="modal order-confirm">
             <div class="order-confirm__badge" aria-hidden="true">
-              <svg class="order-confirm__pinwheel" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="50,50 50,0 100,0" fill="#ffe2a6" />
-                <polygon points="50,50 100,0 100,50" fill="#ae1f2a" />
-                <polygon points="50,50 100,50 100,100" fill="#d43950" />
-                <polygon points="50,50 100,100 50,100" fill="#9ec069" />
-                <polygon points="50,50 50,100 0,100" fill="#7fa244" />
-                <polygon points="50,50 0,100 0,50" fill="#4689b3" />
-                <polygon points="50,50 0,50 0,0" fill="#31759c" />
-                <polygon points="50,50 0,0 50,0" fill="#ffd25b" />
-              </svg>
+              <img class="order-confirm__pinwheel" src="/logo.png" alt="" width="200" height="200" />
               <svg class="order-confirm__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <h2 class="order-confirm__title">{t("order.title", locale.value)}</h2>

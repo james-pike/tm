@@ -848,7 +848,8 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
               ))}
             </nav>
           )}
-          {!isPdp.value && !isElectrical.value && facetOptions.value.genders.length >= 1 && (
+          {/* FIT facet removed per Tamarack request. */}
+          {false && (
             <div class="home-catalog__filter-group">
               <div class="home-catalog__filter-title">{t("filter.fit", locale.value)}</div>
               {facetOptions.value.genders.map((g) => (
