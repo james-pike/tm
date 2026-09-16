@@ -13,7 +13,18 @@ export default component$(() => {
     // Reuse the shared page frame (surround + card ring + the persistent orange
     // strip below the header) so this document sits inside the same card the
     // catalog and product pages use — only the strip's text changes per view.
-    <div class="privacy-page apparel-page dot-pattern">
+    <div
+      class="privacy-page apparel-page dot-pattern"
+      onClick$={(e, el) => {
+        // Clicking the empty page margins / card padding around the document
+        // goes back (same as the breadcrumb), never the text content inside.
+        const tg = e.target as HTMLElement;
+        if (tg === el || tg.classList.contains("apparel-catalog") || tg.classList.contains("product-detail")) {
+          if (typeof window !== "undefined" && window.history.length > 1) window.history.back();
+          else window.location.href = "/";
+        }
+      }}
+    >
       <div class="apparel-catalog" id="products">
         <nav class="pdp-breadcrumb" aria-label="Breadcrumb">
           <Link

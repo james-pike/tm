@@ -26,6 +26,9 @@ const translations = {
   "search.placeholder": { en: "Search", fr: "Rechercher" },
   "search.placeholder.short": { en: "Search...", fr: "Rechercher..." },
 
+  // Brand wordmark suffix
+  "brand.apparel": { en: "Apparel", fr: "Vêtements" },
+
   // Login modal
   "login.title": { en: "Employee Login", fr: "Connexion employé" },
   "login.subtitle": { en: "Login to access apparel", fr: "Connectez-vous pour accéder aux vêtements" },

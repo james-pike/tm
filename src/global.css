@@ -76,7 +76,7 @@
   --radius-md: 8px;
   --radius-lg: 10px;
   --radius-xl: 12px;
-  /* Responsive category-tab label sizes (container-query based, matches cm) */
+  /* Responsive category-tab label sizes (container-query based) */
   --text-tab:      clamp(0.7rem, 3.95cqi, 1.15rem);  /* phone tab labels */
   --text-tab-wide: clamp(0.85rem, 2.9cqi, 1.2rem);   /* tablet tab labels */
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
@@ -281,7 +281,7 @@ img { max-width: 100%; display: block; }
   top: 0;
   z-index: 9999;
   pointer-events: auto;
-  /* Slightly off-white (like the cm project) so the header reads distinct from
+  /* Slightly off-white so the header reads distinct from
      the white tab bar and page content below it. */
   /* iOS/iPadOS Safari (15–26) colours its top toolbar ("forehead") by sampling
      the background-COLOR of the fixed/sticky element at the top of the page —
@@ -2233,7 +2233,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 }
 @media (max-width: 900px) {
   /* Mobile: a small x-inset on the inner applies to both the tab strip and the
-     product grid so they line up and neither runs edge-to-edge (matches cm). */
+     product grid so they line up and neither runs edge-to-edge. */
   .home-catalog__inner { padding: 0 var(--wt-box-my); }
   /* Mobile nav drawer: drop the per-product thumbnails — the list is
      long enough that the images crowd the row; clean text-only list. */
@@ -3321,7 +3321,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
      seamless rather than a harsh black-to-white flash. */
   background: rgba(240, 240, 238, 0.96);
   backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: flex-start; justify-content: center;
   padding: clamp(12px, 4vh, 40px) 0;
   animation: fadeIn 0.2s ease;
   transition: opacity 0.8s ease, backdrop-filter 0.8s ease;
@@ -3339,175 +3339,191 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-/* ═══ Split login (matches the sg project) ══════════════════════════════════
-   Sign-in on the LEFT third over a dark steel pane; a cross-fading carousel of
-   the two Tamarack hero slides fills the RIGHT two-thirds. Capped to the
-   site's max-width and framed in a white sign-edge ring; fills the viewport at a
-   true 16:9 on desktop. Tablet/mobile drops to a full-bleed photo with the
-   sign-in floating over a scrim. */
+/* ═══ Split login — Tamarack green sign pane + single hero image ═════════════
+   Sign-in on the LEFT third over the green iron-textured sign surface (the same
+   treatment as the header/hero bars); a single Tamarack hero photo fills the
+   RIGHT two-thirds. Framed in a white sign-edge ring at a 12:5 ratio on
+   desktop/tablet; stacks (form over a short photo band) on mobile. */
 .login-modal.login-modal--split {
   position: relative;
   z-index: 1;                     /* above the .login-overlay::before dot texture */
   margin: 0 auto;
-  width: 100%;
-  max-width: var(--site-max);
-  height: min(90vh, 880px);
+  width: calc(100% - 1rem);
+  max-width: 1536px;              /* a step past the content width */
+  height: min(60vh, 600px);
   display: flex;
   align-items: stretch;
   overflow: hidden;
-  border: 4px solid #fff;
+  border: var(--wt-box-my) solid #fff;   /* white sign-edge ring */
   border-radius: 0;
-  background: #0c1922;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+  background: var(--ce-greige);
+  box-shadow: none;
   animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* Desktop: fill the viewport height at a true 16:9 (width follows), capped to
-   100vw so it never overflows on tall/narrow monitors. */
-@media (min-width: 1025px) {
-  .login-overlay { padding: 0; }
+/* Desktop/tablet: lock the shape to 12:5 so the right image pane holds ~16:10
+   regardless of viewport height. */
+@media (min-width: 601px) {
   .login-modal.login-modal--split {
-    box-sizing: border-box;
-    width: 100vw;
-    max-width: 100vw;
-    height: 100vh;
-    max-height: 100vh;
+    height: auto;
+    aspect-ratio: 12 / 5;
+    max-height: 88vh;
   }
 }
+
 .login-modal--split .login-modal__form-pane {
-  flex: 0 0 34%;
-  max-width: 34%;
+  flex: 0 0 33.333%;
+  max-width: 33.333%;
   position: relative;
-  display: flex;
-  overflow: hidden;
-  background: linear-gradient(180deg, #12232e 0%, #0b161e 100%);
-}
-/* Subtle dot texture over the steel pane (the tm login treatment) — a fine white
-   dot grid, masked to fade toward the centre so it reads only as faint texture at
-   the edges. Sits under the sign-in content (which is lifted to z-index 1). */
-.login-modal--split .login-modal__form-pane::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1.5px);
-  background-size: 14px 14px;
-  -webkit-mask-image:
-    linear-gradient(to right, #000 0%, rgba(0,0,0,0.35) 14%, transparent 42%, transparent 58%, rgba(0,0,0,0.35) 86%, #000 100%),
-    linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.35) 12%, transparent 40%, transparent 60%, rgba(0,0,0,0.35) 88%, #000 100%);
-  -webkit-mask-composite: source-over;
-  mask-image:
-    linear-gradient(to right, #000 0%, rgba(0,0,0,0.35) 14%, transparent 42%, transparent 58%, rgba(0,0,0,0.35) 86%, #000 100%),
-    linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.35) 12%, transparent 40%, transparent 60%, rgba(0,0,0,0.35) 88%, #000 100%);
-  mask-composite: add;
-}
-.login-modal--split .login-card {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  z-index: 1;   /* above the pane's dot texture */
   display: flex;
   flex-direction: column;
-  /* Centre the brand + hint + form as one connected group in the full-height pane. */
   justify-content: center;
-  padding: clamp(1.5rem, 4vh, 2.75rem) clamp(1rem, 1.75vw, 1.5rem);
-  color: #eef4f8;
+  overflow: hidden;
+  /* The green iron-textured sign surface (matches the hero / header bars): a
+     translucent green scrim over the chevron texture, over a dark box overlay,
+     over the base Tamarack green. */
+  background:
+    linear-gradient(rgba(27, 101, 81, 0.55), rgba(27, 101, 81, 0.55)),
+    var(--wt-iron) left top / 1400px auto repeat,
+    linear-gradient(rgba(0, 0, 0, 0.30), rgba(0, 0, 0, 0.30)),
+    #1B6551;
 }
-/* Carousel pane — the two MN hero photos cross-fading on the right. */
+
+/* Brand header — the wordmark stacked over a centred "APPAREL" kicker (instead
+   of the overlapping inline treatment, which collides in the narrow pane). */
+.login-modal--split .login-modal__header {
+  background: none;
+  box-shadow: none;
+  padding: 2rem 1.75rem 1.6rem;
+}
+.login-modal--split .login-modal__brand--img {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.login-modal--split .login-modal__logo-white { height: 62px; width: auto; display: block; }
+.login-modal--split .login-modal__brand--img .brand-apparel {
+  margin-left: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  /* Wider tracking so APPAREL spans closer to the fields/button width below. */
+  letter-spacing: 0.36em;
+  padding-left: 0.36em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  /* Stretch the caps taller without widening the tracking, and nudge right so
+     APPAREL sits under the "Tamarack" wordmark text. */
+  display: inline-block;
+  transform: translateX(15px) scaleY(1.35);
+  transform-origin: center;
+}
+
+.login-modal--split .login-modal__form {
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem 2.85rem 1.9rem;
+  gap: 1.05rem;
+}
+/* Sits above the password field, on the green pane. */
+.login-modal--split .login-modal__subtitle {
+  margin: 0 0 0.35rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.login-modal--split .login-modal__field { display: flex; flex-direction: column; gap: 0.5rem; }
+.login-modal--split .login-modal__field label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.login-modal--split .login-modal__field input {
+  padding: 14px 16px; border-radius: 6px; font-size: 16px;
+  font-family: var(--font-sans);
+  /* Frosted-white look over an OPAQUE green base (matching the pane) so the
+     chevron texture doesn't show through the fields. */
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)),
+    rgb(23, 87, 70);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+.login-modal--split .login-modal__field input::placeholder { color: rgba(255, 255, 255, 0.55); }
+.login-modal--split .login-modal__field input:focus {
+  border-color: #E2B93B;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.18)),
+    rgb(23, 87, 70);
+  box-shadow: 0 0 0 3px rgba(226, 185, 59, 0.25);
+}
+
+.login-modal--split .login-modal__error {
+  background: rgba(0, 0, 0, 0.22);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 10px 14px; border-radius: 6px;
+  font-size: 0.82rem; font-weight: 600; text-align: center;
+}
+.login-modal--split .login-modal__error--info {
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+/* Submit — the gold brand button on the green pane. */
+.login-modal--split .login-modal__submit.btn {
+  width: 100%; justify-content: center; margin-top: 0.55rem;
+  padding: 14px 22px; border: none; border-radius: 6px;
+  background: #E2B93B; color: var(--ce-green-dark);
+  font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.95rem;
+  text-shadow: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+.login-modal--split .login-modal__submit.btn:hover {
+  background: #efc85a; color: var(--ce-green-dark);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.login-modal--split .login-modal__submit.btn:active { transform: translateY(1px); }
+.login-modal--split .login-modal__submit.btn:disabled {
+  background: rgba(255, 255, 255, 0.16); color: rgba(255, 255, 255, 0.5);
+  box-shadow: none; cursor: not-allowed;
+}
+
+/* Language toggle pinned to the top of the login pane. */
+.login-modal__lang {
+  position: absolute;
+  top: 14px; right: 14px; z-index: 3;
+  padding: 5px 12px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.login-modal__lang:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* Right pane — a single static Tamarack hero image (no carousel). */
 .login-modal__carousel {
-  flex: 1 1 66%;
+  flex: 1 1 66.667%;
   position: relative;
   overflow: hidden;
-  background: #0c1922;
-  cursor: default;   /* clickable to advance, but keep the normal cursor */
+  background: var(--ce-greige);
 }
 .login-modal__slide {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: center 40%;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-/* The wide building-services photo (1920×776) fills the tall pane with `cover`
-   (full height, like the other slide); the crop is centred so the van logo and
-   a worker stay in frame. */
-.login-modal__slide--wide { object-fit: cover; object-position: center center; }
-.login-modal__slide.is-active { opacity: 1; }
-.login-modal__dots {
-  position: absolute; bottom: clamp(1.25rem, 3.2vh, 2rem); right: clamp(1.35rem, 2.3vw, 2.1rem); left: auto;
-  display: flex; justify-content: flex-end; gap: 9px; z-index: 2;
-}
-/* Squares by default; the SELECTED one rotates to a diamond — echoing the
-   angular MN pinwheel mark. Rendered as reset <button>s so each dot jumps
-   straight to its slide. */
-.login-modal__dot {
-  width: 11px; height: 11px; padding: 0; border: none; border-radius: 1px;
-  background: rgba(255, 255, 255, 0.32);
-  cursor: pointer;
-  transform: rotate(0deg);
-  transition: background var(--transition-fast), transform var(--transition-fast);
-}
-.login-modal__dot:hover { background: rgba(255, 255, 255, 0.6); }
-.login-modal__dot.is-active { background: #fff; transform: rotate(45deg) scale(1.15); }
-
-/* ═══ Tablet + mobile (<=1024): STACKED ═══════════════════════════════════════
-   The desktop side-by-side split restacks vertically — the hero carousel becomes
-   a band across the TOP, the steel sign-in pane fills the rest below — so it
-   carries the same design language (steel pane, dot texture, diamond dots, the
-   stacked MN lockup). Tablet keeps a centred, framed card; mobile goes full-bleed. */
-/* ═══ Tablet + mobile (<=1024): SOLID STEEL, NO CAROUSEL ══════════════════════
-   Full-screen steel sign-in (no photo) on both tablet and mobile — the lockup
-   over the steel pane, the form below, everything in the first 100dvh, no scroll.
-   Tablet keeps a centred content column; mobile fills the full viewport width. */
-@media (max-width: 1024px) {
-  .login-overlay { padding: 0; }
-  .login-overlay::before { display: none; }
-  .login-modal.login-modal--split {
-    flex-direction: column;
-    aspect-ratio: auto;                 /* the 16:9 lock is desktop-only */
-    width: 100%; max-width: none;
-    height: 100dvh; max-height: none;
-    margin: 0; border: none; box-shadow: none;
-    overflow: hidden;
-  }
-  .login-modal__carousel { display: none; }   /* no carousel on tablet or mobile */
-  .login-modal__dots { display: none; }
-  .login-modal--split .login-modal__form-pane {
-    flex: 1 1 auto;
-    width: 100%; max-width: 100%;
-  }
-  .login-modal--split .login-card {
-    justify-content: center;
-    /* Centred content column so the lockup + fields share one tidy width on the
-       wide tablet pane. Inert on mobile (viewport already narrower than the cap). */
-    max-width: 620px;
-    margin-inline: auto;
-    padding: clamp(1.3rem, 4.5vw, 2.2rem) clamp(1.3rem, 5vw, 2.3rem);
-  }
-  /* Lockup fills the centred content column (matching the fields), inset to the
-     same edge as the form. The .login-modal--split prefix boosts specificity so
-     these beat the desktop base rules declared LATER in this file. (Mobile
-     overrides the sizing again for its own full-bleed vw fill.) */
-  .login-modal--split .login-card__brand.brand-cluster { gap: clamp(1.7rem, 4vw, 3rem) !important; margin-bottom: 2.3rem; padding-inline: clamp(0.55rem, 1vw, 0.95rem); }
-  .login-modal--split .login-card__brand .brand-cluster__mark { width: 148px; height: 148px; }
-  /* Fixed — the content column is capped at 620px on tablet, so a fixed size
-     fills it consistently (a vw would drift while the column stays put). */
-  .login-modal--split .login-card__brand .brand-cluster__word { font-size: 2.9rem; }
-  .login-modal--split .login-card__hint { font-size: 0.86rem; margin-bottom: 0.15rem; }
-  .login-modal--split .login-modal__form { padding-top: 1rem; gap: 0.75rem; }
-  .login-modal--split .login-modal__field input { padding: 13px 15px; }
-  .login-modal--split .login-modal__submit.btn { padding: 14px 20px; }
-}
-
-/* Mobile: the lockup fills the full viewport width (matching the mobile hero
-   cover sizing); everything still fits the first 100dvh, no scroll. */
-@media (max-width: 600px) {
-  .login-modal--split .login-card__brand.brand-cluster { gap: 9.5vw !important; margin-bottom: 2.5rem; padding-inline: clamp(0.55rem, 1vw, 0.95rem); }
-  .login-modal--split .login-card__brand .brand-cluster__mark { width: 30vw; height: 30vw; }
-  .login-modal--split .login-card__brand .brand-cluster__words { gap: 0.2rem; }
-  .login-modal--split .login-card__brand .brand-cluster__word { font-size: 8.25vw; }
-  .login-modal--split .login-card__brand .brand-cluster__word--sub { letter-spacing: -0.02em; }
+  object-position: center 20%;
 }
 
 .login-modal__close {
@@ -3520,172 +3536,15 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 }
 .login-modal__close:hover { background: rgba(255, 255, 255, 0.3); color: #fff; }
 
-/* MN brand lockup at the top of the sign-in pane — lifted onto the dark pane
-   with light word colors (the default gray-700 is invisible here). */
-/* Two-class selector (.login-card__brand.brand-cluster) so it out-specifies the
-   base .brand-cluster row lockup defined later in the file. */
-.login-card__brand.brand-cluster {
-  /* Stack the mark ABOVE the wordmark and centre the whole lockup in the pane.
-     Sized in vw so it scales with the column (~full width) across desktop sizes. */
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: flex-start;
-  gap: clamp(1.75rem, 3.45vw, 3.1rem) !important;
-  margin: 0 auto 1.85rem;
-  animation: fadeIn 0.45s ease;
-}
-.login-card__brand .brand-cluster__mark { width: clamp(120px, 11.5vw, 185px); height: clamp(120px, 11.5vw, 185px); }
-/* Text lines share a common LEFT edge (MODERN / BUILDING / APPAREL all flush
-   left, as in the original lockup); the words block as a whole is still centred
-   in the column by the parent's align-items: center. */
-.login-card__brand .brand-cluster__words { align-items: flex-start; text-align: left; gap: 4px; }
-/* All three lines share ONE font-size (sized so the longest line, BUILDING
-   SERVICES, still fits the pane); the base weights (700 / 600 / 500) keep the
-   visual hierarchy without changing height. */
-.login-card__brand .brand-cluster__word {
-  color: rgba(255, 255, 255, 0.92);
-  font-size: clamp(1.6rem, 2.82vw, 2.72rem);
-  white-space: nowrap;
-}
-.login-card__brand .brand-cluster__word--sub { color: rgba(224, 236, 244, 0.62); letter-spacing: -0.01em; }
-.login-card__brand .brand-cluster__word--muted { color: rgba(255, 255, 255, 0.92); opacity: 1; }
-.login-card__hint {
-  margin: 0 0 0.4rem;
-  /* Small horizontal inset so the hint + form line up under the centred wordmark
-     block (which sits slightly in from the card edges). Shared with the form. */
-  padding-inline: clamp(0.55rem, 1vw, 0.95rem);
-  max-width: 34ch;
-  font-size: 0.92rem; line-height: 1.5;
-  color: rgba(224, 236, 244, 0.72);
-}
-
-/* Sits beneath the brand + hint; the whole group is centred by the card. */
-.login-modal__form { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem clamp(0.55rem, 1vw, 0.95rem) 0; }
-.login-modal__field { display: flex; flex-direction: column; gap: 0.5rem; }
-.login-modal__field label {
-  font-size: 0.66rem; font-weight: 800; color: rgba(224, 236, 244, 0.82);
-  text-transform: uppercase; letter-spacing: 0.14em;
-}
-.login-modal__field input {
-  padding: 16px 17px; border-radius: 2px;
-  border: 1px solid rgba(255, 255, 255, 0.22); font-size: 16px;
-  font-family: var(--font-sans); color: #fff;
-  background: rgba(255, 255, 255, 0.08);
-  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
-  outline: none;
-}
-.login-modal__field input:focus {
-  border-color: var(--ce-green);
-  background: rgba(255, 255, 255, 0.13);
-  box-shadow: 0 0 0 3px rgba(65, 111, 141, 0.32);
-}
-.login-modal__field input::placeholder { color: rgba(224, 236, 244, 0.45); }
-
-/* Portal picker — two bubbles instead of a username field. */
-.login-portals { display: flex; gap: 0.6rem; }
-.login-portal {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 15px 12px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.08);
-  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-  color: #fff;
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
-}
-.login-portal:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.4); }
-.login-portal.is-selected {
-  background: var(--ce-green);
-  border-color: var(--ce-green);
-  color: #fff;
-  box-shadow: 0 0 0 3px rgba(65, 111, 141, 0.32);
-}
-
-/* Submit — the Tamarack steel-blue CTA. */
-.login-modal__submit.btn {
-  width: 100%; justify-content: center; margin-top: 0.55rem;
-  padding: 16px 22px; border: none; border-radius: 2px;
-  background: var(--ce-green); color: #fff;
-  font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.98rem;
-  text-shadow: none;
-  box-shadow: 0 8px 22px rgba(50, 85, 108, 0.35);
-  transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
-}
-.login-modal__submit.btn:hover {
-  background: var(--ce-green-light); color: #fff;
-  box-shadow: 0 10px 28px rgba(50, 85, 108, 0.5);
-}
-.login-modal__submit.btn:active { transform: translateY(1px); }
-.login-modal__submit.btn:disabled {
-  background: rgba(255, 255, 255, 0.16); color: rgba(255, 255, 255, 0.5);
-  box-shadow: none; cursor: not-allowed;
-}
-
-.login-modal__error {
-  background: rgba(220, 76, 70, 0.16); border: 1px solid rgba(240, 120, 110, 0.55); color: #ffdbd6;
-  padding: 10px 14px; border-radius: 2px;
-  font-size: 0.82rem; font-weight: 600; text-align: center;
-}
-/* Informational (not an error) — e.g. the "Service coming soon" notice. Blue
-   shade instead of the red error tone. */
-.login-modal__error--info {
-  background: rgba(46, 105, 142, 0.18);
-  border-color: rgba(91, 147, 184, 0.6);
-  color: #d3e6f3;
-}
-
-/* ═══ Zoom-stable sign-in pane (desktop) ═════════════════════════════════════
-   The split pane is viewport-locked (its size follows 100vh @ 16:9), so it holds
-   the SAME fraction of the window at any browser-zoom level. The base lockup/form
-   rules above size their contents in vw bounded by px/rem clamp()s — and those
-   px/rem floors/ceilings drift against the viewport-locked pane as you zoom, so
-   the logo, wordmark, and fields end up too big or too small relative to the pane.
-
-   Here the pane is made a container and every child is sized in cqw (% of the
-   pane's own width) with NO px/rem anchors — so the mark, the three wordmark
-   lines, the hint, and the whole form stay a fixed proportion of the pane at
-   every zoom level. Desktop-only: the cqw units resolve against this container,
-   which only exists at >=1025px (tablet/mobile keep their own sizing). */
-@media (min-width: 1025px) {
-  .login-modal--split .login-modal__form-pane { container-type: inline-size; }
-
-  /* Card edge inset in cqw too, so the content column stays pinned to the pane. */
-  .login-modal--split .login-card { padding: 4.4cqw 4.4cqw; }
-
-  /* Uniform vertical rhythm: every major object (mark, wordmark, Login field,
-     Password field, submit) is separated by the SAME gap (--login-gap); each
-     label sits tight to its control (--login-label-gap). The mark is scaled a
-     touch smaller than the wordmark's width. */
-  .login-modal--split .login-card { --login-gap: 4.5cqw; --login-label-gap: 1.5cqw; }
-  .login-modal--split .login-card__brand.brand-cluster {
-    /* The three areas — mark, wordmark, form — get more breathing room than the
-       form internals; the mark↔wordmark gap is a touch larger still. */
-    gap: calc(var(--login-gap) + 6cqw) !important;
-    margin: 0 auto calc(var(--login-gap) + 2cqw);
+/* Mobile: stack the form over a shorter image band. */
+@media (max-width: 600px) {
+  .login-modal.login-modal--split {
+    flex-direction: column;
+    height: auto; min-height: 0; aspect-ratio: auto;
+    width: calc(100% - 1rem); max-width: 420px;
   }
-  .login-modal--split .login-card__brand .brand-cluster__mark { width: 27cqw; height: 27cqw; }
-  .login-modal--split .login-card__brand .brand-cluster__words { gap: 0.8cqw; }
-  .login-modal--split .login-card__brand .brand-cluster__word { font-size: 8cqw; }
-
-  .login-modal--split .login-modal__form { gap: var(--login-gap); padding: 0 2.8cqw 0; }
-  .login-modal--split .login-modal__field { gap: var(--login-label-gap); }
-  .login-modal--split .login-portal { font-size: 2.9cqw; padding: 3.1cqw 12px; }
-  .login-modal--split .login-modal__submit.btn { margin-top: 0; }
-  .login-modal--split .login-modal__field label { font-size: 1.94cqw; }
-  .login-modal--split .login-modal__field input { padding: 2.9cqw 3.1cqw; font-size: 2.94cqw; }
-  .login-modal--split .login-modal__submit.btn { padding: 2.9cqw 4cqw; margin-top: 1.6cqw; font-size: 2.9cqw; }
-  .login-modal--split .login-modal__error { padding: 1.85cqw 2.6cqw; font-size: 2.4cqw; }
+  .login-modal--split .login-modal__form-pane { flex: none; max-width: 100%; }
+  .login-modal__carousel { flex: none; height: 190px; width: 100%; }
 }
 
 
@@ -4483,7 +4342,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 .site-header__search {
   /* Shown only in search mode (phones). It sits as a flex child filling the
      space to the right of the logo — the logo stays visible, only the icon
-     cluster is replaced (matches the cm storefront). */
+     cluster is replaced. */
   display: none;
   align-items: center;
   gap: var(--wt-gap);
@@ -4627,7 +4486,7 @@ body:has(.home-catalog) .site-header .cart-btn {
 body:has(.home-catalog) .site-header .cart-btn svg { stroke: #ffffff !important; }
 body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff !important; }
 @media (hover: hover) {
-  body:has(.home-catalog) .site-header .cart-btn:hover { border-color: var(--ce-gold) !important; background: #23825f !important; color: #ffffff !important; }
+  body:has(.home-catalog) .site-header .cart-btn:hover { border-color: transparent !important; background: rgba(255, 255, 255, 0.14) !important; color: #ffffff !important; }
   body:has(.home-catalog) .site-header .cart-btn:hover svg { stroke: #ffffff !important; }
 }
 /* Logout button in site-header gets a subtle green tint to match the other accented buttons */
@@ -5606,11 +5465,12 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   background: #1B6551;
   color: var(--ce-white);
   border: none;
-  box-shadow: 0 6px 22px rgba(65,111,141,0.34);
+  box-shadow: 0 6px 22px rgba(27,101,81,0.28);
 }
+/* Hover: just a lighter shade of the same green (no blue shift). */
 .product-modal__add.btn--primary:hover {
-  background: #375f79;
-  box-shadow: 0 10px 30px rgba(65,111,141,0.42);
+  background: #23825f;
+  box-shadow: 0 10px 30px rgba(27,101,81,0.34);
 }
 
 @media (min-width: 769px) {
@@ -6664,7 +6524,7 @@ details[open] > .cart-drawer__checkout-title::after {
   .home-catalog__tabs { overflow-x: hidden; container-type: inline-size; gap: 0; align-self: stretch; }
   .home-catalog__tabs .apparel-titlebar__tab { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; text-align: center; justify-content: center; position: relative; isolation: isolate; font-size: var(--text-tab); letter-spacing: -0.04em; padding: 2px 1px; }
   /* Active fill as an inset pill so a uniform ~1px of the bar shows on all four
-     sides — matches cm (instead of an edge-to-edge full-width fill). */
+     sides (instead of an edge-to-edge full-width fill). */
   .home-catalog__tabs .apparel-titlebar__tab.active { background: none; }
   .home-catalog__tabs .apparel-titlebar__tab.active::before {
     content: '';
@@ -8581,7 +8441,7 @@ details[open] > .cart-drawer__checkout-title::after {
   padding: clamp(0.8rem, 2vw, 1.5rem) !important;
   gap: clamp(1.5rem, 3.5vw, 2.5rem) !important;
   color: #fff !important;
-  /* Same dark overlay as willstransfer.com's hero content box (slider_text_container). */
+  /* Dark overlay behind the hero content box. */
   background: rgba(0, 0, 0, 0.4) !important;
   /* No corner chamfer on desktop — the top-left triangle cut is a mobile-only
      treatment; here the dark overlay keeps its full square top-left corner. */
@@ -9182,8 +9042,8 @@ details[open] > .cart-drawer__checkout-title::after {
   .product-detail .product-carousel { width: 100%; }
 }
 
-/* Desktop: image and info sit flush with just a 1px hairline between them
-   (matches CM) — remove the column-gap width and the edge margins. */
+/* Desktop: image and info sit flush with just a 1px hairline between them —
+   remove the column-gap width and the edge margins. */
 @media (min-width: 1025px) {
   .product-modal__layout { column-gap: 1px; }
   .product-detail .product-image-row { margin-left: 0; }
@@ -9221,8 +9081,8 @@ details[open] > .cart-drawer__checkout-title::after {
   --wt-orange: #1B6551;
   --wt-orange-dark: #12463a;
   --wt-orange-hi: #E2B93B;
-  /* Darker-orange overlay box behind the logo + buttons (willstransfer.com
-     mobile/tablet look): ~30% black over the orange bar → ~#14285f. */
+  /* Darker overlay box behind the logo + buttons on the mobile/tablet look:
+     ~30% black over the bar → ~#14285f. */
   /* The Tamarack "pressed sign" 30% black overlay — removed (transparent) so the
      bars, boxes and buttons show their true base blue instead of a darkened,
      muddied version of it. */
@@ -11642,9 +11502,9 @@ details[open] > .cart-drawer__checkout-title::after {
    Keeps the Tamarack button wholesale: the mark chip, the staggered
    fade-in of the triangles, the square->diamond rotate, the travelling sheen,
    the cart->check crossfade. Only the COLOUR changes.
-   Was: a #1B6551 -> #4689b3 gradient (brown into MN blue) with the triangles
-   staggering through MN's brand reds, greens, blue and yellow — none of which
-   appear anywhere else in this app.
+   Was: a #1B6551 -> #4689b3 gradient with the triangles staggering through a
+   spread of reds, greens, blue and yellow — none of which appear anywhere
+   else in this app.
    Now: the sign palette. The ramp is one warm family (cream -> orange ->
    burnt brown) so the triangles read as the Tamarack orange catching light at
    different angles, rather than eight unrelated brand colours.
@@ -11697,11 +11557,12 @@ details[open] > .cart-drawer__checkout-title::after {
   background: #1B6551;
   color: var(--ce-white);
   border: none;
-  box-shadow: 0 6px 22px rgba(65, 111, 141, 0.34);
+  box-shadow: 0 6px 22px rgba(27, 101, 81, 0.28);
 }
+/* Hover: just a lighter shade of the same green (no blue shift). */
 .product-modal__add.btn--primary:hover {
-  background: #375f79;
-  box-shadow: 0 10px 30px rgba(65, 111, 141, 0.42);
+  background: #23825f;
+  box-shadow: 0 10px 30px rgba(27, 101, 81, 0.34);
 }
 
 /* Desktop: the fullscreen image viewer stays inside the site card.
@@ -12002,7 +11863,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
   .site-header .cart-btn.cart-btn--active svg { stroke: #fff !important; }
   .site-header .cart-btn:hover,
   .site-header .cart-btn.cart-btn--active:hover {
-    background: #77a1bf !important;
+    background: #23825f !important;
     color: #fff !important;
   }
   .site-header .cart-btn:hover svg,
@@ -12154,8 +12015,8 @@ body:has(.product-fullscreen) { overflow: hidden; }
        dark layers used to sit on top of the ring's inner 2px and cut the strip
        to 1px, the desktop version of the grey x-border removed on mobile. Now
        the full 3px white shows with the grey rim outside it. */
-    /* One thin grey edge only — matches the product / catalog / privacy cards
-       (sg parity): no outer blur, so the ring reads the same light weight on
+    /* One thin grey edge only — matches the product / catalog / privacy cards:
+       no outer blur, so the ring reads the same light weight on
        every side and never darker where it meets the header. */
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
   }
@@ -12379,8 +12240,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
   .cart-table__th-total { justify-content: flex-end; text-align: right !important; }
 
   /* Item row: product spans the left at 1fr (so the title gets ~2/3+), with the
-     PRICE stacked on top of the QTY stepper in a narrow right rail (matches the
-     cm storefront). */
+     PRICE stacked on top of the QTY stepper in a narrow right rail. */
   .cart-table tbody tr {
     grid-template-columns: 1fr auto;
     grid-template-areas:
@@ -12583,7 +12443,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
   body:has(.home-catalog) .site-header .cart-btn:hover,
   body:has(.home-catalog) .site-header .cart-btn.cart-btn--active:hover {
     border: none !important;
-    background: #77a1bf !important;
+    background: #23825f !important;
     color: #fff !important;
   }
   body .site-header .cart-btn svg,
@@ -14678,7 +14538,7 @@ html { background: rgb(223, 226, 230) !important; }
    border — and the panel's LEFT ring drew a stray inner divider between the
    sidebar and the product. Drop the product panel's own ring so only the page
    card's border shows; the sidebar and product are separated by the greige
-   gutter alone, the way sg builds it (one consistent border around the route).
+   gutter alone (one consistent border around the route).
 
    Scoped to the SHOP product route only (the panel nested inside
    .home-catalog__inner). The privacy page reuses .apparel-catalog:has(
@@ -14816,10 +14676,12 @@ html { background: rgb(223, 226, 230) !important; }
     justify-content: center;
     padding: 2rem 1.5rem;
     text-align: center;
-    /* Same green iron "sign" surface family the login pane uses. */
+    /* Pre-mn2 Tamarack green iron "sign" surface (matches the login pane / header),
+       instead of the mn2 dark steel-blue. */
     background:
-      radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 14px 14px,
-      linear-gradient(160deg, #14212b 0%, #1c2f3d 55%, #12202b 100%);
+      var(--wt-iron) left top / 1400px auto repeat,
+      linear-gradient(rgba(0, 0, 0, 0.30), rgba(0, 0, 0, 0.30)),
+      #1B6551;
     color: #fff;
     overscroll-behavior: contain;
   }
@@ -15047,35 +14909,49 @@ html { background: rgb(223, 226, 230) !important; }
 .checkout-page .checkout-modal__pay { margin-top: 14px !important; }
 .checkout-page .cart-drawer__footer { border-radius: 0 !important; }
 
-/* ── Tamarack wordmark logo (replaces the mn2 mark+words lockup) ─────────── */
+/* ── Tamarack wordmark logo ──────────────────────────────────────────────── */
 .brand-cluster__logo { display: block; width: auto; height: auto; max-width: 100%; object-fit: contain; }
-.site-header__logo .brand-cluster__logo { height: 30px; }
+.site-header__logo .brand-cluster__logo { height: 40px; }
 .site-footer__brand .brand-cluster__logo { height: 40px; }
 .login-card__brand .brand-cluster__logo { height: 66px; margin: 0 auto; }
 .mobile-coming-soon__brand .brand-cluster__logo { height: 54px; margin: 0 auto; }
 
-/* ── "Apparel" wordmark suffix (header + footer) ────────────────────────── */
+/* ── "Apparel" wordmark suffix (header + footer) — pre-mn2 treatment ────────
+   A Times-style serif cap-label tucked TIGHT against the wordmark's trailing
+   whitespace (negative margin), the way it sat before the mn2 port, rather than
+   spaced out beside the logo. */
 .site-header__logo.brand-cluster,
-.site-footer__brand.brand-cluster { gap: 0.5rem; align-items: center; }
+.site-footer__brand.brand-cluster { gap: 0; align-items: center; }
 .brand-cluster__apparel {
   align-self: center;
-  /* Match the Tamarack wordmark: a high-contrast serif (Playfair Display) rather
-     than the Montserrat sans used elsewhere. The old lockup stretched the sans
-     vertically (scaleY) to read tall next to the logo; a real serif carries that
-     height on its own, so the size is bumped instead of distorting the glyphs. */
-  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  /* Matches the logo's own serif caps — a Times-style bold serif. */
+  font-family: 'Times New Roman', Times, Georgia, serif;
+  font-weight: 700;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.92);
   line-height: 1;
+  white-space: nowrap;
   display: inline-block;
-  /* Sit the suffix a touch lower so its baseline aligns under the wordmark. */
-  position: relative;
-  top: 4px;
 }
-.site-header__logo .brand-cluster__apparel { font-size: 1.3rem; }
-.site-footer__brand .brand-cluster__apparel { font-size: 1.3rem; }
+/* Header + footer: "Apparel" overprints the wordmark, centred over the "arac"
+   letters of "Tamarack" rather than trailing it as a suffix. Both use the same
+   40px logo scale, so the identical absolute placement lines up in each. */
+.site-header__logo.brand-cluster,
+.site-footer__brand.brand-cluster { position: relative; }
+.site-header__logo .brand-cluster__apparel,
+.site-footer__brand .brand-cluster__apparel {
+  position: absolute;
+  left: 70%;
+  top: 22%;
+  transform: translate(-50%, -50%);
+  margin-left: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #fff;
+  pointer-events: none;
+}
 /* Login: "Apparel" sits UNDER the wordmark, centered. */
 .login-card__brand.brand-cluster { flex-direction: column; }
 .login-card__brand .brand-cluster__apparel { font-size: 1.15rem; margin-top: 0.55rem; }
@@ -15185,7 +15061,7 @@ html body .site-header .site-header__inner { background: transparent !important;
 
 /* ── Original Tamarack "Add to Cart" animation: the white /footer-mark.png mark
       wipes in from the left when the item is added, the cart glyph fades out
-      beneath it. Overrides the mn2 pinwheel behaviour. ───────────────────────── */
+      beneath it. ───────────────────────────────────────────────────────────── */
 .product-modal__add-logo {
   position: absolute;
   inset: 0;

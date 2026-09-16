@@ -562,11 +562,6 @@ export default component$(() => {
 
   const showLogin = useSignal(false);
   const overlayFading = useSignal(false);
-  // Login modal background carousel: cross-fade the two hero slides on the right
-  // pane while the login modal is open (autoplay wired up in a visible task).
-  // Autoplay runs every 6s and only pauses while the sign-in form is focused.
-  const loginHeroIndex = useSignal(0);
-  const loginCarouselPaused = useSignal(false);
   const menuOpen = useSignal(false);
   const savedLocale = useLocaleLoader();
   const locale = useSignal<Locale>(savedLocale.value);
@@ -1087,18 +1082,6 @@ export default component$(() => {
     }
   }, { strategy: 'document-ready' });
 
-  // Login carousel autoplay: cross-fade the two hero slides every 6s while the
-  // login modal is open. Stops (and is torn down) once the modal closes.
-  // eslint-disable-next-line qwik/no-use-visible-task
-  useVisibleTask$(({ track, cleanup }) => {
-    if (!track(() => showLogin.value)) return;
-    const id = setInterval(() => {
-      if (loginCarouselPaused.value) return;
-      loginHeroIndex.value = (loginHeroIndex.value + 1) % 2;
-    }, 6000);
-    cleanup(() => clearInterval(id));
-  });
-
   // Close modal and unlock scroll on successful login
   // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(({ track, cleanup }) => {
@@ -1156,10 +1139,8 @@ export default component$(() => {
       {/* Login Modal */}
       {showLogin.value && !isPaymentReturn.value && (
         <div class={`login-overlay ${overlayFading.value ? "login-overlay--fading" : ""}`} onClick$={() => { if (auth.value.loggedIn) showLogin.value = false; }}>
-          {/* Split login (matches the sg project): sign-in on the left third,
-              a cross-fading carousel of the two MN hero slides on the right.
-              Fills the viewport at a 16:9 frame on desktop; the carousel goes
-              full-bleed behind the sign-in on tablet/mobile. */}
+          {/* Split login: the sign-in form over the green iron-textured sign pane
+              on the left third, a single Tamarack hero photo filling the right. */}
           <div class="login-modal login-modal--split" onClick$={(e) => e.stopPropagation()}>
             {auth.value.loggedIn && (
               <button
@@ -1171,62 +1152,40 @@ export default component$(() => {
               </button>
             )}
             <div class="login-modal__form-pane">
-              <div class="login-card">
-                <div class="login-card__brand brand-cluster">
-                  <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
-                  <span class="brand-cluster__apparel">Apparel</span>
+              <button type="button" class="login-modal__lang" onClick$={toggleLocale} aria-label="Toggle language">
+                {locale.value === "en" ? "Français" : "English"}
+              </button>
+              <div class="login-modal__header">
+                <div class="login-modal__brand login-modal__brand--img">
+                  <img src="/tamarack-logo-white.png" alt="Tamarack" class="login-modal__logo-white" width="1451" height="250" />
+                  <span class="brand-apparel">{t("brand.apparel", locale.value)}</span>
                 </div>
-                <Form
-                  action={loginAction}
-                  reloadDocument
-                  class="login-modal__form"
-                  onFocusIn$={() => { loginCarouselPaused.value = true; }}
-                  onFocusOut$={() => { loginCarouselPaused.value = false; }}
-                >
-                  {loginAction.value?.failed && (
-                    <div class={`login-modal__error ${(loginAction.value as { comingSoon?: boolean }).comingSoon ? "login-modal__error--info" : ""}`}>{loginAction.value.message}</div>
-                  )}
-                  <div class="login-modal__field">
-                    <label for="password">{t("login.password", locale.value)}</label>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      autoComplete="current-password"
-                      required
-                      placeholder={t("login.password.placeholder", locale.value)}
-                    />
-                  </div>
-                  <button type="submit" class="btn login-modal__submit">
-                    {loginAction.isRunning ? t("login.submitting", locale.value) : t("login.submit", locale.value)}
-                  </button>
-                </Form>
               </div>
-              <div class="login-modal__dots">
-                <button
-                  type="button"
-                  class={`login-modal__dot ${loginHeroIndex.value === 0 ? "is-active" : ""}`}
-                  aria-label="Show slide 1"
-                  onClick$={() => { loginHeroIndex.value = 0; }}
-                />
-                <button
-                  type="button"
-                  class={`login-modal__dot ${loginHeroIndex.value === 1 ? "is-active" : ""}`}
-                  aria-label="Show slide 2"
-                  onClick$={() => { loginHeroIndex.value = 1; }}
-                />
-              </div>
+              <Form action={loginAction} reloadDocument class="login-modal__form">
+                <p class="login-modal__subtitle">{t("login.subtitle", locale.value)}</p>
+                {loginAction.value?.failed && (
+                  <div class={`login-modal__error ${(loginAction.value as { comingSoon?: boolean }).comingSoon ? "login-modal__error--info" : ""}`}>{loginAction.value.message}</div>
+                )}
+                <div class="login-modal__field">
+                  <label for="password">{t("login.password", locale.value)}</label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    placeholder={t("login.password.placeholder", locale.value)}
+                  />
+                </div>
+                <button type="submit" class="btn login-modal__submit">
+                  {loginAction.isRunning ? t("login.submitting", locale.value) : t("login.submit", locale.value)}
+                </button>
+              </Form>
             </div>
-            <div
-              class="login-modal__carousel"
-              onClick$={() => { loginHeroIndex.value = (loginHeroIndex.value + 1) % 2; }}
-            >
+            <div class="login-modal__carousel" aria-hidden="true">
               <img src="/login-hero.jpg" alt="" width="1920" height="776"
                    loading="eager" decoding="sync"
-                   class={`login-modal__slide login-modal__slide--wide ${loginHeroIndex.value === 0 ? "is-active" : ""}`} />
-              <img src="/hero.jpg" alt="" width="1600" height="900"
-                   loading="eager" decoding="sync"
-                   class={`login-modal__slide ${loginHeroIndex.value === 1 ? "is-active" : ""}`} />
+                   class="login-modal__slide is-active" />
             </div>
           </div>
         </div>
@@ -1257,7 +1216,7 @@ export default component$(() => {
             }}
           >
             <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
-            <span class="brand-cluster__apparel">Apparel</span>
+            <span class="brand-cluster__apparel">{t("brand.apparel", locale.value)}</span>
           </Link>
           <nav class="site-header__categories">
             <Link href="/" class={loc.url.pathname === "/" ? "active" : ""}>{t("nav.home", locale.value)}</Link>
@@ -1552,7 +1511,7 @@ export default component$(() => {
         <div class="site-footer__inner">
           <div class="site-footer__brand brand-cluster">
             <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
-            <span class="brand-cluster__apparel">Apparel</span>
+            <span class="brand-cluster__apparel">{t("brand.apparel", locale.value)}</span>
           </div>
           <div class="site-footer__col">
           {loginType.value === "safety" && (

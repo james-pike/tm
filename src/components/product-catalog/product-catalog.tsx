@@ -1,4 +1,4 @@
-import { component$, useSignal, useComputed$, useContext, $, useVisibleTask$, Slot } from "@builder.io/qwik";
+import { component$, useSignal, useComputed$, useContext, $, useVisibleTask$, useOnDocument, Slot } from "@builder.io/qwik";
 import { useLocation, useNavigate } from "@builder.io/qwik-city";
 import { LocaleContext, t } from "../../i18n";
 import { allProducts, categoryLabel, colorName } from "../../routes/apparel/products";
@@ -12,26 +12,21 @@ const SHOW_FIT_FACET = false;
 
 export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Sweaters", "Hats"];
 
-// Electrical portal: shows ONLY these SKUs (the small Electrical-division lineup).
-// Add/replace the Electrical SKU codes here — order is preserved in the grid.
-// MN-36 = Carhartt FR Rigby Pants (104204), MN-37 = Carhartt FR Full Zip Hoodie
-// (104982) — renamed off the old MNFR- prefix to match the catalog's MN- numbering.
-// The FR Dearborn LS Tee (100235) isn't in the catalog yet — add it to the DB,
-// then drop its SKU in here.
-// Display order: T-Shirts, Sweaters, Pants, Headwear (matches the sidebar).
-export const ELECTRICAL_SKUS: string[] = ["MN-38", "MN-40", "MN-36", "MN-39"];
+// Electrical portal: shows ONLY these SKUs (an optional division lineup).
+// Tamarack runs a single open catalog, so this legacy hardcoded list is empty;
+// membership is DB-driven (a product's `portals` array). Order is preserved in
+// the grid if a list is ever added back here.
+export const ELECTRICAL_SKUS: string[] = [];
 const ELECTRICAL_SKU_SET = new Set(ELECTRICAL_SKUS);
 
-// Safety catalog: every MNFR-* item plus a small allowlist of standard SKUs,
-// minus a deny list for FR items we don't carry yet.
-const SAFETY_SKU_PREFIX = "MNFR-";
-const SAFETY_EXTRA_SKUS = new Set(["MN-2", "MN-3", "MN-5", "MN-6"]);
-const SAFETY_HIDDEN_SKUS = new Set(["MNFR-5", "MNFR-6"]); // FR Insulated Bib & Jacket
+// Safety catalog: any SKU on the safety prefix plus a small allowlist, minus a
+// deny list. Empty for Tamarack's single open catalog (all lists inert).
+const SAFETY_SKU_PREFIX = "SAFETY-";
+const SAFETY_EXTRA_SKUS = new Set<string>([]);
+const SAFETY_HIDDEN_SKUS = new Set<string>([]);
 export const SAFETY_CATEGORIES = ["All", "Flame Resistant", "Shirts", "Hats"];
-// Explicit display order for the Safety "All" view: FR shirt + hoodies,
-// FR pants, then the standard-SKU allowlist (short-sleeve tee,
-// long-sleeve tee, ball cap, toque).
-export const SAFETY_SKU_ORDER = ["MNFR-2", "MNFR-3", "MNFR-4", "MNFR-1", "MN-3", "MN-2", "MN-5", "MN-6"];
+// Explicit display order for the Safety "All" view (empty here — see above).
+export const SAFETY_SKU_ORDER: string[] = [];
 export const isSafetyProduct = (sku: string) =>
   !SAFETY_HIDDEN_SKUS.has(sku) && (sku.startsWith(SAFETY_SKU_PREFIX) || SAFETY_EXTRA_SKUS.has(sku));
 
@@ -39,8 +34,8 @@ export const isSafetyProduct = (sku: string) =>
 const CARD_HIDDEN_COLORS = new Set(["#c0392b", "#1e40af", "#6b3fa0"]);
 // SKUs exempt from CARD_HIDDEN_COLORS: products where a normally-decluttered
 // accent colour (e.g. red) is a first-class option and must show on the card.
-// MN-33 offers Black / Red / White, so its red swatch stays.
-const CARD_SHOW_ALL_COLORS = new Set(["MN-33"]);
+// Add a SKU here when its accent swatch should stay on the card.
+const CARD_SHOW_ALL_COLORS = new Set<string>([]);
 const EMPTY_COLOR_SET = new Set<string>();
 
 export const CATEGORY_ICONS: Record<string, string> = {
@@ -74,7 +69,7 @@ function matchesQuery(p: Product, q: string): boolean {
 }
 
 // Return the category of the FIRST product that matches the search, so its tab
-// can be highlighted as active (matches the cm storefront). "All" if nothing
+// can be highlighted as active. "All" if nothing
 // matches or the query is empty.
 function categoryForQuery(query: string, products: Product[]): string {
   const q = query.trim().toLowerCase();
@@ -140,7 +135,7 @@ function brandOf(p: Product): string | null {
 }
 // Scroll the product grid up so it pins just below the sticky tab bar, so the
 // first results aren't hidden under it. Used by the category tabs and by search
-// (auto-position, mirroring the cm storefront).
+// (auto-position).
 function scrollProductsBelowBar() {
   const isDesktop = window.innerWidth > 1024;
   const headerH = stickyTop();
@@ -404,6 +399,20 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
   // any deeper path under this (shop) layout is a product page. The sidebar +
   // header stay mounted, so there is no shift between the catalog and PDP.
   const isPdp = useComputed$(() => loc.url.pathname.replace(/\/+$/, "") !== "");
+  // On a product page, clicking the empty page margins / gutters around the detail
+  // panel (any of the structural background layers, never the header/panel/links)
+  // returns to the catalog. A document listener is used because a per-element
+  // handler on the huge section doesn't fire reliably in Qwik's dev delegation.
+  useOnDocument(
+    "click",
+    $((ev: Event) => {
+      if (!isPdp.value) return;
+      const tg = ev.target as HTMLElement | null;
+      if (!tg || !tg.classList) return;
+      const bg = ["home-catalog", "home-catalog__inner", "home-catalog__pdp-main", "apparel-catalog", "apparel-page", "dot-pattern"];
+      if (bg.some((c) => tg.classList.contains(c))) nav("/");
+    }),
+  );
   // Tamarack is a single open catalog — no portal/division filtering. These stay
   // false regardless of the auth cookie value (so a stray "electrical"/"tech"
   // cookie from a sibling site on localhost can't hide the catalog).

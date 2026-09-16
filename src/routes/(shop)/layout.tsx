@@ -1,4 +1,5 @@
 import { component$, Slot } from "@builder.io/qwik";
+import { useLocation, useNavigate } from "@builder.io/qwik-city";
 import { ProductCatalog } from "../../components/product-catalog/product-catalog";
 
 // ONE shared shell for the whole shop: the catalog at "/" and each product at
@@ -13,8 +14,19 @@ import { ProductCatalog } from "../../components/product-catalog/product-catalog
 // the same way the home route always worked. A server redirect to "/" would loop
 // here, since "/" is this very route.
 export default component$(() => {
+  const loc = useLocation();
+  const nav = useNavigate();
   return (
-    <div class="apparel-page dot-pattern">
+    <div
+      class="apparel-page dot-pattern"
+      onClick$={(e, el) => {
+        // On a product page, clicking the outermost page margin (the greige
+        // gutter around the whole route) returns to the catalog. Only fires when
+        // this wrapper itself is the click target — never its content.
+        if (loc.url.pathname.replace(/\/+$/, "") === "") return; // catalog home
+        if (e.target === el) nav("/");
+      }}
+    >
       <ProductCatalog>
         <Slot />
       </ProductCatalog>

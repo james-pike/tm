@@ -33,7 +33,7 @@ export const allProducts = [
       "#b6e021"
     ],
     "price": 6.8,
-    "img": "/skus/ATC1015-tamarack.png",
+    "img": "/skus/ATC1015-safetygreen-tamarack.png",
     "imgs": [
       "/skus/ATC1015-tamarack.png",
       "/skus/ATC1015-safetygreen-tamarack.png"
@@ -69,7 +69,7 @@ export const allProducts = [
       "#a5e82c"
     ],
     "price": 6,
-    "img": "/skus/S350-tamarack.png",
+    "img": "/skus/S350-limeshock-tamarack.png",
     "imgs": [
       "/skus/S350-tamarack.png",
       "/skus/S350-limeshock-tamarack.png"
@@ -88,7 +88,7 @@ export const allProducts = [
       "#a5e82c"
     ],
     "price": 6,
-    "img": "/skus/L350-tamarack.png",
+    "img": "/skus/L350-limeshock-tamarack.png",
     "imgs": [
       "/skus/L350-tamarack.png",
       "/skus/L350-limeshock-tamarack.png"
@@ -206,9 +206,9 @@ const colorNames: Record<string, Record<string, string>> = {
   "#94a3b8": { en: "Silver", fr: "Argent" },
   "#4a4a4a": { en: "Charcoal", fr: "Charbon" },
   "#6b8bb0": { en: "Solace Blue", fr: "Bleu Solace" },
-  "#517fa4": { en: "Copen Blue", fr: "Bleu Copen" }, // Travis Mathew Heater Polo (MN-32)
-  "#9caf88": { en: "Green Bay", fr: "Green Bay" }, // Travis Mathew Final Drive View Polo (MN-34)
-  "#3b4657": { en: "Heather Navy", fr: "Marine chiné" }, // Travis Mathew Tour Ready 1/4 Zip (MN-35)
+  "#517fa4": { en: "Copen Blue", fr: "Bleu Copen" },
+  "#9caf88": { en: "Green Bay", fr: "Green Bay" },
+  "#3b4657": { en: "Heather Navy", fr: "Marine chiné" },
   "#7dd3fc": { en: "Light Blue", fr: "Bleu clair" },
   "#b8b8b8": { en: "Grey Heather", fr: "Gris chiné" },
   "#6b3fa0": { en: "Purple", fr: "Violet" },

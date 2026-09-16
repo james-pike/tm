@@ -75,9 +75,9 @@ const colorNames: Record<string, Record<string, string>> = {
   "#94a3b8": { en: "Silver", fr: "Argent" },
   "#4a4a4a": { en: "Charcoal", fr: "Charbon" },
   "#6b8bb0": { en: "Solace Blue", fr: "Bleu Solace" },
-  "#517fa4": { en: "Copen Blue", fr: "Bleu Copen" }, // Travis Mathew Heater Polo (MN-32)
-  "#9caf88": { en: "Green Bay", fr: "Green Bay" }, // Travis Mathew Final Drive View Polo (MN-34)
-  "#3b4657": { en: "Heather Navy", fr: "Marine chiné" }, // Travis Mathew Tour Ready 1/4 Zip (MN-35)
+  "#517fa4": { en: "Copen Blue", fr: "Bleu Copen" },
+  "#9caf88": { en: "Green Bay", fr: "Green Bay" },
+  "#3b4657": { en: "Heather Navy", fr: "Marine chiné" },
   "#7dd3fc": { en: "Light Blue", fr: "Bleu clair" },
   "#b8b8b8": { en: "Grey Heather", fr: "Gris chiné" },
   "#6b3fa0": { en: "Purple", fr: "Violet" },

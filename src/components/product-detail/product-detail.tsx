@@ -61,38 +61,14 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
     cleanup(() => mq.removeEventListener("change", apply));
   });
 
-  const waistLengthSkus = new Set(["CAR-12", "CAR-14", "MN-1", "MNFR-1", "MN-36"]);
-  const variantSizesBySku: Record<string, Record<string, string[]>> = {
-    "MN-3": {
-      "Regular": ["S", "M", "L", "XL", "2XL", "3XL", "4XL"],
-      "Tall": ["L", "XL", "2XL", "3XL", "4XL"],
-    },
-    "CAR-11": {
-      "Regular": ["S", "M", "L", "XL", "2XL", "3XL", "4XL"],
-      "Tall": ["S", "M", "L", "XL", "2XL", "3XL", "4XL"],
-    },
-    "CAR-17": {
-      "Regular": ["S", "M", "L", "XL", "2XL", "3XL", "4XL"],
-      "Tall": ["S", "M", "L", "XL", "2XL", "3XL", "4XL"],
-    },
-    "MN-8": {
-      "Short": ["M", "L", "XL", "2XL", "3XL", "4XL"],
-      "Regular": ["S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"],
-      "Tall": ["M", "L", "XL", "2XL", "3XL", "4XL"],
-    },
-  };
+  // Per-SKU size/fit overrides. Keyed by SKU; empty for Tamarack's current
+  // catalog (products fall back to the generic size/waist/length options below).
+  const waistLengthSkus = new Set<string>([]);
+  const variantSizesBySku: Record<string, Record<string, string[]>> = {};
   const variantSkus = new Set(Object.keys(variantSizesBySku));
   const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL"];
-  const waistOptionsBySku: Record<string, string[]> = {
-    "MN-1": ["28", "29", "30", "31", "32", "33", "34", "35", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54"],
-    "MNFR-1": ["30", "31", "32", "33", "34", "35", "36", "38", "40", "42", "44", "46"],
-    "MN-36": ["30", "31", "32", "33", "34", "35", "36", "38", "40", "42", "44", "46", "48", "52"],
-  };
-  const lengthOptionsBySku: Record<string, string[]> = {
-    "MN-1": ["28", "30", "32", "34", "36"],
-    "MNFR-1": ["30", "32", "34", "36"],
-    "MN-36": ["30", "32", "34", "36"],
-  };
+  const waistOptionsBySku: Record<string, string[]> = {};
+  const lengthOptionsBySku: Record<string, string[]> = {};
   const waistOptions = ["28", "29", "30", "31", "32", "33", "34", "35", "36", "38", "40", "42", "44", "46", "48", "50"];
   const lengthOptions = ["30", "32", "34", "36"];
 

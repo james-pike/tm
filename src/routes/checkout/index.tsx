@@ -7,7 +7,7 @@
  *
  * The cart itself stays a slide-in drawer in the layout; its "Checkout" button
  * now navigates here. Payment is purchase-order only (no Stripe / gift card),
- * matching the rest of mn2.
+ * matching the rest of the store.
  */
 import { component$, useSignal, useStore, useComputed$, useContext, useVisibleTask$, $ } from "@builder.io/qwik";
 import { Link, useNavigate } from "@builder.io/qwik-city";
@@ -243,7 +243,7 @@ export default component$(() => {
     }
 
     // Order saved. Clear the cart, tell the rest of the app, and show the
-    // confirmation. (mn2 is PO-only, so there's never a Stripe redirect.)
+    // confirmation. (Checkout is PO-only, so there's never a Stripe redirect.)
     orderNum.value = v?.orderNumber || "";
     try {
       localStorage.removeItem(`ce_cart_mn_${loginType.value || "clothing"}`);
@@ -386,8 +386,8 @@ export default component$(() => {
               {/* ---- Payment method ---- */}
               <div class="checkout-modal__pay">
                 <h3 class="checkout-modal__form-title">{t("pay.title", locale.value)}</h3>
-                {/* MN accepts purchase-order checkout only — no gift card or
-                    credit-card options. */}
+                {/* Tamarack accepts purchase-order checkout only — no gift card
+                    or credit-card options. */}
                 <div class={`checkout-modal__field ${formTouched.value && !empPO.value ? "checkout-modal__field--error" : ""}`}>
                   <label>{t("cart.po", locale.value)}</label>
                   <input type="text" value={empPO.value} onInput$={(_, el) => (empPO.value = el.value)} />
