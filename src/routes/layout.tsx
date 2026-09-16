@@ -1,6 +1,6 @@
 import { component$, Slot, useSignal, useTask$, useVisibleTask$, $, useContextProvider, useStore, useComputed$, createContextId, isBrowser } from "@builder.io/qwik";
 import type { Signal } from "@builder.io/qwik";
-import { Modal, Collapsible, Accordion } from '@qwik-ui/headless';
+import { Modal, Accordion } from '@qwik-ui/headless';
 import {
   Link,
   routeAction$,
@@ -28,7 +28,6 @@ const LOCALE_COOKIE = "ce_locale";
 // The home hero has been removed — "/" is now the catalog itself, so the header
 // must always be visible (solid, with its logo) exactly like every other route,
 // including the product pages. Hero slide-in mode is therefore OFF.
-const SHOW_HERO_HEADER = false;
 
 // Canadian provincial sales tax rates (combined GST/HST/PST/QST)
 const PROVINCE_TAX: Record<string, number> = {
@@ -623,7 +622,6 @@ export default component$(() => {
   const submitting = useSignal(false);
   const checkoutOpen = useSignal(false);
   const checkoutStep = useSignal<"cart" | "details">("cart");
-  const summaryOpen = useSignal(true);
   const formError = useSignal("");
   const formTouched = useSignal(false);
   const empFirstName = useSignal("");
@@ -645,6 +643,7 @@ export default component$(() => {
   const giftError = useSignal("");
   const usesGift = useComputed$(() => payMethod.value === "giftcard" || payMethod.value === "giftcard_card");
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const checkGiftCard = $(async () => {
     giftError.value = "";
     if (!giftCode.value.trim()) { giftError.value = t("pay.gift.enter", locale.value); return; }
@@ -683,7 +682,6 @@ export default component$(() => {
   // What's left ON THE CARD after this order (balance minus what it covers) —
   // shown when the card fully covers the order, so the customer sees their
   // remaining allotment instead of a bare $0.00 amount-due.
-  const giftLeftover = useComputed$(() => Math.max(0, +((giftBalance.value ?? 0) - giftCovers.value).toFixed(2)));
   // Whether the order can be placed — every required field filled and the
   // payment method satisfied (gift card checked / covers the order, PO number
   // for PO). Drives the greyed-out state of the place-order button. Detailed
@@ -758,6 +756,7 @@ export default component$(() => {
     window.dispatchEvent(new CustomEvent("cart-updated"));
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const submitOrder = $(async () => {
     // Fail-safe: the button is disabled while greyed out, but never act on a
     // click that somehow gets through when the order can't be placed / is sending.

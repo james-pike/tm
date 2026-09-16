@@ -4,14 +4,10 @@ import { LocaleContext, t } from "../../i18n";
 import { allProducts, categoryLabel, colorName } from "../../routes/apparel/products";
 import type { Product } from "../../routes/apparel/products";
 import { sizeGroups, sortColorsWhiteLast } from "../../routes/apparel/utils";
-import { LoginTypeContext, stickyTop } from "../../routes/layout";
+import { stickyTop } from "../../routes/layout";
 
-// The two desktop view modes. The toggle shows the one you'll switch TO.
-// Labels are the single source for the button text, aria-label and title.
-const VIEW_MODES: { key: number | "list"; label: string; icon: string }[] = [
-  { key: 3, label: "Gallery", icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>' },
-  { key: "list", label: "Catalog", icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="4" height="4"/><line x1="10" y1="6" x2="21" y2="6"/><rect x="3" y="10" width="4" height="4"/><line x1="10" y1="12" x2="21" y2="12"/><rect x="3" y="16" width="4" height="4"/><line x1="10" y1="18" x2="21" y2="18"/></svg>' },
-];
+// FIT (gender) sidebar facet is disabled for Tamarack.
+const SHOW_FIT_FACET = false;
 
 
 export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Sweaters", "Hats"];
@@ -188,7 +184,6 @@ const EAGER_CARDS = 4;
 
 const ProductCard = component$<{ item: Product; sku: string; index: number }>(({ item, sku, index }) => {
   const locale = useContext(LocaleContext);
-  const loginType = useContext(LoginTypeContext);
   const isTech = false; // Tamarack: single catalog, always show prices
   const eager = index < EAGER_CARDS;
 
@@ -402,7 +397,6 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
 
 export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) => {
   const locale = useContext(LocaleContext);
-  const loginType = useContext(LoginTypeContext);
   const loc = useLocation();
   const nav = useNavigate();
   // On a product route (/<sku>/) the shared shell shows the routed product
@@ -846,7 +840,7 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
             </nav>
           )}
           {/* FIT facet removed per Tamarack request. */}
-          {false && (
+          {SHOW_FIT_FACET && (
             <div class="home-catalog__filter-group">
               <div class="home-catalog__filter-title">{t("filter.fit", locale.value)}</div>
               {facetOptions.value.genders.map((g) => (

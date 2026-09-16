@@ -33,7 +33,7 @@
      --ce-btn-radius unifies the header/hero button corners (was 2px vs 4px). */
   --ce-border: rgba(0, 0, 0, 0.08);
   --ce-btn-radius: 4px;
-  /* Shared content max-width (96rem / 1536px, matching the cm Carmichael site;
+  /* Shared content max-width (96rem / 1536px, matching the reference site;
      Tailwind's 2xl screen): header bar, category tab bar, catalog, product page
      and footer all align to this. */
   /* Edge-to-edge: the whole page (header, tab bar, catalog, product page,
@@ -4385,7 +4385,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 .locale-btn__full { display: inline; }
 
 /* Language toggle — coloured by the language it switches TO, using the Modern
-   Niagara logo palette: brand blue when offering Français, the lighter brand
+   Tamarack logo palette: brand blue when offering Français, the lighter brand
    red when offering English. !important so the fill survives the white-header,
    hero-visible and responsive overrides (same approach as .cart-btn--active). */
 .locale-btn--to-fr {
@@ -9207,7 +9207,7 @@ details[open] > .cart-drawer__checkout-title::after {
 
 /* ============================================================
    Blue brand theme — Tamarack header colour (#1B6551)
-   with the white "Wills" wordmark logo.
+   with the white "Tamarack" wordmark logo.
    Applies to every device header, the mobile menu drawer, and the
    login modal. Appended last so it wins over the stateful rules above.
    ============================================================ */
@@ -9216,14 +9216,14 @@ details[open] > .cart-drawer__checkout-title::after {
      ratio (÷1.618) → #3b6581, so the header sits a φ step below the tab bar just
      like the 64/40 height ratio between them. Both blues were lightened + softened
      a step (from #2b556f / #4689b3) so they read gentler against the pale page. */
-  /* Header/footer/bar colour — a silvery slate grey (was the mnbs blue #1B6551),
+  /* Header/footer/bar colour — a silvery slate grey (was the tamarack blue #1B6551),
      kept dark enough that the white logo + labels stay legible. */
   --wt-orange: #1B6551;
   --wt-orange-dark: #12463a;
   --wt-orange-hi: #E2B93B;
   /* Darker-orange overlay box behind the logo + buttons (willstransfer.com
      mobile/tablet look): ~30% black over the orange bar → ~#14285f. */
-  /* The Wills "pressed sign" 30% black overlay — removed (transparent) so the
+  /* The Tamarack "pressed sign" 30% black overlay — removed (transparent) so the
      bars, boxes and buttons show their true base blue instead of a darkened,
      muddied version of it. */
   --wt-box: rgba(0,0,0,0);
@@ -9264,7 +9264,7 @@ details[open] > .cart-drawer__checkout-title::after {
 }
 
 /* ---- "APPAREL" clean uppercase label next to the script logo ----
-   Pairs a sans cap-label with the cursive "Wills" wordmark (echoing the
+   Pairs a sans cap-label with the cursive "Tamarack" wordmark (echoing the
    logo's own script + "TRANSFER LIMITED" caps pairing) rather than a
    second cursive. */
 .brand-apparel {
@@ -10032,11 +10032,11 @@ details[open] > .cart-drawer__checkout-title::after {
 .login-modal__logo-white { height: 44px; width: auto; display: block; filter: drop-shadow(0 1px 3px rgba(10, 25, 55, 0.5)); }
 
 /* ============================================================
-   Hero cover — Wills wordmark logo + APPAREL, side-by-side in the same
+   Hero cover — Tamarack wordmark logo + APPAREL, side-by-side in the same
    format as the header lockup (APPAREL overlapping the wordmark's tail),
    scaled up. Replaces the old Tamarack pinwheel + text.
    ============================================================ */
-.hero__upper .hero__text.hero__text--wills {
+.hero__upper .hero__text.hero__text--brand {
   flex-direction: row !important;
   justify-content: center !important;
   align-items: center !important;
@@ -10045,7 +10045,7 @@ details[open] > .cart-drawer__checkout-title::after {
   gap: 0 !important;
   padding: clamp(1.4rem, 4vw, 3rem) clamp(1.2rem, 3.5vw, 2.5rem) !important;
 }
-.hero__upper .hero__text--wills .hero__brand-lockup {
+.hero__upper .hero__text--brand .hero__brand-lockup {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -10053,7 +10053,7 @@ details[open] > .cart-drawer__checkout-title::after {
   opacity: 0;
   animation: hero-word-fade 0.7s ease-out 0.15s forwards;
 }
-.hero__upper .hero__text--wills .hero__brand-logo {
+.hero__upper .hero__text--brand .hero__brand-logo {
   width: clamp(190px, 42vw, 400px) !important;
   height: auto !important;
   display: block !important;
@@ -10063,7 +10063,7 @@ details[open] > .cart-drawer__checkout-title::after {
 /* APPAREL in the header's serif-caps style, overlapping the wordmark tail.
    The negative margin is in em so the overlap scales with the font, matching
    the header's proportions at any size. */
-.hero__upper .hero__text--wills .hero__brand-apparel {
+.hero__upper .hero__text--brand .hero__brand-apparel {
   font-family: 'Times New Roman', Times, Georgia, serif !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
@@ -10314,7 +10314,7 @@ details[open] > .cart-drawer__checkout-title::after {
   /* Solid blue header — no white sign-frame band below the bar. The header
      background is a light off-white "sign frame" and the blue __inner bar sat
      1px short of the header's bottom edge, so that 1px of off-white read as a
-     white border below the header. Fill the header with the mnbs blue, drop the
+     white border below the header. Fill the header with the tamarack blue, drop the
      white ring cap (::before), and zero the inner's top/bottom margins so the
      blue bar reaches the header edges. */
   .site-header.site-header--white,
@@ -11637,7 +11637,7 @@ details[open] > .cart-drawer__checkout-title::after {
 }
 
 /* ============================================================
-   Add to Cart — MN button, Wills palette
+   Add to Cart — Tamarack button, Tamarack palette
    ------------------------------------------------------------
    Keeps the Tamarack button wholesale: the mark chip, the staggered
    fade-in of the triangles, the square->diamond rotate, the travelling sheen,
@@ -11646,7 +11646,7 @@ details[open] > .cart-drawer__checkout-title::after {
    staggering through MN's brand reds, greens, blue and yellow — none of which
    appear anywhere else in this app.
    Now: the sign palette. The ramp is one warm family (cream -> orange ->
-   burnt brown) so the triangles read as the Wills orange catching light at
+   burnt brown) so the triangles read as the Tamarack orange catching light at
    different angles, rather than eight unrelated brand colours.
    The mark artwork itself is being replaced — these fills are per-polygon and
    will carry over to whatever shape lands, as long as it keeps 8 polygons.
@@ -11654,7 +11654,7 @@ details[open] > .cart-drawer__checkout-title::after {
 :root {
   /* The original Tamarack pinwheel colours (match the add-to-cart SVG's
      polygon fills, in nth-child order) — restored so the Add to Cart button's
-     triangles read as the MN logo rather than the wills sign palette. */
+     triangles read as the Tamarack logo rather than the brand sign palette. */
   --wt-pin-1: #ffe2a6;
   --wt-pin-2: #ae1f2a;
   --wt-pin-3: #d43950;
@@ -12767,7 +12767,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
 /* ============================================================
    Phones: no wordmark in the footer.
 
-   The header carries the same Wills + APPAREL lockup ~two thumb-scrolls up,
+   The header carries the same Tamarack + APPAREL lockup ~two thumb-scrolls up,
    and on a 430px viewport the footer's copy of it is the tallest thing in the
    bar for no informational gain. Drop the whole lockup rather than just the
    image — pulling only the logo would strand the "Apparel" word beside it —
@@ -13203,7 +13203,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
    ============================================================ */
 
 /* ============================================================
-   Phones: nudge the Wills + APPAREL lockup left a few px to free space on the
+   Phones: nudge the Tamarack + APPAREL lockup left a few px to free space on the
    right of the header, and let the APPAREL wordmark grow taller — there's
    headroom in the bar. Placed last so it wins over the ≤600 / ≤767 lockup
    rules above.
@@ -13450,7 +13450,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
 @media (min-width: 1025px) {
   /* Full-width login-style split hero: a solid steel-blue brand pane on the LEFT
      and the photo carousel on the RIGHT (the same layout as the login window),
-     sized to ~82vh like the mnbs.ca banner so the catalog peeks in just below. */
+     sized to ~82vh like the tamarack.ca banner so the catalog peeks in just below. */
   .hero { height: 82vh !important; min-height: 480px !important; }
   .hero__upper {
     height: 100% !important;
@@ -13574,7 +13574,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
 }
 
 /* ============================================================
-   Tamarack — mobile/tablet: the wills "sign" framed each bar in a greige
+   Tamarack — mobile/tablet: the brand "sign" framed each bar in a greige
    surround (--wt-frame) with a white edge strip. With the blue header + lighter
    blue tab bar, the surround should just read as a plain white page margin, not
    a greige/white sign frame. Whiten the surround variable (covers the header AND
@@ -13603,7 +13603,7 @@ body:has(.product-fullscreen) { overflow: hidden; }
   .home-catalog__seam { background: transparent !important; }
 }
 
-/* Mobile/tablet: EDGE TO EDGE. The wills "sign" framed the whole site in a
+/* Mobile/tablet: EDGE TO EDGE. The brand "sign" framed the whole site in a
    --wt-box-my white page margin (header frame padding, catalog inner padding,
    with the tab bar bleeding back out). Zero every horizontal inset so the header,
    tab bar, breadcrumb, hero and catalog all run flush to the screen edges — no
@@ -14011,7 +14011,7 @@ body:has(.nav-drawer-overlay) .site-header__logo {
 body:has(.home-catalog) .site-header .cart-btn svg { stroke: #fff !important; }
 .site-header .cart-btn__label,
 body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #fff !important; }
-/* Cart button is Tamarack blue (mnbs CTA), so its icon + label stay white
+/* Cart button is Tamarack blue (tamarack CTA), so its icon + label stay white
    for contrast — matches the white-icon rule above (logout/hamburger too). */
 .site-header .cart-btn svg,
 body:has(.home-catalog) .site-header .cart-btn svg { stroke: #ffffff !important; }
@@ -14460,7 +14460,7 @@ body .site-header__inner { border-top-left-radius: 0 !important; border-top-righ
   }
 }
 
-/* ═══ Desktop: mnbs theme finishing pass ═══════════════════════════════════════
+/* ═══ Desktop: tamarack theme finishing pass ═══════════════════════════════════════
    (Placed last so it wins over the earlier per-state header/cart rules.) */
 @media (min-width: 1025px) {
   /* My Cart — the Tamarack blue CTA (#1B6551) with white icon + label. */
