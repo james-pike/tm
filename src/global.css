@@ -15059,17 +15059,23 @@ html { background: rgb(223, 226, 230) !important; }
 .site-footer__brand.brand-cluster { gap: 0.5rem; align-items: center; }
 .brand-cluster__apparel {
   align-self: center;
-  font-weight: 600;
-  letter-spacing: 0.3em;
+  /* Match the Tamarack wordmark: a high-contrast serif (Playfair Display) rather
+     than the Montserrat sans used elsewhere. The old lockup stretched the sans
+     vertically (scaleY) to read tall next to the logo; a real serif carries that
+     height on its own, so the size is bumped instead of distorting the glyphs. */
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.92);
   line-height: 1;
   display: inline-block;
-  transform: scaleY(1.35);
-  transform-origin: center;
+  /* Sit the suffix a touch lower so its baseline aligns under the wordmark. */
+  position: relative;
+  top: 4px;
 }
-.site-header__logo .brand-cluster__apparel { font-size: 0.95rem; }
-.site-footer__brand .brand-cluster__apparel { font-size: 0.95rem; }
+.site-header__logo .brand-cluster__apparel { font-size: 1.3rem; }
+.site-footer__brand .brand-cluster__apparel { font-size: 1.3rem; }
 /* Login: "Apparel" sits UNDER the wordmark, centered. */
 .login-card__brand.brand-cluster { flex-direction: column; }
 .login-card__brand .brand-cluster__apparel { font-size: 1.15rem; margin-top: 0.55rem; }
