@@ -5,7 +5,6 @@ import { allProducts, categoryLabel, colorName } from "../../routes/apparel/prod
 import type { Product } from "../../routes/apparel/products";
 import { sizeGroups, sortColorsWhiteLast } from "../../routes/apparel/utils";
 import { LoginTypeContext, stickyTop } from "../../routes/layout";
-import { ProductImage } from "../product-image/product-image";
 
 // The two desktop view modes. The toggle shows the one you'll switch TO.
 // Labels are the single source for the button text, aria-label and title.
@@ -262,15 +261,22 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
   return (
     <Link href={`/${sku}/`} class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}>
       <div class="product-card__image">
-        <ProductImage
-          key={activeImg.value}
-          src={activeImg.value}
-          alt={item.name}
-          width={440}
-          height={440}
-          loading={eager ? "eager" : "lazy"}
-          fetchPriority={eager ? "high" : "auto"}
-        />
+        {/* Bound directly to the activeImg signal so a swatch click updates the
+            src in place (a nested component wouldn't react to the prop change). */}
+        <picture>
+          {activeImg.value.replace(/\.(jpe?g|png)$/i, ".webp") !== activeImg.value && (
+            <source srcset={activeImg.value.replace(/\.(jpe?g|png)$/i, ".webp")} type="image/webp" />
+          )}
+          <img
+            src={activeImg.value}
+            alt={item.name}
+            width={440}
+            height={440}
+            loading={eager ? "eager" : "lazy"}
+            fetchPriority={eager ? "high" : "auto"}
+            decoding="async"
+          />
+        </picture>
       </div>
       <div class="product-card__info">
         <div class="product-card__name-row">
