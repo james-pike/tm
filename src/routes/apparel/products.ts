@@ -109,7 +109,8 @@ export const allProducts = [
     "price": 4,
     "img": "/skus/ATC1000L-tamarack.png",
     "imgs": [
-      "/skus/ATC1000L-tamarack.png"
+      "/skus/ATC1000L-tamarack.png",
+      "/skus/ATC1000L-limeshock-tamarack.png"
     ],
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Tear away label for private branding, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, OEKO-TEX® STANDARD 100 certified, #ATC1000L"

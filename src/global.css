@@ -15140,4 +15140,37 @@ html body header.site-header { background-image: var(--wt-iron) !important; back
 img.product-modal__add-pinwheel, img.order-confirm__pinwheel { object-fit: contain; }
 
 /* A little more breathing room below the sidebar "Collections" title */
-.home-catalog__catnav-title { padding-bottom: 0.55rem !important; margin-bottom: 0.15rem; }
+.home-catalog__catnav-title { padding-bottom: 0.32rem !important; margin-bottom: 0.05rem; }
+
+/* ── Header: Tamarack green + chevron texture on EVERY route (checkout too).
+      Appended last so it beats the earlier background-image:none and the
+      --white/--tabs-stuck states used on the checkout page. ─────────────────── */
+html body header.site-header,
+html body header.site-header.site-header--white,
+html body header.site-header.site-header--tabs-stuck,
+html body header.site-header::before {
+  background-color: #1B6551 !important;
+  background-image: var(--wt-iron) !important;
+  background-repeat: repeat !important;
+}
+html body .site-header .site-header__inner { background: transparent !important; background-image: none !important; }
+
+/* Header controls: white logout icon, and solid (untextured) search + logout
+   so the header chevron texture doesn't bleed through them. */
+.site-header .site-header__search,
+.site-header .logout-btn,
+.site-header__login--logout,
+.site-header .logout-form button {
+  background-color: #22705a !important;
+  background-image: none !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+}
+.site-header .logout-btn svg,
+.site-header__login--logout svg,
+.site-header .logout-form svg,
+.cart-drawer__site-header .logout-form svg,
+.cart-drawer__site-header .logout-btn svg { stroke: #ffffff !important; color: #ffffff !important; }
+.site-header .logout-btn,
+.site-header__login--logout,
+.site-header .logout-form button,
+.cart-drawer__site-header .logout-form button { color: #ffffff !important; }
