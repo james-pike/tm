@@ -15174,3 +15174,30 @@ html body .site-header .site-header__inner { background: transparent !important;
 .site-header__login--logout,
 .site-header .logout-form button,
 .cart-drawer__site-header .logout-form button { color: #ffffff !important; }
+
+/* ── Original Tamarack "Add to Cart" animation: the white /footer-mark.png mark
+      wipes in from the left when the item is added, the cart glyph fades out
+      beneath it. Overrides the mn2 pinwheel behaviour. ───────────────────────── */
+.product-modal__add-logo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
+  background: transparent;
+  z-index: 2;
+  opacity: 0;
+  clip-path: inset(0 0 0 0);
+  transition: opacity 0.35s ease;
+}
+.product-modal__add--added .product-modal__add-logo {
+  opacity: 1;
+  animation: add-logo-wipe-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes add-logo-wipe-in {
+  from { clip-path: inset(0 100% 0 0); opacity: 1; }
+  to   { clip-path: inset(0 0 0 0);    opacity: 1; }
+}
+.product-modal__add--branded:not(:disabled):active .product-modal__add-glyph,
+.product-modal__add--added .product-modal__add-glyph { opacity: 0; transition: opacity 0.2s ease; }
