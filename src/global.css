@@ -14350,18 +14350,6 @@ body .site-header__inner { border-top-left-radius: 0 !important; border-top-righ
   .site-header--solid { padding-left: 0 !important; padding-right: 0 !important; }
   .site-header__inner { margin-left: 0 !important; margin-right: 0 !important; padding-left: 16px !important; padding-right: 0 !important; }
 
-  /* The crisp white viewport frame (4px, square edges) belongs ONLY to the login
-     window — it framed the whole site before, which read as a stray white border
-     around the content. The login overlay is only in the DOM while signed out,
-     so :has() keeps the frame on the login screen and drops it once you're in. */
-  body:has(.login-overlay)::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    border: 4px solid #ffffff;
-    pointer-events: none;
-    z-index: 10001;
-  }
 }
 
 
