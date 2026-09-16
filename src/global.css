@@ -14453,7 +14453,7 @@ body .site-header__inner { border-top-left-radius: 0 !important; border-top-righ
   /* One smooth expression (no breakpoint jump, so browser zoom stays monotonic):
      near full-width on laptops, and once the viewport passes the 1728px cap the
      content plateaus and wide desktop monitors get real side margins. */
-  :root { --site-max: min(calc(100vw - 2rem), 1600px); }
+  :root { --site-max: min(calc(100vw - 2rem), 1728px); }
   /* Bring the sticky header bar in to the same width as the content column. */
   .site-header { max-width: var(--site-max); margin-inline: auto; }
 }
