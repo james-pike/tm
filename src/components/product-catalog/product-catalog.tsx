@@ -263,6 +263,7 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
     <Link href={`/${sku}/`} class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}>
       <div class="product-card__image">
         <ProductImage
+          key={activeImg.value}
           src={activeImg.value}
           alt={item.name}
           width={440}

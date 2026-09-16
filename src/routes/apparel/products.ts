@@ -262,7 +262,7 @@ const colorNames: Record<string, Record<string, string>> = {
   "#a8c4d8": { en: "Light Blue", fr: "Bleu clair" },
   "#a9682f": { en: "Brown", fr: "Brun" },
   "#b0b0b0": { en: "Grey", fr: "Gris" },
-  "#a5e82c": { en: "Lime Shock", fr: "Vert lime" },
+  "#a5e82c": { en: "Lime", fr: "Lime" },
   "#b6e021": { en: "Safety Green", fr: "Vert sécurité" },
   "#b8ad97": { en: "Khaki", fr: "Kaki" },
   "#ab8f66": { en: "Dark Khaki", fr: "Kaki foncé" },
