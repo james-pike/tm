@@ -13,7 +13,7 @@ export const allProducts = [
       "#1a1a18",
       "#b6e021"
     ],
-    "price": 10,
+    "price": 0,
     "img": "/skus/ATC1000-tamarack.png",
     "imgs": [
       "/skus/ATC1000-tamarack.png",
@@ -32,7 +32,7 @@ export const allProducts = [
       "#1a1a18",
       "#b6e021"
     ],
-    "price": 6.8,
+    "price": 0,
     "img": "/skus/ATC1015-safetygreen-tamarack.png",
     "imgs": [
       "/skus/ATC1015-tamarack.png",
@@ -50,7 +50,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 18.5,
+    "price": 0,
     "img": "/skus/L00555-tamarack.png",
     "imgs": [
       "/skus/L00555-tamarack.png"
@@ -68,7 +68,7 @@ export const allProducts = [
       "#1a1a18",
       "#a5e82c"
     ],
-    "price": 6,
+    "price": 0,
     "img": "/skus/S350-limeshock-tamarack.png",
     "imgs": [
       "/skus/S350-tamarack.png",
@@ -87,7 +87,7 @@ export const allProducts = [
       "#1a1a18",
       "#a5e82c"
     ],
-    "price": 6,
+    "price": 0,
     "img": "/skus/L350-limeshock-tamarack.png",
     "imgs": [
       "/skus/L350-tamarack.png",
@@ -106,7 +106,7 @@ export const allProducts = [
       "#1a1a18",
       "#a6e82c"
     ],
-    "price": 4,
+    "price": 0,
     "img": "/skus/ATC1000L-tamarack.png",
     "imgs": [
       "/skus/ATC1000L-tamarack.png",
@@ -124,7 +124,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 32.5,
+    "price": 0,
     "img": "/skus/L00671-tamarack.png",
     "imgs": [
       "/skus/L00671-tamarack.png"
@@ -141,13 +141,125 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 32.5,
+    "price": 0,
     "img": "/skus/L00670-tamarack.png",
     "imgs": [
       "/skus/L00670-tamarack.png"
     ],
     "material": "80% cotton / 20% recycled polyester fleece, 3-ply fleece",
     "details": "Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, #L00670"
+  },
+  {
+    "sku": "TM-11",
+    "name": "Flux Quarter-Zip Sweatshirt",
+    "category": "Sweaters",
+    "sizes": "XS - 4XL",
+    "badge": "New",
+    "colors": [
+      "#1a1a18",
+      "#bbbcbc",
+      "#53565a"
+    ],
+    "price": 0,
+    "img": "/skus/L00545-athleticgrey-tamarack.png",
+    "imgs": [
+      "/skus/L00545-tamarack.png",
+      "/skus/L00545-athleticgrey-tamarack.png",
+      "/skus/L00545-charcoal-tamarack.png"
+    ],
+    "material": "70% ring-spun combed cotton / 30% polyester fleece",
+    "details": "100% cotton print face, Rib-knit cuff and hem, Metal YKK front zipper closure, Tear-away label, Quarter-zip, Canada Sportswear, #L00545",
+    "portals": [
+      "groupb"
+    ]
+  },
+  {
+    "sku": "TM-12",
+    "name": "Core365 Optimum Short-Sleeve Twill Shirt",
+    "category": "Polos",
+    "sizes": "S - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 0,
+    "img": "/skus/88194-black-tamarack.jpg",
+    "imgs": [
+      "/skus/88194-black-tamarack.jpg"
+    ],
+    "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
+    "details": "UV protection, button-down collar, flat-felled seams, left chest pocket, back yoke with box pleat, #88194"
+  },
+  {
+    "sku": "TM-13",
+    "name": "Core365 Operate Long-Sleeve Twill Shirt",
+    "category": "Polos",
+    "sizes": "S - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 0,
+    "img": "/skus/88193-black-tamarack.jpg",
+    "imgs": [
+      "/skus/88193-black-tamarack.jpg"
+    ],
+    "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
+    "details": "UV protection, button-down collar, flat-felled seams, adjustable cuffs, left chest pocket, back yoke with box pleat, #88193"
+  },
+  {
+    "sku": "TM-14",
+    "name": "Core365 Ladies Operate Long-Sleeve Twill Shirt",
+    "category": "Polos",
+    "sizes": "XS - 3XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 0,
+    "img": "/skus/78193-black-tamarack.png",
+    "imgs": [
+      "/skus/78193-black-tamarack.png"
+    ],
+    "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
+    "details": "UV protection, button-down collar, flat-felled seams, adjustable cuffs, left chest pocket, back yoke with box pleat, #78193"
+  },
+  {
+    "sku": "TM-15",
+    "name": "Core365 Ladies Optimum Short-Sleeve Twill Shirt",
+    "category": "Polos",
+    "sizes": "XS - 3XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 0,
+    "img": "/skus/78194-black-tamarack.png",
+    "imgs": [
+      "/skus/78194-black-tamarack.png"
+    ],
+    "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
+    "details": "UV protection, button-down collar, flat-felled seams, left chest pocket, back yoke with box pleat, #78194"
+  },
+  {
+    "sku": "TM-16",
+    "name": "Carhartt Iconic Duck Active Jacket",
+    "category": "Jackets",
+    "sizes": "S - 5XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 0,
+    "img": "/skus/106673-black-tamarack.png",
+    "imgs": [
+      "/skus/106673-black-tamarack.png"
+    ],
+    "material": "100% ring-spun cotton duck",
+    "details": "Quilted-flannel lining in body, Quilted-nylon lining in sleeves, Attached quilted-flannel-lined hood with draw-cord closure, Two inside pockets, Rib-knit cuffs, #106673",
+    "portals": [
+      "groupb"
+    ]
   },
   {
     "sku": "TM-9",
@@ -158,7 +270,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 23.5,
+    "price": 0,
     "img": "/skus/i8502-tamarack.png",
     "imgs": [
       "/skus/i8502-tamarack.png",
@@ -177,7 +289,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 18.5,
+    "price": 0,
     "img": "/skus/DK24-tamarack.png",
     "imgs": [
       "/skus/DK24-tamarack.png"
@@ -199,6 +311,8 @@ export function badgeClass(badge: string) {
 const colorNames: Record<string, Record<string, string>> = {
   "#00703c": { en: "Green", fr: "Vert" },
   "#1a1a18": { en: "Black", fr: "Noir" },
+  "#bbbcbc": { en: "Athletic Grey", fr: "Gris athlétique" },
+  "#53565a": { en: "Charcoal", fr: "Charbon" },
   "#ffffff": { en: "White", fr: "Blanc" },
   "#2c3e50": { en: "Navy", fr: "Marine" },
   "#6e6e6e": { en: "Grey", fr: "Gris" },

@@ -351,8 +351,10 @@ export default component$(() => {
                   <label>{t("cart.city", locale.value)}</label>
                   <input type="text" autoComplete="address-level2" value={empCity.value} onInput$={(_, el) => { empCity.value = el.value; formError.value = ""; }} />
                 </div>
-                {/* Province sits high so the tax line in the summary updates as
+                {/* Province + Postal share a row (neither needs full width).
+                    Province sits high so the tax line in the summary updates as
                     soon as possible. */}
+                <div class="checkout-modal__row">
                 <div class={`checkout-modal__field ${formTouched.value && !empProvince.value ? "checkout-modal__field--error" : ""}`}>
                   <label>{t("cart.province", locale.value)}</label>
                   <select required value={empProvince.value} onChange$={(_, el) => { empProvince.value = el.value; formError.value = ""; }}>
@@ -373,6 +375,9 @@ export default component$(() => {
                   <label>{t("cart.postal", locale.value)}</label>
                   <input type="text" autoComplete="postal-code" value={empPostal.value} onInput$={(_, el) => { empPostal.value = el.value; formError.value = ""; }} />
                 </div>
+                </div>
+                {/* Email + Phone share a row. */}
+                <div class="checkout-modal__row">
                 <div class={`checkout-modal__field ${formTouched.value && !empEmail.value ? "checkout-modal__field--error" : ""}`}>
                   <label>{t("cart.email", locale.value)}</label>
                   <input type="email" value={empEmail.value} onInput$={(_, el) => { empEmail.value = el.value; formError.value = ""; }} />
@@ -380,6 +385,7 @@ export default component$(() => {
                 <div class={`checkout-modal__field ${formTouched.value && !empPhone.value ? "checkout-modal__field--error" : ""}`}>
                   <label>{t("cart.phone", locale.value)}</label>
                   <input type="tel" value={empPhone.value} onInput$={(_, el) => { empPhone.value = el.value; formError.value = ""; }} />
+                </div>
                 </div>
               </div>
 

@@ -2,14 +2,19 @@ import { component$ } from "@builder.io/qwik";
 import { useLocation, routeLoader$ } from "@builder.io/qwik-city";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import { allProducts } from "../../apparel/products";
+import { getLoginType } from "../../layout";
 import { ProductDetailPanel } from "../../../components/product-detail/product-detail";
 
 // Guards the /<sku>/ route. Unknown slugs (including the retired "/apparel"
-// path) redirect to the catalog. Tamarack is a single open catalog — every
-// known product is viewable.
+// path) redirect to the catalog. The full-catalog login sees every product; a
+// Group B session may only open products tagged for its lineup.
 export const useProductGuard = routeLoader$((ev) => {
   const product = allProducts.find((p) => p.sku === ev.params.sku);
   if (!product) throw ev.redirect(302, "/");
+  const lt = getLoginType(ev.cookie);
+  if (lt === "groupb" && !(product as { portals?: string[] }).portals?.includes("groupb")) {
+    throw ev.redirect(302, "/");
+  }
   return {};
 });
 

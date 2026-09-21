@@ -75,14 +75,18 @@ export const useLocaleLoader = routeLoader$(({ cookie }) => {
   return (saved === "fr" ? "fr" : "en") as Locale;
 });
 
-export type LoginType = "service" | "electrical" | null;
+// "service" = the full catalog (first password). "groupb" = the second, curated
+// lineup (second password). The label "Group B" is internal only — it is never
+// shown to shoppers; the store looks identical either way, only the product set
+// differs.
+export type LoginType = "service" | "groupb" | null;
 
 export function getLoginType(cookie: Cookie): LoginType {
   const val = cookie.get(AUTH_COOKIE)?.value;
-  if (val === "service" || val === "electrical") return val;
-  // backward compat: the old clothing/authenticated logins map to the full
-  // Service catalog.
-  if (val === "clothing" || val === "authenticated") return "service";
+  if (val === "service" || val === "groupb") return val;
+  // backward compat: the old clothing/authenticated (and the retired
+  // "electrical" scaffold) logins map to the full catalog.
+  if (val === "clothing" || val === "authenticated" || val === "electrical") return "service";
   return null;
 }
 
@@ -100,15 +104,18 @@ export const useCartCountLoader = routeLoader$(({ cookie }) => {
 });
 
 export const useLogin = routeAction$(
-  ({ password }, { cookie, fail, env }) => {
-    // Single staff login for the Tamarack apparel store — one password, one
-    // open catalog. The session is stored as "service" (the full catalog view).
+  ({ portal, password }, { cookie, fail, env }) => {
+    // Both portals share ONE password (APP_PASSWORD, set in Cloudflare). The
+    // picked portal only decides which catalog is shown — Site Clerks ("service",
+    // full catalog) or Labourers ("groupb", curated lineup) — not the credential.
+    // Portal names live only on the login screen, never in the store.
     const expected = env.get("APP_PASSWORD") || env.get("VITE_APP_PASSWORD");
     if (!expected) {
       return fail(500, { message: "Login not configured" });
     }
     if (password === expected) {
-      cookie.set(AUTH_COOKIE, "service", {
+      const granted = portal === "groupb" ? "groupb" : "service";
+      cookie.set(AUTH_COOKIE, granted, {
         path: "/",
         httpOnly: true,
         secure: true,
@@ -120,6 +127,7 @@ export const useLogin = routeAction$(
     return fail(401, { message: "Invalid password" });
   },
   zod$({
+    portal: z.enum(["service", "groupb"]).optional().default("service"),
     password: z.string().min(1).max(128),
   }),
 );
@@ -153,9 +161,11 @@ export const useSubmitOrder = routeAction$(
       return fail(401, { message: "Not authenticated" });
     }
     const lt = getLoginType(cookie);
-    // Electrical orders are tagged to their own vendor bucket; Service uses the
-    // main Tamarack vendor.
-    const vendor = lt === "electrical" ? "tamarack-electrical" : "tamarack";
+    // Group B orders are tagged to their own vendor bucket so the admin can tell
+    // the two lineups apart; the full catalog uses the main Tamarack vendor.
+    // Both share the TM-<n> order numbering (the sequence counts vendor LIKE
+    // 'tamarack%').
+    const vendor = lt === "groupb" ? "tamarack-groupb" : "tamarack";
     // Read from non-prefixed names first, fall back to VITE_* for backward compat.
     // Both are safe at runtime — env.get() reads server env, never bundles.
     const tursoUrl = env.get("TURSO_URL") || env.get("VITE_TURSO_URL");
@@ -561,6 +571,10 @@ export default component$(() => {
   const orderAction = useSubmitOrder();
 
   const showLogin = useSignal(false);
+  // Which portal tile is picked on the login screen. "service" = Site Clerks
+  // (full catalog), "groupb" = Labourers (curated lineup). Submitted with the
+  // password so the server checks that portal's password.
+  const selectedPortal = useSignal<"service" | "groupb">("service");
   const overlayFading = useSignal(false);
   const menuOpen = useSignal(false);
   const savedLocale = useLocaleLoader();
@@ -589,9 +603,7 @@ export default component$(() => {
   // the header the whole time.
   const showSearch = useComputed$(
     () =>
-      (loc.url.pathname === "/" || (!loc.url.pathname.startsWith("/privacy") && !loc.url.pathname.startsWith("/checkout"))) &&
-      // Electrical has only a handful of products — no need for search.
-      auth.value.loginType !== "electrical",
+      (loc.url.pathname === "/" || (!loc.url.pathname.startsWith("/privacy") && !loc.url.pathname.startsWith("/checkout"))),
   );
 
   useContextProvider(LocaleContext, locale);
@@ -1163,10 +1175,34 @@ export default component$(() => {
                 </div>
               </div>
               <Form action={loginAction} reloadDocument class="login-modal__form">
-                <p class="login-modal__subtitle">{t("login.subtitle", locale.value)}</p>
                 {loginAction.value?.failed && (
                   <div class={`login-modal__error ${(loginAction.value as { comingSoon?: boolean }).comingSoon ? "login-modal__error--info" : ""}`}>{loginAction.value.message}</div>
                 )}
+                {/* Portal picker — two tiles; the selected one is submitted as a
+                    hidden field and its own password is checked server-side. */}
+                <input type="hidden" name="portal" value={selectedPortal.value} />
+                <div class="login-modal__field">
+                  <div class="login-portals" role="radiogroup" aria-label="Portal">
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={selectedPortal.value === "service"}
+                      class={`login-portal ${selectedPortal.value === "service" ? "is-selected" : ""}`}
+                      onClick$={() => { selectedPortal.value = "service"; }}
+                    >
+                      <span>Site Clerks</span>
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={selectedPortal.value === "groupb"}
+                      class={`login-portal ${selectedPortal.value === "groupb" ? "is-selected" : ""}`}
+                      onClick$={() => { selectedPortal.value = "groupb"; }}
+                    >
+                      <span>Labourers</span>
+                    </button>
+                  </div>
+                </div>
                 <div class="login-modal__field">
                   <label for="password">{t("login.password", locale.value)}</label>
                   <input
@@ -1350,11 +1386,13 @@ export default component$(() => {
                   value={searchValue.value}
                   onInput$={(_, el) => {
                     searchValue.value = el.value;
-                    // With the catalog on the page (home / apparel listing), relay
-                    // keystrokes to it for live filtering. On a page without a
-                    // catalog (e.g. a product page) typing just fills the field —
-                    // nothing moves until Enter (see below).
-                    if (document.querySelector(".home-catalog")) {
+                    // Live-filter only when the catalog GRID is the current view.
+                    // The catalog stays mounted on a product page (PDP mode), so a
+                    // "is .home-catalog present" check is true there too and would
+                    // move the sidebar while the grid isn't even shown. Gate on the
+                    // route instead (grid == home "/"); on a PDP, typing only fills
+                    // the field — nothing moves until Enter (see below).
+                    if (loc.url.pathname.replace(/\/+$/, "") === "") {
                       window.dispatchEvent(new CustomEvent("apparel-search", { detail: el.value }));
                     }
                   }}
@@ -1364,14 +1402,21 @@ export default component$(() => {
                       // Close the menu takeover so the filtered products are visible
                       // (searching from inside the open menu otherwise did nothing).
                       menuOpen.value = false;
-                      if (document.querySelector(".home-catalog")) {
+                      if (loc.url.pathname.replace(/\/+$/, "") === "") {
+                        // On the grid: commit the live-filtered results in place.
                         window.dispatchEvent(new CustomEvent("apparel-search", { detail: el.value }));
                         window.dispatchEvent(new CustomEvent("apparel-search-commit"));
                       } else {
-                        // No catalog here (product page): Enter takes the user to the
-                        // listing, swapping the breadcrumb bar for the tabs + grid,
-                        // with the typed term carried along in ?q=.
-                        nav(`/?q=${encodeURIComponent(el.value)}`);
+                        // On a product page: apply the search to the catalog (kept
+                        // mounted by the shared shell) FIRST, then swap to the grid
+                        // so it opens straight on the results. A ?q= navigation
+                        // wouldn't work here — the mount-time query handler doesn't
+                        // re-run when the already-mounted catalog switches out of
+                        // PDP mode, which left the first Enter showing the previous
+                        // category and needing a second Enter.
+                        window.dispatchEvent(new CustomEvent("apparel-search", { detail: el.value }));
+                        window.dispatchEvent(new CustomEvent("apparel-search-commit"));
+                        nav("/");
                       }
                     }
                     if (e.key === "Escape") { searchValue.value = ""; window.dispatchEvent(new CustomEvent("apparel-search", { detail: "" })); searchOpen.value = false; }

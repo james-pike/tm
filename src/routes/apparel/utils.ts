@@ -93,3 +93,26 @@ export function sizeGroups(sizes: string): string[] {
   if (tall.length) groups.push(condense(tall, TALL_ORDER));
   return groups.length ? groups : [sizes];
 }
+
+// Compact product name for gallery + carousel cards: drop the model code, the
+// gender word (it's shown on the sizes row instead), abbreviate Long/Short
+// Sleeve to LS/SS, and drop a trailing "- Colour".
+export function cardTitle(name: string): string {
+  return name
+    .replace(/#\S+/g, "")
+    .replace(/\b(?:men|women|ladies|unisex)['’]?s?\s+/gi, "")
+    .replace(/\bLong[-\s]Sleeve\b/gi, "LS")
+    .replace(/\bShort[-\s]Sleeve\b/gi, "SS")
+    .replace(/\s+[-–]\s+.+$/, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+// Gender inferred from the product name — drives the "Women's"/"Men's" prefix
+// on the sizes row (kept off the title itself).
+export function productGender(name: string): "Men" | "Women" | "Unisex" {
+  const n = name.toLowerCase();
+  if (/\bwomen['’]?s?\b|ladies/.test(n)) return "Women";
+  if (/\bmen['’]?s?\b/.test(n)) return "Men";
+  return "Unisex";
+}

@@ -4,13 +4,13 @@ import { LocaleContext, t } from "../../i18n";
 import { allProducts, categoryLabel, colorName } from "../../routes/apparel/products";
 import type { Product } from "../../routes/apparel/products";
 import { sizeGroups, sortColorsWhiteLast } from "../../routes/apparel/utils";
-import { stickyTop } from "../../routes/layout";
+import { stickyTop, LoginTypeContext } from "../../routes/layout";
 
 // FIT (gender) sidebar facet is disabled for Tamarack.
 const SHOW_FIT_FACET = false;
 
 
-export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Sweaters", "Hats"];
+export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Polos", "Sweaters", "Jackets", "Hats"];
 
 // Electrical portal: shows ONLY these SKUs (an optional division lineup).
 // Tamarack runs a single open catalog, so this legacy hardcoded list is empty;
@@ -115,7 +115,7 @@ function sizesOf(p: Product): string[] {
 // Brands carried, in sidebar display order. A brand must be listed here to show
 // up as a filter (the facet list is BRAND_LIST ∩ brands-present).
 const BRAND_LIST = [
-  "ATC", "Canada Sportswear", "Blundstone", "Coal Harbour", "Columbia", "Core365", "Devon & Jones",
+  "ATC", "Canada Sportswear", "Blundstone", "Carhartt", "Coal Harbour", "Columbia", "Core365", "Devon & Jones",
   "Cap America", "Flexfit", "Harriton", "New Balance", "Nike", "Roots", "The North Face", "Timberland",
   "Under Armour",
 ];
@@ -126,6 +126,7 @@ const BRAND_BY_SKU: Record<string, string> = {
   "TM-3": "Canada Sportswear", // Surfer Full-Zip hoodie #L00555 (CSW L-series)
   "TM-7": "Canada Sportswear", // Women's Lakeview Full-Zip hoodie #L00671 (CSW)
   "TM-8": "Canada Sportswear", // Lakeview Adult Full-Zip hoodie #L00670 (CSW)
+  "TM-11": "Canada Sportswear", // Flux Quarter-Zip #L00545 (CSW L-series)
 };
 function brandOf(p: Product): string | null {
   if (BRAND_BY_SKU[p.sku]) return BRAND_BY_SKU[p.sku];
@@ -241,9 +242,16 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
     visibleColors.length === 1
       ? (visibleColors[0].startsWith("#") ? colorName(visibleColors[0], "en") : visibleColors[0])
       : null;
-  // Title: drop the model code, the gender prefix, and — when there's a single
-  // colour — the trailing "- Colour" (it's shown beside the swatch instead).
-  let displayName = item.name.replace(/#\S+/g, "").replace(/^(men|women|ladies|unisex)['’]?s?\s+/i, "");
+  // Card title (gallery cards only — the PDP keeps the full authored name):
+  // drop the model code and the gender word anywhere (Women's/Ladies show on the
+  // sizes row below instead), abbreviate Long/Short Sleeve, and — when there's a
+  // single colour — drop the trailing "- Colour" (shown beside the swatch).
+  let displayName = item.name
+    .replace(/#\S+/g, "")
+    .replace(/\b(?:men|women|ladies|unisex)['’]?s?\s+/gi, "")
+    .replace(/\bLong[-\s]Sleeve\b/gi, "LS")
+    .replace(/\bShort[-\s]Sleeve\b/gi, "SS")
+    .replace(/\s{2,}/g, " ");
   if (singleColorEn) {
     displayName = displayName.replace(new RegExp(`\\s*[-–]\\s*${singleColorEn.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "i"), "");
   }
@@ -413,13 +421,19 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
       if (bg.some((c) => tg.classList.contains(c))) nav("/");
     }),
   );
-  // Tamarack is a single open catalog — no portal/division filtering. These stay
-  // false regardless of the auth cookie value (so a stray "electrical"/"tech"
-  // cookie from a sibling site on localhost can't hide the catalog).
+  // Legacy portal branches (tech/safety/electrical) are inert for Tamarack — they
+  // stay false so a stray sibling-site cookie can't hide the catalog and so none
+  // of their labels/UI ever render.
   const isTech = useComputed$(() => false);
   const isSafety = useComputed$(() => false);
   const isElectrical = useComputed$(() => false);
   const isSingleCat = useComputed$(() => false);
+  // Group B: the second password's curated lineup. This ONLY narrows the product
+  // set — it drives no labels or layout changes, so Group B looks identical to
+  // the full catalog. Membership is the product's `portals` array including
+  // "groupb" (set per product in cm-admin).
+  const loginType = useContext(LoginTypeContext);
+  const isGroupB = useComputed$(() => loginType.value === "groupb");
   const activeCat = useSignal("All");
   const searchQuery = useSignal("");
   // Mobile tab strip: true once scrolled to the end (flips the chevron cue).
@@ -467,6 +481,13 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
         );
 
   const baseProducts = useComputed$(() => {
+    if (isGroupB.value) {
+      // Group B sees ONLY products tagged for it. The first password (full
+      // catalog) sees everything, so a Group B product also shows there.
+      return allProducts.filter((p) =>
+        (p as { portals?: string[] }).portals?.includes("groupb"),
+      );
+    }
     if (isElectrical.value) {
       // Electrical membership is DB-driven (products.portals includes
       // "electrical"), falling back to the legacy hardcoded ELECTRICAL_SKUS so
@@ -620,6 +641,13 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
     if (isSafety.value) {
       const present = new Set(baseProducts.value.map((p) => p.category));
       return SAFETY_CATEGORIES.filter((c) => ALWAYS_SHOW.has(c) || present.has(c));
+    }
+    // Group B (Labourers): a curated subset — drop clothing categories that have
+    // no products in this lineup (brand filters are computed separately and
+    // unaffected).
+    if (isGroupB.value) {
+      const present = new Set(baseProducts.value.map((p) => p.category));
+      return CLOTHING_CATEGORIES.filter((c) => ALWAYS_SHOW.has(c) || present.has(c));
     }
     return CLOTHING_CATEGORIES;
   });

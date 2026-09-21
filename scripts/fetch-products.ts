@@ -48,6 +48,9 @@ async function fetchAndWrite() {
         material: row.material,
         details: row.details,
         pdf: row.pdf || undefined,
+        // Login-group membership (set per product in cm-admin). Only emitted when
+        // present, so products in the default catalog keep their existing shape.
+        portals: row.portals ? JSON.parse(row.portals) : undefined,
       })).map((p) => ({ ...p, ...OVERRIDES[p.sku] }));
 
     const output = `// AUTO-GENERATED — do not edit manually. Updated from database at build time.
@@ -68,6 +71,8 @@ export function badgeClass(badge: string) {
 const colorNames: Record<string, Record<string, string>> = {
   "#00703c": { en: "Green", fr: "Vert" },
   "#1a1a18": { en: "Black", fr: "Noir" },
+  "#bbbcbc": { en: "Athletic Grey", fr: "Gris athlétique" },
+  "#53565a": { en: "Charcoal", fr: "Charbon" },
   "#ffffff": { en: "White", fr: "Blanc" },
   "#2c3e50": { en: "Navy", fr: "Marine" },
   "#6e6e6e": { en: "Grey", fr: "Gris" },

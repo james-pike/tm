@@ -3170,7 +3170,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   margin-bottom: 0.35rem;
 }
 .product-card__name {
-  font-size: 0.88rem;
+  font-size: 0.93rem;
   font-weight: 700;
   color: var(--ce-gray-900);
   letter-spacing: -0.035em;
@@ -3189,7 +3189,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   color: var(--ce-gray-500);
 }
 .product-card__price {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--ce-green);
   white-space: nowrap;
@@ -3275,7 +3275,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 }
 
 .product-card__sizes {
-  font-size: 0.72rem;
+  font-size: 0.77rem;
   color: var(--ce-gray-500);
   letter-spacing: -0.01em;
 }
@@ -3322,7 +3322,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   background: rgba(240, 240, 238, 0.96);
   backdrop-filter: blur(8px);
   display: flex; align-items: flex-start; justify-content: center;
-  padding: clamp(12px, 4vh, 40px) 0;
+  padding: 0;
   animation: fadeIn 0.2s ease;
   transition: opacity 0.8s ease, backdrop-filter 0.8s ease;
 }
@@ -3386,6 +3386,30 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
     var(--wt-iron) left top / 1400px auto repeat,
     linear-gradient(rgba(0, 0, 0, 0.30), rgba(0, 0, 0, 0.30)),
     #1B6551;
+}
+
+/* Login portal picker — two tiles (Site Clerks / Labourers) on the green pane. */
+.login-modal__form .login-portals { display: flex; gap: 0.6rem; }
+.login-modal__form .login-portal {
+  flex: 1 1 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 13px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.8rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+.login-modal__form .login-portal:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.4); }
+.login-modal__form .login-portal.is-selected {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1B6551;
+  border-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
 }
 
 /* Brand header — the wordmark stacked over a centred "APPAREL" kicker (instead
@@ -4977,7 +5001,7 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   position: fixed;
   bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(0.75rem);
   background: #e8f3ee;
   color: #12463a;
   border: 1px solid var(--ce-gold);
@@ -4985,12 +5009,22 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   font-size: 0.85rem;
   font-weight: 600;
   z-index: 9999;
-  animation: toast-in 0.3s ease, toast-out 0.3s ease 3.2s forwards;
   border-radius: 6px;
   width: calc(100% - 2.5rem);
   max-width: 480px;
   text-align: center;
   box-sizing: border-box;
+  /* Toggled by .toast--show (driven by the same `added` state as the button), so
+     the fade-out runs on the button's clock. Fade-out timing (0.45s) matches the
+     button's logo/glyph/label exit; fade-in is a touch longer (see --show). */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.toast--show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  transition-duration: 0.5s;
 }
 @keyframes toast-in {
   from { opacity: 0; transform: translateX(-50%) translateY(1rem); }
@@ -5380,12 +5414,12 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   color: var(--ce-white);
   stroke-width: 2.6px;
   filter: drop-shadow(0 1px 1.5px rgba(0,0,0,0.6));
-  /* Exit (added -> rest): snap back quickly. */
-  transition: opacity 0.12s ease;
+  /* Exit (added -> rest): smooth crossfade in step with the logo/label. */
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* Entry (rest -> added): slightly quicker than before, still a soft fade. */
+/* Entry (rest -> added): soft fade, matched to the logo wipe. */
 .product-modal__add--added .product-modal__add-glyph {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.5s cubic-bezier(0.33, 1, 0.68, 1);
 }
 /* Crossfade cart -> checkmark in place when added */
 .product-modal__add-glyph--check { opacity: 0; }
@@ -5402,7 +5436,8 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
 .product-modal__add-label-text {
   grid-area: 1 / 1;
   white-space: nowrap;
-  transition: opacity 0.3s ease;
+  /* Matched to the logo/glyph so the label crossfades in the same beat. */
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .product-modal__add-label-text--added { opacity: 0; }
 .product-modal__add--added .product-modal__add-label-text--primary { opacity: 0; }
@@ -7887,7 +7922,7 @@ details[open] > .cart-drawer__checkout-title::after {
   .cta-section { padding: 4rem 1rem; }
   .cta-section__inner { padding: 3rem 1.5rem; }
   .apparel-grid { grid-template-columns: repeat(2, 1fr); gap: 2px; margin-top: -3px; padding: 0; }
-  .product-card__name { font-size: 0.82rem; line-height: 1.3; }
+  .product-card__name { font-size: 0.87rem; line-height: 1.3; }
   .product-card__name-code { display: none; }
   .product-card__price-group { flex-direction: row; align-items: baseline; align-self: flex-start; }
   .product-card { border-radius: 2px; }
@@ -14798,7 +14833,11 @@ html { background: rgb(223, 226, 230) !important; }
 /* Thin the gutter BETWEEN the two columns without changing the outer indent:
    trim the padding on the facing edges (details' right, summary's left). */
 .checkout-page .checkout-modal__form { padding-right: 0.5rem !important; }
-.checkout-page .cart-drawer__summary { padding-left: 0.5rem !important; }
+/* Slight grey divider between the order-details and order-summary sections. */
+.checkout-page .cart-drawer__summary { padding-left: 24px !important; border-left: 1px solid var(--ce-gray-300) !important; align-self: stretch !important; }
+/* Keep the input fields from sprawling across the wide details column. */
+.checkout-page .checkout-modal__form,
+.checkout-page .checkout-modal__pay { max-width: 640px; }
 .checkout-page .cart-drawer__back-btn {
   /* Same light-grey secondary-bar fill as the cart's PRODUCT/QTY strip, so the
      bar reads distinct from the order-details content below it. */
@@ -14891,7 +14930,7 @@ html { background: rgb(223, 226, 230) !important; }
    (this checkout is a full-width page, not a rounded drawer card). */
 .checkout-page .cart-drawer__details-step {
   row-gap: 0 !important;
-  column-gap: 8px !important;
+  column-gap: 24px !important;
 }
 .checkout-page .cart-drawer__back-btn { margin: 0 !important; }
 .checkout-page .checkout-modal__pay { margin-top: 14px !important; }
@@ -15065,11 +15104,14 @@ html body .site-header .site-header__inner { background: transparent !important;
   z-index: 2;
   opacity: 0;
   clip-path: inset(0 0 0 0);
-  transition: opacity 0.35s ease;
+  /* Fade-out (added -> rest): smooth, a touch quicker than before. */
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .product-modal__add--added .product-modal__add-logo {
   opacity: 1;
-  animation: add-logo-wipe-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Eases in behind the cart icon over 0.5s — matched to the glyph/label/toast
+     so the whole "added" moment moves as one. */
+  animation: add-logo-wipe-in 0.5s cubic-bezier(0.33, 1, 0.68, 1) both;
 }
 @keyframes add-logo-wipe-in {
   from { clip-path: inset(0 100% 0 0); opacity: 1; }

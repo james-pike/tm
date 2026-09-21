@@ -3,9 +3,8 @@ import { Carousel } from "@qwik-ui/headless";
 import { Link } from "@builder.io/qwik-city";
 import { LocaleContext, t } from "../../i18n";
 import { allProducts, colorName, categoryLabel } from "../../routes/apparel/products";
-import { expandSizes, sizeGroups, sortColorsWhiteLast } from "../../routes/apparel/utils";
+import { expandSizes, sizeGroups, sortColorsWhiteLast, cardTitle, productGender } from "../../routes/apparel/utils";
 import { LoginTypeContext } from "../../routes/layout";
-import { ELECTRICAL_SKUS } from "../product-catalog/product-catalog";
 import { ProductImage } from "../product-image/product-image";
 
 // Tall sizes are rendered on their own row, separate from the regular sizes.
@@ -150,6 +149,8 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
     addedInfo.value = selectedColor.value ? `${p.name} — ${colorName(selectedColor.value, "en")} / ${sizeVal}` : `${p.name} — ${sizeVal}`;
     added.value = true;
     selectedQty.value = 1;
+    // Hold the "Added" state ~1.3s, then revert. The toast fade-out is timed to
+    // finish just before this (see .toast in global.css).
     setTimeout(() => { added.value = false; }, 1300);
   });
 
@@ -466,39 +467,52 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
           tech: ["Work Wear"],
           safety: ["Flame Resistant", "Shirts", "Hats"],
         };
-        const isElectrical = loginType.value === "electrical";
+        const isGroupB = loginType.value === "groupb";
         const visible = visibleByLogin[loginType.value] || visibleByLogin.clothing;
-        const inVisible = visible.includes(p.category);
-        // Electrical: the "more products" row is just the rest of the Electrical
-        // lineup — not the full catalog.
-        const related = isElectrical
-          ? allProducts.filter((r) => r.sku !== p.sku && ELECTRICAL_SKUS.includes(r.sku)).slice(0, 8)
-          : inVisible
-          ? allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && r.category === p.category).slice(0, 8)
+        // Other products in the SAME category (excluding self + the retired
+        // CAR-12). If a product is the only one in its category (e.g. the single
+        // jacket), there's nothing to show as "More <Category>", so fall back to
+        // a general "More Apparel" row of other items.
+        const sameCat = allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && r.category === p.category);
+        const hasSiblings = sameCat.length > 0;
+        // Group B: the "more products" row stays within the Group B lineup, not
+        // the full catalog.
+        const related = isGroupB
+          ? allProducts.filter((r) => r.sku !== p.sku && (r as { portals?: string[] }).portals?.includes("groupb")).slice(0, 8)
+          : hasSiblings
+          ? sameCat.slice(0, 8)
           : allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && visible.includes(r.category)).slice(0, 8);
-        const headingSuffix = isElectrical ? t("login.portal.electrical", locale.value) : inVisible ? catLabel : t("nav.apparel", locale.value);
+        // "More <Category>" when there are same-category siblings; otherwise (and
+        // for Group B, which shows no group label) the generic "More Apparel".
+        const headingSuffix = (!isGroupB && hasSiblings) ? catLabel : t("nav.apparel", locale.value);
         // Card inner markup, shared by the grid + carousel below (inline, not a
         // component, to keep it a plain render helper).
-        const cardInner = (item: typeof related[number], loading: "eager" | "lazy") => (
+        const cardInner = (item: typeof related[number], loading: "eager" | "lazy") => {
+          const g = productGender(item.name);
+          return (
           <>
             <div class="product-card__image">
               <ProductImage src={item.img} alt={item.name} width={440} height={440} loading={loading} />
             </div>
             <div class="product-card__info">
               <div class="product-card__name-row">
-                <div class="product-card__name">{item.name}</div>
+                <div class="product-card__name">{cardTitle(item.name)}</div>
                 <div class="product-card__price-group">
                   {!hidePrice && <div class="product-card__price">${(Number(item.price) || 0).toFixed(2)}</div>}
                   <span class="product-card__sizes">
-                    {(item.sizes === "One Size" ? [t("modal.onesize", locale.value)] : sizeGroups(item.sizes)).map((g) => (
-                      <span key={g} class="product-card__sizes-line">{g}</span>
+                    {(g === "Men" || g === "Women") && (
+                      <span class="product-card__sizes-gender">{t(g === "Men" ? "gender.mens" : "gender.womens", locale.value)}{" "}</span>
+                    )}
+                    {(item.sizes === "One Size" ? [t("modal.onesize", locale.value)] : sizeGroups(item.sizes)).map((sg) => (
+                      <span key={sg} class="product-card__sizes-line">{sg}</span>
                     ))}
                   </span>
                 </div>
               </div>
             </div>
           </>
-        );
+          );
+        };
         return (
           <div class="related-items">
             <h3 class="related-items__title">{t("product.more", locale.value)} {headingSuffix}</h3>
@@ -549,9 +563,9 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
           </div>
         );
       })()}
-      {added.value && (
-        <div class="toast">{t("modal.added", locale.value)} — {addedInfo.value}</div>
-      )}
+      {/* Kept mounted and toggled by the same `added` state as the button, so its
+          fade-out runs on the same clock as the button's logo/glyph/label exit. */}
+      <div class={`toast ${added.value ? "toast--show" : ""}`}>{t("modal.added", locale.value)} — {addedInfo.value}</div>
       {imgFullscreen.value && (
         <div class="product-fullscreen" onClick$={() => (imgFullscreen.value = false)}>
           <button class="product-fullscreen__close" aria-label="Close fullscreen" onClick$={(e) => { e.stopPropagation(); imgFullscreen.value = false; }}>&times;</button>
