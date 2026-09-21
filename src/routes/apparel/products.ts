@@ -165,7 +165,10 @@ export const allProducts = [
       "/skus/L00670-tamarack.png"
     ],
     "material": "80% cotton / 20% recycled polyester fleece, 3-ply fleece",
-    "details": "Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, #L00670"
+    "details": "Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, #L00670",
+    "portals": [
+      "groupb"
+    ]
   },
   {
     "sku": "TM-11",
