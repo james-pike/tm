@@ -20,7 +20,10 @@ export const allProducts = [
       "/skus/ATC1000-safetygreen-tamarack.png"
     ],
     "material": "100% cotton",
-    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000"
+    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000",
+    "portals": [
+      "groupb"
+    ]
   },
   {
     "sku": "TM-2",
@@ -39,7 +42,10 @@ export const allProducts = [
       "/skus/ATC1015-safetygreen-tamarack.png"
     ],
     "material": "100% cotton",
-    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, 1x1 rib knit collar, Rib knit cuffs, Double needle cover stitch at sleeve & bottom hem, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1015"
+    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, 1x1 rib knit collar, Rib knit cuffs, Double needle cover stitch at sleeve & bottom hem, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1015",
+    "portals": [
+      "groupb"
+    ]
   },
   {
     "sku": "TM-3",
@@ -56,7 +62,10 @@ export const allProducts = [
       "/skus/L00555-tamarack.png"
     ],
     "material": "70% ring-spun combed cotton / 30% polyester fleece",
-    "details": "Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555"
+    "details": "Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555",
+    "portals": [
+      "groupb"
+    ]
   },
   {
     "sku": "TM-4",
@@ -75,7 +84,10 @@ export const allProducts = [
       "/skus/S350-limeshock-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
-    "details": "Wicking technology, Side seamed, Breathable, Classic fit, #S350"
+    "details": "Wicking technology, Side seamed, Breathable, Classic fit, #S350",
+    "portals": [
+      "groupb"
+    ]
   },
   {
     "sku": "TM-5",
@@ -94,7 +106,10 @@ export const allProducts = [
       "/skus/L350-limeshock-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
-    "details": "Wicking technology, Side seamed, Contoured fit, Breathable, #L350"
+    "details": "Wicking technology, Side seamed, Contoured fit, Breathable, #L350",
+    "portals": [
+      "groupb"
+    ]
   },
   {
     "sku": "TM-6",
@@ -113,7 +128,10 @@ export const allProducts = [
       "/skus/ATC1000L-limeshock-tamarack.png"
     ],
     "material": "100% cotton",
-    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, OEKO-TEX® STANDARD 100 certified, #ATC1000L"
+    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, OEKO-TEX® STANDARD 100 certified, #ATC1000L",
+    "portals": [
+      "groupb"
+    ]
   },
   {
     "sku": "TM-7",
