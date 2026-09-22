@@ -34,6 +34,9 @@ async function fetchAndWrite() {
     );
 
     const products = result.rows
+      // Products flagged hidden in cm-admin are delisted from the storefront —
+      // the row stays in the DB (visible in the admin) so it can be unhidden.
+      .filter((row: any) => !row.hidden)
       .filter((row: any) => !EXCLUDE_CATEGORIES.has(row.category))
       .map((row: any) => ({
         sku: row.sku,

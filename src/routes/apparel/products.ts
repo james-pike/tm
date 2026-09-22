@@ -134,23 +134,6 @@ export const allProducts = [
     ]
   },
   {
-    "sku": "TM-7",
-    "name": "Women's Lakeview Full-Zip Hooded Sweatshirt",
-    "category": "Sweaters",
-    "sizes": "XS - 2XL",
-    "badge": "",
-    "colors": [
-      "#1a1a18"
-    ],
-    "price": 0,
-    "img": "/skus/L00671-tamarack.png",
-    "imgs": [
-      "/skus/L00671-tamarack.png"
-    ],
-    "material": "80% cotton / 20% recycled polyester fleece",
-    "details": "3-ply fleece, cotton face for superior print surface, Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper,  #L00671"
-  },
-  {
     "sku": "TM-8",
     "name": "Lakeview Full-Zip Hooded Sweatshirt",
     "category": "Sweaters",
