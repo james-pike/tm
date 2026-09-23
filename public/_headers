@@ -29,6 +29,30 @@
 /sku/*
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
+/skus/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+/beanie/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+/golf/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+/hat/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+/softshell/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+/swag/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+/uapolo/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
+/mn-services/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
+
 /textures/*
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
