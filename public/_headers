@@ -19,41 +19,39 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Product photos. NOT immutable: the filenames are stable (/wt/122366_omf_fl-1.jpg),
-# so replacing a photo reuses its name and an immutable cache would pin the old
-# one indefinitely. A month of caching with a year of stale-while-revalidate means
+# Images (product photos, logos, heroes, favicons) live in public/ with stable
+# filenames — /wt/122366_omf_fl-1.jpg, /skus/ATC1000-tamarack.png, /logo.png — so
+# replacing an image reuses its name. NOT immutable (that would pin the old bytes
+# forever); instead a month of caching plus a year of stale-while-revalidate, so
 # repeat visits serve from cache and refresh in the background.
-/wt/*
+#
+# Matched by extension rather than by directory so a new image dir is covered
+# automatically. An earlier version listed dirs by hand and missed /skus — the
+# newest and heaviest product-photo dir — which then revalidated on every view.
+/*.png
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
-/sku/*
+/*.jpg
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
-/skus/*
+/*.jpeg
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
-/beanie/*
+/*.webp
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
-/golf/*
+/*.avif
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
-/hat/*
+/*.svg
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
-/softshell/*
+/*.ico
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
-/swag/*
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
-
-/uapolo/*
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
-
-/mn-services/*
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
-
-/textures/*
+# One product photo has an uppercase .JPG extension. Cloudflare path matching is
+# case-sensitive, so the /*.jpg rule above skips it — cover it explicitly.
+/hat/30109107PS2_FRONT.JPG
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
 # HTML is server-rendered per request and must not be cached by the browser.
