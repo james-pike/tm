@@ -29,6 +29,15 @@ TASKS = [
     ("78193",  "78193-black.png",          "78193-black-tamarack.png"),
     ("78194",  "78194-black.png",          "78194-black-tamarack.png"),
     ("106673", "106673-black.png",         "106673-black-tamarack.png"),
+    # Added Sep 2026: new Tamarack lineup SKUs (crop-aware — see apply_crop).
+    ("S445",   "S445-black.png",           "S445-black-tamarack.png"),
+    ("S445",   "S445-kellygreen.png",      "S445-kellygreen-tamarack.png"),
+    ("106674", "106674-black.png",          "106674-black-tamarack.png"),
+    ("8800",   "8800-black.png",            "8800-black-tamarack.png"),
+    ("8800",   "8800-kellygreen.png",       "8800-kellygreen-tamarack.png"),
+    ("105751", "105751-black.jpg",          "105751-black-tamarack.png"),
+    ("105751", "105751-tarmac.jpg",         "105751-tarmac-tamarack.png"),
+    ("6328JG", "6328JG-safetygreen.jpg",    "6328JG-safetygreen-tamarack.png"),
 ]
 
 placements = json.load(open(f"{SM}/src/data/placements.json"))
@@ -36,8 +45,22 @@ P = placements.get("placements", placements)
 # Which {code}::{colorslug} combos use the DARK logo (light/grey garments).
 dark_raw = json.load(open(f"{SM}/src/data/dark-logo.json"))
 DARK = {k.lower() for k, v in dark_raw.items() if v}
+# Non-destructive per-image crops (keyed by source public path). Applied AFTER
+# compositing the logo on the FULL image, matching sm's WYSIWYG crop preview
+# (see scripts/bake-finaldrive.py apply_crop).
+CROPS = json.load(open(f"{SM}/src/data/crops.json"))
 logo_light = Image.open(LOGO_LIGHT).convert("RGBA")
 logo_dark = Image.open(LOGO_DARK).convert("RGBA")
+
+
+def apply_crop(im, rect):
+    if not rect:
+        return im
+    W, H = im.size
+    x = min(max(rect["x"], 0.0), 1.0); y = min(max(rect["y"], 0.0), 1.0)
+    w = min(max(rect["w"], 0.02), 1.0 - x); h = min(max(rect["h"], 0.02), 1.0 - y)
+    L, T = round(x * W), round(y * H); R, B = round((x + w) * W), round((y + h) * H)
+    return im.crop((L, T, R, B)) if R - L > 1 and B - T > 1 else im
 
 for code, src, out in TASKS:
     key = f"{code}::tamarack"
@@ -62,6 +85,8 @@ for code, src, out in TASKS:
     px = round(bx + (bw - lg.width) / 2)
     py = round(by + (bh - lg.height) / 2)
     base.alpha_composite(lg, (px, py))
+    # apply the saved non-destructive crop (if any) to the composited full image
+    base = apply_crop(base, CROPS.get(f"/skus/{src}"))
     # flatten onto white (removes transparent-blank fuzz; needed for JPEG too)
     flat = Image.new("RGBA", base.size, (255, 255, 255, 255))
     flat.alpha_composite(base)

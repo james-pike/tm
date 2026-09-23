@@ -74,6 +74,10 @@ export function badgeClass(badge: string) {
 const colorNames: Record<string, Record<string, string>> = {
   "#00703c": { en: "Green", fr: "Vert" },
   "#1a1a18": { en: "Black", fr: "Noir" },
+  "#008652": { en: "Kelly Green", fr: "Vert Kelly" },
+  "#079e75": { en: "Kelly Green", fr: "Vert Kelly" },
+  "#44372b": { en: "Tarmac", fr: "Tarmac" },
+  "#c6d219": { en: "Hi-Vis Yellow", fr: "Jaune haute visibilité" },
   "#bbbcbc": { en: "Athletic Grey", fr: "Gris athlétique" },
   "#53565a": { en: "Charcoal", fr: "Charbon" },
   "#ffffff": { en: "White", fr: "Blanc" },
@@ -162,7 +166,7 @@ const colorNames: Record<string, Record<string, string>> = {
   "#ff6a13": { en: "Orange", fr: "Orange" },
 };
 export function colorName(hex: string, locale: Locale): string {
-  return colorNames[hex]?.[locale] || hex;
+  return colorNames[hex?.toLowerCase()]?.[locale] || colorNames[hex]?.[locale] || hex;
 }
 
 export function categoryLabel(cat: string, locale: Locale): string {

@@ -22,7 +22,7 @@ export const allProducts = [
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000",
     "portals": [
-      "groupb"
+      "labourers"
     ]
   },
   {
@@ -44,7 +44,7 @@ export const allProducts = [
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, 1x1 rib knit collar, Rib knit cuffs, Double needle cover stitch at sleeve & bottom hem, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1015",
     "portals": [
-      "groupb"
+      "labourers"
     ]
   },
   {
@@ -64,51 +64,7 @@ export const allProducts = [
     "material": "70% ring-spun combed cotton / 30% polyester fleece",
     "details": "Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555",
     "portals": [
-      "groupb"
-    ]
-  },
-  {
-    "sku": "TM-4",
-    "name": "ATC Pro Team Short Sleeve Tee",
-    "category": "T-Shirts",
-    "sizes": "XS - 4XL",
-    "badge": "",
-    "colors": [
-      "#1a1a18",
-      "#a5e82c"
-    ],
-    "price": 0,
-    "img": "/skus/S350-limeshock-tamarack.png",
-    "imgs": [
-      "/skus/S350-tamarack.png",
-      "/skus/S350-limeshock-tamarack.png"
-    ],
-    "material": "100% performance polyester interlock",
-    "details": "Wicking technology, Side seamed, Breathable, Classic fit, #S350",
-    "portals": [
-      "groupb"
-    ]
-  },
-  {
-    "sku": "TM-5",
-    "name": "Women's ATC Pro Team Short Sleeve Tee",
-    "category": "T-Shirts",
-    "sizes": "XS - 4XL",
-    "badge": "",
-    "colors": [
-      "#1a1a18",
-      "#a5e82c"
-    ],
-    "price": 0,
-    "img": "/skus/L350-limeshock-tamarack.png",
-    "imgs": [
-      "/skus/L350-tamarack.png",
-      "/skus/L350-limeshock-tamarack.png"
-    ],
-    "material": "100% performance polyester interlock",
-    "details": "Wicking technology, Side seamed, Contoured fit, Breathable, #L350",
-    "portals": [
-      "groupb"
+      "labourers"
     ]
   },
   {
@@ -130,7 +86,51 @@ export const allProducts = [
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, OEKO-TEX® STANDARD 100 certified, #ATC1000L",
     "portals": [
-      "groupb"
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-4",
+    "name": "ATC Pro Team Short Sleeve Tee",
+    "category": "T-Shirts",
+    "sizes": "XS - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18",
+      "#a5e82c"
+    ],
+    "price": 0,
+    "img": "/skus/S350-limeshock-tamarack.png",
+    "imgs": [
+      "/skus/S350-tamarack.png",
+      "/skus/S350-limeshock-tamarack.png"
+    ],
+    "material": "100% performance polyester interlock",
+    "details": "Wicking technology, Side seamed, Breathable, Classic fit, #S350",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-5",
+    "name": "Women's ATC Pro Team Short Sleeve Tee",
+    "category": "T-Shirts",
+    "sizes": "XS - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18",
+      "#a5e82c"
+    ],
+    "price": 0,
+    "img": "/skus/L350-limeshock-tamarack.png",
+    "imgs": [
+      "/skus/L350-tamarack.png",
+      "/skus/L350-limeshock-tamarack.png"
+    ],
+    "material": "100% performance polyester interlock",
+    "details": "Wicking technology, Side seamed, Contoured fit, Breathable, #L350",
+    "portals": [
+      "labourers"
     ]
   },
   {
@@ -150,7 +150,7 @@ export const allProducts = [
     "material": "80% cotton / 20% recycled polyester fleece, 3-ply fleece",
     "details": "Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, #L00670",
     "portals": [
-      "groupb"
+      "labourers"
     ]
   },
   {
@@ -174,12 +174,12 @@ export const allProducts = [
     "material": "70% ring-spun combed cotton / 30% polyester fleece",
     "details": "100% cotton print face, Rib-knit cuff and hem, Metal YKK front zipper closure, Tear-away label, Quarter-zip, Canada Sportswear, #L00545",
     "portals": [
-      "groupb"
+      "labourers"
     ]
   },
   {
     "sku": "TM-12",
-    "name": "Core365 Optimum Short-Sleeve Twill Shirt",
+    "name": "Core365 Men's Optimum Short-Sleeve Twill Shirt",
     "category": "Polos",
     "sizes": "S - 4XL",
     "badge": "",
@@ -192,11 +192,14 @@ export const allProducts = [
       "/skus/88194-black-tamarack.jpg"
     ],
     "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
-    "details": "UV protection, button-down collar, flat-felled seams, left chest pocket, back yoke with box pleat, #88194"
+    "details": "UV protection, button-down collar, flat-felled seams, left chest pocket, back yoke with box pleat, #88194",
+    "portals": [
+      "labourers"
+    ]
   },
   {
     "sku": "TM-13",
-    "name": "Core365 Operate Long-Sleeve Twill Shirt",
+    "name": "Core365 Men's Operate Long-Sleeve Twill Shirt",
     "category": "Polos",
     "sizes": "S - 4XL",
     "badge": "",
@@ -209,7 +212,32 @@ export const allProducts = [
       "/skus/88193-black-tamarack.jpg"
     ],
     "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
-    "details": "UV protection, button-down collar, flat-felled seams, adjustable cuffs, left chest pocket, back yoke with box pleat, #88193"
+    "details": "UV protection, button-down collar, flat-felled seams, adjustable cuffs, left chest pocket, back yoke with box pleat, #88193",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-19",
+    "name": "Gildan DryBlend Jersey Polo",
+    "category": "Polos",
+    "sizes": "S - 3XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18",
+      "#079e75"
+    ],
+    "price": 0,
+    "img": "/skus/8800-kellygreen-tamarack.png",
+    "imgs": [
+      "/skus/8800-black-tamarack.png",
+      "/skus/8800-kellygreen-tamarack.png"
+    ],
+    "material": "50% cotton / 50% polyester DryBlend jersey",
+    "details": "DryBlend moisture-wicking jersey, Welt-knit collar and cuffs, Three-button placket, #8800",
+    "portals": [
+      "labourers"
+    ]
   },
   {
     "sku": "TM-14",
@@ -226,7 +254,10 @@ export const allProducts = [
       "/skus/78193-black-tamarack.png"
     ],
     "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
-    "details": "UV protection, button-down collar, flat-felled seams, adjustable cuffs, left chest pocket, back yoke with box pleat, #78193"
+    "details": "UV protection, button-down collar, flat-felled seams, adjustable cuffs, left chest pocket, back yoke with box pleat, #78193",
+    "portals": [
+      "labourers"
+    ]
   },
   {
     "sku": "TM-15",
@@ -243,7 +274,10 @@ export const allProducts = [
       "/skus/78194-black-tamarack.png"
     ],
     "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
-    "details": "UV protection, button-down collar, flat-felled seams, left chest pocket, back yoke with box pleat, #78194"
+    "details": "UV protection, button-down collar, flat-felled seams, left chest pocket, back yoke with box pleat, #78194",
+    "portals": [
+      "labourers"
+    ]
   },
   {
     "sku": "TM-16",
@@ -262,7 +296,8 @@ export const allProducts = [
     "material": "100% ring-spun cotton duck",
     "details": "Quilted-flannel lining in body, Quilted-nylon lining in sleeves, Attached quilted-flannel-lined hood with draw-cord closure, Two inside pockets, Rib-knit cuffs, #106673",
     "portals": [
-      "groupb"
+      "labourers",
+      "labourers-only"
     ]
   },
   {
@@ -300,6 +335,90 @@ export const allProducts = [
     ],
     "material": "100% Acrylic",
     "details": "Traditional knit hat with cuff, One size fits most, #DK24"
+  },
+  {
+    "sku": "TM-17",
+    "name": "Coal Harbour Snag Resistant Polo",
+    "category": "Polos",
+    "sizes": "XS - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18",
+      "#008652"
+    ],
+    "price": 0,
+    "img": "/skus/S445-kellygreen-tamarack.png",
+    "imgs": [
+      "/skus/S445-black-tamarack.png",
+      "/skus/S445-kellygreen-tamarack.png"
+    ],
+    "material": "100% polyester snag-resistant mesh",
+    "details": "Snag-resistant micro-mesh knit, Moisture wicking, Flat-knit collar, Three-button placket, #S445",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-18",
+    "name": "Carhartt Traditional Duck Coat",
+    "category": "Jackets",
+    "sizes": "S - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 0,
+    "img": "/skus/106674-black-tamarack.png",
+    "imgs": [
+      "/skus/106674-black-tamarack.png"
+    ],
+    "material": "100% ring-spun cotton duck",
+    "details": "Arctic-weight quilted lining, Corduroy-trimmed collar, Triple-stitched main seams, Two chest pockets, Two lower-front pockets, #106674",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-20",
+    "name": "Carhartt Storm Defender Jacket",
+    "category": "Jackets",
+    "sizes": "S - 4XL / LT - 2XLT",
+    "badge": "",
+    "colors": [
+      "#44372b",
+      "#1a1a18"
+    ],
+    "price": 0,
+    "img": "/skus/105751-tarmac-tamarack.png",
+    "imgs": [
+      "/skus/105751-tarmac-tamarack.png",
+      "/skus/105751-black-tamarack.png"
+    ],
+    "material": "4.2 oz 100% nylon",
+    "details": "Storm Defender waterproof breathable technology, 10K/5K rating, Wind Fighter technology, Relaxed fit, Water-repellent front zip, Adjustable hood, Drawcord-adjustable droptail hem, Packable into left lower pocket, Zippered chest and two lower pockets, #105751",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-21",
+    "name": "Viking Handyman 7-in-1 Jacket",
+    "category": "Jackets",
+    "sizes": "XS - 4XL",
+    "badge": "",
+    "colors": [
+      "#C6D219"
+    ],
+    "price": 0,
+    "img": "/skus/6328JG-safetygreen-tamarack.png",
+    "imgs": [
+      "/skus/6328JG-safetygreen-tamarack.png"
+    ],
+    "material": "300 denier polyester with PU backing, 250gsm insulated",
+    "details": "2\" Vibrance reflective in 4\" contrasting tape, Fully lined 250gsm insulated (to -30C/-22F), Double-sewn taped and heat-sealed seams, Waterproof and windproof, CSA Z96-22 Class 2 Level 2 (Class 3 as a suit), ANSI/ISEA 107-2020 Type R Class 3, #6328JG",
+    "portals": [
+      "labourers"
+    ]
   }
 ];
 
@@ -315,6 +434,10 @@ export function badgeClass(badge: string) {
 const colorNames: Record<string, Record<string, string>> = {
   "#00703c": { en: "Green", fr: "Vert" },
   "#1a1a18": { en: "Black", fr: "Noir" },
+  "#008652": { en: "Kelly Green", fr: "Vert Kelly" },
+  "#079e75": { en: "Kelly Green", fr: "Vert Kelly" },
+  "#44372b": { en: "Tarmac", fr: "Tarmac" },
+  "#c6d219": { en: "Hi-Vis Yellow", fr: "Jaune haute visibilité" },
   "#bbbcbc": { en: "Athletic Grey", fr: "Gris athlétique" },
   "#53565a": { en: "Charcoal", fr: "Charbon" },
   "#ffffff": { en: "White", fr: "Blanc" },
@@ -403,7 +526,7 @@ const colorNames: Record<string, Record<string, string>> = {
   "#ff6a13": { en: "Orange", fr: "Orange" },
 };
 export function colorName(hex: string, locale: Locale): string {
-  return colorNames[hex]?.[locale] || hex;
+  return colorNames[hex?.toLowerCase()]?.[locale] || colorNames[hex]?.[locale] || hex;
 }
 
 export function categoryLabel(cat: string, locale: Locale): string {

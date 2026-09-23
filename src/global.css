@@ -2249,12 +2249,18 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   .home-catalog__search-desktop { display: none !important; }
   .home-catalog .apparel-titlebar__action--mobile-search { display: flex; }
   .home-catalog .apparel-grid { grid-template-columns: repeat(2, 1fr); gap: 2px; margin-top: -3px; min-height: 100vh; align-content: start; }
+  /* 2-col: hug the footer once a 2nd row exists (3rd card). A single row keeps
+     the full-height fill so the footer lands at the viewport bottom. */
+  .home-catalog .apparel-grid:has(> .product-card:nth-child(3)) { min-height: 0; }
 }
 @media (min-width: 601px) and (max-width: 1024px) {
   .home-catalog { padding: 0; }
   .home-catalog__inner { padding: 0; max-width: 100%; }
   .home-catalog .apparel-grid { grid-template-columns: repeat(3, 1fr); gap: 0.2rem; min-height: 100vh; align-content: start; padding: 0 0.25rem; margin: -3px 0 0; }
   .home-catalog .apparel-grid.apparel-grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+  /* 3-col: hug once a 2nd row exists (4th card); the 2-col variant at its 3rd. */
+  .home-catalog .apparel-grid:has(> .product-card:nth-child(4)) { min-height: 0; }
+  .home-catalog .apparel-grid--cols-2:has(> .product-card:nth-child(3)) { min-height: 0; }
   /* List view: two columns of short, horizontal rows — small square thumbnail
      on the left, all the product details beside it. Shows many products at
      once without the tall image tiles. */
@@ -3275,16 +3281,16 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 }
 
 .product-card__sizes {
-  font-size: 0.77rem;
-  color: var(--ce-gray-500);
+  font-size: 0.8rem;
+  color: var(--ce-gray-600);
   letter-spacing: -0.01em;
 }
 /* Gender ("Men's"/"Women's") and the single-colour name — same muted style as
    the sizes text. */
 .product-card__gender,
 .product-card__color-name {
-  font-size: 0.72rem;
-  color: var(--ce-gray-500);
+  font-size: 0.8rem;
+  color: var(--ce-gray-600);
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
@@ -7239,12 +7245,12 @@ details[open] > .cart-drawer__checkout-title::after {
     background: var(--ce-gray-200);
     border-radius: 2px;
     padding: 0;
-    /* Dynamic fit: fill the viewport MINUS the pinned header+tab bar (~109px) and
-       the footer (~140px), so a thin category's tray ends exactly where the
-       footer begins and the footer lands flush at the viewport bottom on any
-       screen height. Longer lists grow past it and the footer follows the last
-       product. */
-    min-height: calc(100vh - 249px);
+    /* Reserve ~2 card rows so 1-row AND 2-row categories share the SAME footer
+       height: a lone row still ends where a 2-row category would, 2 rows hug
+       their content, and 3+ rows grow past it. The card image is square (= the
+       column width), so a row ≈ colW + 74px info; colW = (site-max − sidebar)/4.
+       This scales with the viewport (and plateaus at the 1600px site-max cap). */
+    min-height: min(calc((min(100vw - 32px, 1600px) - 274px) / 2 + 176px), calc(100dvh - 172px));
     align-content: start;
   }
   .cart-btn__label { display: inline; }
@@ -14486,17 +14492,20 @@ body .site-header__inner { border-top-left-radius: 0 !important; border-top-righ
    login portal is a separate full-screen overlay and is unaffected. */
 @media (min-width: 90rem) {
   /* One smooth expression (no breakpoint jump, so browser zoom stays monotonic):
-     near full-width on laptops, and once the viewport passes the 1728px cap the
-     content plateaus and wide desktop monitors get real side margins. */
-  :root { --site-max: min(calc(100vw - 2rem), 1728px); }
+     near full-width on laptops, and once the viewport passes the 1600px cap the
+     content plateaus and wide desktop monitors get real side margins. Matches
+     mn2's content width (slightly narrower than the old 1728px). */
+  :root { --site-max: min(calc(100vw - 2rem), 1600px); }
   /* Bring the sticky header bar in to the same width as the content column. */
   .site-header { max-width: var(--site-max); margin-inline: auto; }
 }
 
 @media (min-width: 1025px) {
-  /* Fill the viewport so the footer sits flush at the bottom with no page
-     background showing below it on short catalogs (e.g. the Electrical shop). */
-  .apparel-page:not(.privacy-page) { min-height: calc(100dvh - 58px); }
+  /* The catalog grid's own min-height (reserving ~2 card rows) drives where the
+     footer sits, so the page frame just hugs its content instead of stacking a
+     second viewport under it. Forcing a full-viewport min-height here dropped the
+     footer a screenful below short (1-row) categories with a dead gap between. */
+  .apparel-page:not(.privacy-page) { min-height: 0; }
 }
 
 /* Electrical shop: only a handful of products (never a 2nd row), so drop the

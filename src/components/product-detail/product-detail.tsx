@@ -10,6 +10,55 @@ import { ProductImage } from "../product-image/product-image";
 // Tall sizes are rendered on their own row, separate from the regular sizes.
 const TALL_SIZES = new Set(["ST", "MT", "LT", "XLT", "2XLT", "3XLT", "4XLT", "5XLT"]);
 
+// Base (fit-less) size tokens, largest last, for parsing fit variants.
+const SIZE_BASES = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL"];
+
+/** Split a size token into its base and fit: "LT" → {base:"L",fit:"Tall"},
+ *  "2XL" → {base:"2XL",fit:"Regular"}. */
+function parseFitToken(tok: string): { base: string; fit: "Regular" | "Tall" | "Short" } {
+  if (SIZE_BASES.includes(tok)) return { base: tok, fit: "Regular" };
+  if (tok.endsWith("T")) {
+    const base = tok.slice(0, -1);
+    if (SIZE_BASES.includes(base)) return { base, fit: "Tall" };
+  }
+  if (tok.endsWith("S")) {
+    const base = tok.slice(0, -1);
+    if (SIZE_BASES.includes(base)) return { base, fit: "Short" };
+  }
+  return { base: tok, fit: "Regular" };
+}
+
+/**
+ * Derive fit-variant size groups from a slash-separated sizes string, e.g.
+ * "S - 4XL / LT - 2XLT" → { Regular: [S…4XL], Tall: [L…2XL] }. Each "/" group
+ * must be a fit-suffixed range; anything else yields null so those never become
+ * variants. Returns null unless at least two real fit groups are found — so a
+ * product's sizes are NEVER clumped into one button when they span fits.
+ */
+function variantMapFromSizes(sizes: string): Record<string, string[]> | null {
+  if (!sizes || !sizes.includes("/")) return null;
+  const map: Record<string, string[]> = {};
+  for (const group of sizes.split("/").map((s) => s.trim()).filter(Boolean)) {
+    const m = group.match(/^(\S+)\s*-\s*(\S+)$/);
+    if (!m) return null;
+    const a = parseFitToken(m[1]);
+    const b = parseFitToken(m[2]);
+    const list = expandSizes(`${a.base} - ${b.base}`);
+    if (list.length === 0 || (list.length === 1 && list[0].includes(" "))) return null;
+    map[a.fit] = list;
+  }
+  return Object.keys(map).length >= 2 ? map : null;
+}
+
+/** Fit-variant size map for a product, derived from its sizes string (module-
+ *  scoped so it's usable inside Qwik $ / useComputed$ / useTask$ boundaries). */
+function getVariantMap(
+  p: { sku: string; sizes: string } | null | undefined,
+): Record<string, string[]> | null {
+  if (!p) return null;
+  return variantMapFromSizes(p.sizes);
+}
+
 interface ProductDetailPanelProps {
   /** SKU to render (from the route param, or the in-frame catalog overlay). */
   sku: string;
@@ -63,8 +112,6 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
   // Per-SKU size/fit overrides. Keyed by SKU; empty for Tamarack's current
   // catalog (products fall back to the generic size/waist/length options below).
   const waistLengthSkus = new Set<string>([]);
-  const variantSizesBySku: Record<string, Record<string, string[]>> = {};
-  const variantSkus = new Set(Object.keys(variantSizesBySku));
   const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL"];
   const waistOptionsBySku: Record<string, string[]> = {};
   const lengthOptionsBySku: Record<string, string[]> = {};
@@ -74,7 +121,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
   const sizeOptions = useComputed$<string[]>(() => {
     const p = product.value;
     if (!p) return [];
-    const variantMap = variantSizesBySku[p.sku];
+    const variantMap = getVariantMap(p);
     if (variantMap) {
       if (selectedVariant.value && variantMap[selectedVariant.value]) {
         return variantMap[selectedVariant.value];
@@ -102,10 +149,10 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
     if (!p || !selectedSize.value) return;
     if (p.colors.length > 0 && !selectedColor.value) return;
     if (waistLengthSkus.has(p.sku) && (!selectedWaist.value || !selectedLength.value)) return;
-    if (variantSkus.has(p.sku) && !selectedVariant.value) return;
+    if (getVariantMap(p) && !selectedVariant.value) return;
     const sizeVal = waistLengthSkus.has(p.sku)
       ? `W${selectedWaist.value} x L${selectedLength.value}`
-      : variantSkus.has(p.sku)
+      : getVariantMap(p)
         ? `${selectedSize.value} ${selectedVariant.value}`
         : selectedSize.value;
     try {
@@ -138,7 +185,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
           item.waist = selectedWaist.value;
           item.length = selectedLength.value;
         }
-        if (variantSkus.has(p.sku)) {
+        if (getVariantMap(p)) {
           item.variant = selectedVariant.value;
         }
         items.push(item);
@@ -169,8 +216,8 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
     selectedColor.value = sortColorsWhiteLast(p0.colors)[0];
     if (waistLengthSkus.has(p0.sku)) {
       selectedSize.value = "W/L";
-    } else if (variantSkus.has(p0.sku)) {
-      const variantMap = variantSizesBySku[p0.sku];
+    } else if (getVariantMap(p0)) {
+      const variantMap = getVariantMap(p0)!;
       const variantKeys = Object.keys(variantMap);
       const defVariant = variantKeys.includes("Regular") ? "Regular" : variantKeys[0];
       selectedVariant.value = defVariant;
@@ -343,7 +390,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
             )}
             {!waistLengthSkus.has(p.sku) && (
             <div class="product-modal__field">
-              <label class="product-modal__label">{t("modal.size", locale.value)}{variantSkus.has(p.sku) && selectedVariant.value && <span class="product-modal__color-inline"> — {t(`variant.${selectedVariant.value}` as any, locale.value)}</span>}{!variantSkus.has(p.sku) && sizeOptions.value.some((s) => TALL_SIZES.has(s)) && selectedSize.value && <span class="product-modal__color-inline"> — {t(TALL_SIZES.has(selectedSize.value) ? "variant.Tall" : "variant.Regular", locale.value)}</span>}</label>
+              <label class="product-modal__label">{t("modal.size", locale.value)}{getVariantMap(p) && selectedVariant.value && <span class="product-modal__color-inline"> — {t(`variant.${selectedVariant.value}` as any, locale.value)}</span>}{!getVariantMap(p) && sizeOptions.value.some((s) => TALL_SIZES.has(s)) && selectedSize.value && <span class="product-modal__color-inline"> — {t(TALL_SIZES.has(selectedSize.value) ? "variant.Tall" : "variant.Regular", locale.value)}</span>}</label>
               <div class="product-modal__options">
                 {sizeOptions.value.filter((s) => !TALL_SIZES.has(s)).map((size) => (
                   <button
@@ -370,11 +417,11 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
               )}
             </div>
             )}
-            {variantSkus.has(p.sku) && (
+            {getVariantMap(p) && (
               <div class="product-modal__field">
                 <label class="product-modal__label">{t("product.variant", locale.value)}</label>
                 <div class="product-modal__options">
-                  {(variantSizesBySku[p.sku] ? Object.keys(variantSizesBySku[p.sku]) : []).map((v) => (
+                  {(getVariantMap(p) ? Object.keys(getVariantMap(p)!) : []).map((v) => (
                     <button
                       key={v}
                       class={`product-modal__option ${selectedVariant.value === v ? "active" : ""}`}
@@ -444,7 +491,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
             <div class="product-modal__actions">
               <button
                 class={`btn btn--primary product-modal__add product-modal__add--branded ${added.value ? "product-modal__add--added" : ""}`}
-                disabled={!selectedSize.value || (waistLengthSkus.has(p.sku) && (!selectedWaist.value || !selectedLength.value)) || (variantSkus.has(p.sku) && !selectedVariant.value)}
+                disabled={!selectedSize.value || (waistLengthSkus.has(p.sku) && (!selectedWaist.value || !selectedLength.value)) || (!!getVariantMap(p) && !selectedVariant.value)}
                 onClick$={addToCart}
               >
                 <span class="product-modal__add-label">
@@ -467,21 +514,24 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
           tech: ["Work Wear"],
           safety: ["Flame Resistant", "Shirts", "Hats"],
         };
-        const isGroupB = loginType.value === "groupb";
+        const isGroupB = loginType.value === "labourers";
         const visible = visibleByLogin[loginType.value] || visibleByLogin.clothing;
         // Other products in the SAME category (excluding self + the retired
         // CAR-12). If a product is the only one in its category (e.g. the single
         // jacket), there's nothing to show as "More <Category>", so fall back to
         // a general "More Apparel" row of other items.
-        const sameCat = allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && r.category === p.category);
+        // Site Clerks never sees "labourers-only" products, including in related rows.
+        const notLabourersOnly = (r: (typeof allProducts)[number]) =>
+          !((r as { portals?: string[] }).portals ?? []).includes("labourers-only");
+        const sameCat = allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && r.category === p.category && notLabourersOnly(r));
         const hasSiblings = sameCat.length > 0;
         // Group B: the "more products" row stays within the Group B lineup, not
         // the full catalog.
         const related = isGroupB
-          ? allProducts.filter((r) => r.sku !== p.sku && (r as { portals?: string[] }).portals?.includes("groupb")).slice(0, 8)
+          ? allProducts.filter((r) => r.sku !== p.sku && (r as { portals?: string[] }).portals?.includes("labourers")).slice(0, 8)
           : hasSiblings
           ? sameCat.slice(0, 8)
-          : allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && visible.includes(r.category)).slice(0, 8);
+          : allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && visible.includes(r.category) && notLabourersOnly(r)).slice(0, 8);
         // "More <Category>" when there are same-category siblings; otherwise (and
         // for Group B, which shows no group label) the generic "More Apparel".
         const headingSuffix = (!isGroupB && hasSiblings) ? catLabel : t("nav.apparel", locale.value);

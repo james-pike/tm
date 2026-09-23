@@ -12,7 +12,14 @@ export const useProductGuard = routeLoader$((ev) => {
   const product = allProducts.find((p) => p.sku === ev.params.sku);
   if (!product) throw ev.redirect(302, "/");
   const lt = getLoginType(ev.cookie);
-  if (lt === "groupb" && !(product as { portals?: string[] }).portals?.includes("groupb")) {
+  const portals = (product as { portals?: string[] }).portals ?? [];
+  // Labourers may only open products tagged for its lineup.
+  if (lt === "labourers" && !portals.includes("labourers")) {
+    throw ev.redirect(302, "/");
+  }
+  // "labourers-only" products are exclusive to the Labourers side — hide them
+  // from Site Clerks (the full-catalog session) even via a direct URL.
+  if (lt !== "labourers" && portals.includes("labourers-only")) {
     throw ev.redirect(302, "/");
   }
   return {};

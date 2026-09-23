@@ -75,15 +75,15 @@ export const useLocaleLoader = routeLoader$(({ cookie }) => {
   return (saved === "fr" ? "fr" : "en") as Locale;
 });
 
-// "service" = the full catalog (first password). "groupb" = the second, curated
+// "service" = the full catalog (first password). "labourers" = the second, curated
 // lineup (second password). The label "Group B" is internal only — it is never
 // shown to shoppers; the store looks identical either way, only the product set
 // differs.
-export type LoginType = "service" | "groupb" | null;
+export type LoginType = "service" | "labourers" | null;
 
 export function getLoginType(cookie: Cookie): LoginType {
   const val = cookie.get(AUTH_COOKIE)?.value;
-  if (val === "service" || val === "groupb") return val;
+  if (val === "service" || val === "labourers") return val;
   // backward compat: the old clothing/authenticated (and the retired
   // "electrical" scaffold) logins map to the full catalog.
   if (val === "clothing" || val === "authenticated" || val === "electrical") return "service";
@@ -107,14 +107,14 @@ export const useLogin = routeAction$(
   ({ portal, password }, { cookie, fail, env }) => {
     // Both portals share ONE password (APP_PASSWORD, set in Cloudflare). The
     // picked portal only decides which catalog is shown — Site Clerks ("service",
-    // full catalog) or Labourers ("groupb", curated lineup) — not the credential.
+    // full catalog) or Labourers ("labourers", curated lineup) — not the credential.
     // Portal names live only on the login screen, never in the store.
     const expected = env.get("APP_PASSWORD") || env.get("VITE_APP_PASSWORD");
     if (!expected) {
       return fail(500, { message: "Login not configured" });
     }
     if (password === expected) {
-      const granted = portal === "groupb" ? "groupb" : "service";
+      const granted = portal === "labourers" ? "labourers" : "service";
       cookie.set(AUTH_COOKIE, granted, {
         path: "/",
         httpOnly: true,
@@ -127,7 +127,7 @@ export const useLogin = routeAction$(
     return fail(401, { message: "Invalid password" });
   },
   zod$({
-    portal: z.enum(["service", "groupb"]).optional().default("service"),
+    portal: z.enum(["service", "labourers"]).optional().default("service"),
     password: z.string().min(1).max(128),
   }),
 );
@@ -165,7 +165,7 @@ export const useSubmitOrder = routeAction$(
     // the two lineups apart; the full catalog uses the main Tamarack vendor.
     // Both share the TM-<n> order numbering (the sequence counts vendor LIKE
     // 'tamarack%').
-    const vendor = lt === "groupb" ? "tamarack-groupb" : "tamarack";
+    const vendor = lt === "labourers" ? "tamarack-labourers" : "tamarack";
     // Read from non-prefixed names first, fall back to VITE_* for backward compat.
     // Both are safe at runtime — env.get() reads server env, never bundles.
     const tursoUrl = env.get("TURSO_URL") || env.get("VITE_TURSO_URL");
@@ -572,9 +572,9 @@ export default component$(() => {
 
   const showLogin = useSignal(false);
   // Which portal tile is picked on the login screen. "service" = Site Clerks
-  // (full catalog), "groupb" = Labourers (curated lineup). Submitted with the
+  // (full catalog), "labourers" = Labourers (curated lineup). Submitted with the
   // password so the server checks that portal's password.
-  const selectedPortal = useSignal<"service" | "groupb">("service");
+  const selectedPortal = useSignal<"service" | "labourers">("service");
   const overlayFading = useSignal(false);
   const menuOpen = useSignal(false);
   const savedLocale = useLocaleLoader();
@@ -1195,9 +1195,9 @@ export default component$(() => {
                     <button
                       type="button"
                       role="radio"
-                      aria-checked={selectedPortal.value === "groupb"}
-                      class={`login-portal ${selectedPortal.value === "groupb" ? "is-selected" : ""}`}
-                      onClick$={() => { selectedPortal.value = "groupb"; }}
+                      aria-checked={selectedPortal.value === "labourers"}
+                      class={`login-portal ${selectedPortal.value === "labourers" ? "is-selected" : ""}`}
+                      onClick$={() => { selectedPortal.value = "labourers"; }}
                     >
                       <span>Labourers</span>
                     </button>

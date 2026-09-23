@@ -116,8 +116,8 @@ function sizesOf(p: Product): string[] {
 // up as a filter (the facet list is BRAND_LIST ∩ brands-present).
 const BRAND_LIST = [
   "ATC", "Canada Sportswear", "Blundstone", "Carhartt", "Coal Harbour", "Columbia", "Core365", "Devon & Jones",
-  "Cap America", "Flexfit", "Harriton", "New Balance", "Nike", "Roots", "The North Face", "Timberland",
-  "Under Armour",
+  "Cap America", "Flexfit", "Gildan", "Harriton", "New Balance", "Nike", "Roots", "The North Face", "Timberland",
+  "Under Armour", "Viking",
 ];
 // Brand overrides for products whose brand isn't in the display name (identified
 // from the product spec / style code). Everything else is matched by name
@@ -431,9 +431,9 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
   // Group B: the second password's curated lineup. This ONLY narrows the product
   // set — it drives no labels or layout changes, so Group B looks identical to
   // the full catalog. Membership is the product's `portals` array including
-  // "groupb" (set per product in cm-admin).
+  // "labourers" (set per product in cm-admin).
   const loginType = useContext(LoginTypeContext);
-  const isGroupB = useComputed$(() => loginType.value === "groupb");
+  const isGroupB = useComputed$(() => loginType.value === "labourers");
   const activeCat = useSignal("All");
   const searchQuery = useSignal("");
   // Mobile tab strip: true once scrolled to the end (flips the chevron cue).
@@ -481,11 +481,28 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
         );
 
   const baseProducts = useComputed$(() => {
+    // Group products by category in the tab order (T-Shirts → Polos → Sweaters →
+    // Jackets → Hats), preserving DB sort_order within a category. Shared by the
+    // Labourers and Site Clerks catalogs so both use the SAME ordering system.
+    const isFootwear = (c: string) => c === "Safety Boots" || c === "Safety Shoes" || c === "Footwear";
+    const catOrder = CLOTHING_CATEGORIES.filter((c) => c !== "All");
+    const catRank = (c: string) => {
+      const i = catOrder.indexOf(c);
+      if (i !== -1) return i;
+      const hats = catOrder.indexOf("Hats");
+      return hats === -1 ? catOrder.length : hats - 0.5; // unknowns sit just before Hats
+    };
+    const byCategory = (list: typeof allProducts) =>
+      list
+        .map((p) => (isFootwear(p.category) ? { ...p, category: "Footwear" } : p))
+        .sort((a, b) => catRank(a.category) - catRank(b.category));
+
     if (isGroupB.value) {
-      // Group B sees ONLY products tagged for it. The first password (full
-      // catalog) sees everything, so a Group B product also shows there.
-      return allProducts.filter((p) =>
-        (p as { portals?: string[] }).portals?.includes("groupb"),
+      // Labourers see ONLY products tagged for them. The first password (full
+      // catalog) sees everything, so a Labourers product also shows there.
+      // Same category ordering as Site Clerks.
+      return byCategory(
+        allProducts.filter((p) => (p as { portals?: string[] }).portals?.includes("labourers")),
       );
     }
     if (isElectrical.value) {
@@ -517,13 +534,18 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
         .slice()
         .sort((a, b) => rank(a.sku) - rank(b.sku));
     }
-    // Clothing catalog: group the footwear products (safety boots + shoes) under
-    // the "Footwear" tab so they show when it's selected.
-    const isFootwear = (c: string) => c === "Safety Boots" || c === "Safety Shoes" || c === "Footwear";
-    return allProducts
-      // Exclude FR items and the Electrical-only SKUs from the full (Service) catalog.
-      .filter((p) => p.category !== "Flame Resistant" && !ELECTRICAL_SKU_SET.has(p.sku))
-      .map((p) => (isFootwear(p.category) ? { ...p, category: "Footwear" } : p));
+    // Site Clerks: the full clothing catalog, grouped by category (Footwear
+    // products are remapped under the "Footwear" tab inside byCategory).
+    // Products tagged "labourers-only" are exclusive to the Labourers side and
+    // are excluded here.
+    return byCategory(
+      allProducts.filter(
+        (p) =>
+          p.category !== "Flame Resistant" &&
+          !ELECTRICAL_SKU_SET.has(p.sku) &&
+          !((p as { portals?: string[] }).portals ?? []).includes("labourers-only"),
+      ),
+    );
   });
 
   // eslint-disable-next-line qwik/no-use-visible-task
