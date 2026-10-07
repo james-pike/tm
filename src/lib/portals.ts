@@ -58,8 +58,9 @@ const TECH_SUPERVISOR_ALLOWANCES: AllowanceGroup[] = [
   { key: "shirts", label: "dress & golf shirts", skus: DRESS_SHIRTS, cap: 5, season: "all" },
   { key: "cap", label: "ball cap", skus: ["TM-9"], cap: 1, season: "summer" },
   { key: "raincoat", label: "rain coat", skus: ["TM-20"], cap: 1, season: "summer", approval: true },
-  { key: "fleece", label: "zip fleece or hooded sweatshirt", skus: ["TM-11", "TM-3", "TM-8", "TM-16"], cap: 1, season: "winter" },
-  { key: "wintercoat", label: "winter coat", skus: ["TM-18"], cap: 1, season: "winter", approval: true },
+  { key: "fleece", label: "zip fleece or hooded sweatshirt", skus: ["TM-11", "TM-3", "TM-8"], cap: 1, season: "winter" },
+  // Both Carhartt duck coats count as the winter coat.
+  { key: "wintercoat", label: "winter coat", skus: ["TM-18", "TM-16"], cap: 1, season: "winter", approval: true },
   { key: "toque", label: "toque", skus: ["TM-10"], cap: 1, season: "winter" },
 ];
 
@@ -68,9 +69,7 @@ export const PORTAL_ALLOWANCES: Record<Portal, AllowanceGroup[]> = {
   labourers: [
     { key: "tees", label: "t-shirts", skus: ["TM-1", "TM-2", "TM-4", "TM-5", "TM-6"], cap: 5, season: "all" },
     { key: "cap", label: "ball cap", skus: ["TM-9"], cap: 1, season: "summer" },
-    // The Carhartt Iconic Duck Active Jacket (TM-16) is a hooded piece, so it
-    // counts toward the hooded-sweatshirt allowance, not the hi-vis coat.
-    { key: "hoodie", label: "hooded sweatshirt", skus: ["TM-3", "TM-8", "TM-16"], cap: 1, season: "winter" },
+    { key: "hoodie", label: "hooded sweatshirt", skus: ["TM-3", "TM-8"], cap: 1, season: "winter" },
     { key: "toque", label: "toque", skus: ["TM-10"], cap: 1, season: "winter" },
     { key: "hivis-coat", label: "high-visibility coat", skus: ["TM-21"], cap: 1, season: "winter", approval: true },
   ],
