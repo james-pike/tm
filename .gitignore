@@ -41,3 +41,6 @@ lerna-debug.log*
 # Yarn
 .yarn/*
 !.yarn/releases
+
+# Local-only responsive preview harness (mobile+tablet split), never deployed
+public/__preview.html

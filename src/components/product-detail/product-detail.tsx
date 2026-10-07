@@ -6,6 +6,7 @@ import { allProducts, colorName, categoryLabel } from "../../routes/apparel/prod
 import { expandSizes, sizeGroups, sortColorsWhiteLast, cardTitle, productGender } from "../../routes/apparel/utils";
 import { LoginTypeContext } from "../../routes/layout";
 import { ProductImage } from "../product-image/product-image";
+import { allowedSkus, currentSeason, isPortal, remainingAllowance } from "../../lib/portals";
 
 // Tall sizes are rendered on their own row, separate from the regular sizes.
 const TALL_SIZES = new Set(["ST", "MT", "LT", "XLT", "2XLT", "3XLT", "4XLT", "5XLT"]);
@@ -96,6 +97,39 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
   const selectedVariant = useSignal("");
   const added = useSignal(false);
   const addedInfo = useSignal("");
+  // When the toast is showing an allowance-limit warning rather than an
+  // "Added — …" confirmation (drops the prefix, flips the toast to a warning).
+  const capBlocked = useSignal(false);
+  // Portal allowance for THIS product: how many more units the role may still
+  // order (cap minus whatever's already in the cart for the same group), and
+  // whether it's an "as needed/approved" item. Refreshed when the panel points
+  // at a new SKU and on every cart change, so the qty stepper + add button
+  // reflect the live remaining allowance. null = unrestricted (shouldn't happen
+  // for a real portal, but keeps the panel usable if the login type is unknown).
+  const capInfo = useSignal<{ cap: number; remaining: number; approval: boolean; label: string } | null>(null);
+  // Transient note shown by the quantity stepper when "+" is blocked by the
+  // per-order cap (e.g. a toque locked at 1), so the lock has a reason.
+  const qtyNotice = useSignal("");
+  // The limit message under Add to Cart is revealed while the button is hovered,
+  // or flashed for a few seconds on a blocked click. Hover is tracked explicitly
+  // (not CSS :hover) so a successful add that locks the button doesn't pop the
+  // message while the cursor is still resting on it — it resets `hovering` and
+  // only shows again once the cursor leaves and returns.
+  const hovering = useSignal(false);
+  const limitFlash = useSignal(false);
+  const refreshCap = $(() => {
+    const p = product.value;
+    if (!p || !isPortal(loginType.value)) { capInfo.value = null; return; }
+    let items: any[] = [];
+    try {
+      const saved = localStorage.getItem(`ce_cart_mn_${loginType.value}`);
+      items = saved ? JSON.parse(saved) : [];
+    } catch { items = []; }
+    const r = remainingAllowance(loginType.value, currentSeason(), p.sku, items);
+    capInfo.value = r.group
+      ? { cap: r.cap, remaining: r.remaining, approval: r.approval, label: r.group.label }
+      : null;
+  });
   const imgFullscreen = useSignal(false);
   const imgLayout = useSignal<"rail" | "full">("rail");
 
@@ -144,9 +178,38 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
     }
   });
 
+  // Keep the remaining allowance current: recompute when the panel switches
+  // products and whenever any cart change fires. Clamp the chosen quantity down
+  // if it now exceeds what's left.
+  // eslint-disable-next-line qwik/no-use-visible-task
+  useVisibleTask$(({ track, cleanup }) => {
+    track(() => product.value?.sku);
+    track(() => loginType.value);
+    refreshCap();
+    const onCartUpdate = () => refreshCap();
+    window.addEventListener("cart-updated", onCartUpdate);
+    cleanup(() => window.removeEventListener("cart-updated", onCartUpdate));
+  });
+  useTask$(({ track }) => {
+    const ci = track(() => capInfo.value);
+    // The allowance changed (cart update / different product) — the stale "can't
+    // increase" note no longer applies.
+    qtyNotice.value = "";
+    if (ci && selectedQty.value > ci.remaining) selectedQty.value = Math.max(1, ci.remaining);
+  });
+
   const addToCart = $(() => {
     const p = product.value;
     if (!p || !selectedSize.value) return;
+    // Enforce the portal's quantity cap: never let the group total exceed the
+    // allowance. Clicking the locked button flashes the limit message (which is
+    // otherwise only revealed on hover) for a few seconds.
+    if (capInfo.value && capInfo.value.remaining <= 0) {
+      limitFlash.value = true;
+      setTimeout(() => { limitFlash.value = false; }, 4000);
+      return;
+    }
+    const qtyToAdd = capInfo.value ? Math.min(selectedQty.value, capInfo.value.remaining) : selectedQty.value;
     if (p.colors.length > 0 && !selectedColor.value) return;
     if (waistLengthSkus.has(p.sku) && (!selectedWaist.value || !selectedLength.value)) return;
     if (getVariantMap(p) && !selectedVariant.value) return;
@@ -162,7 +225,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
         (i: any) => i.name === p.name && i.size === sizeVal && i.color === selectedColor.value
       );
       if (existing) {
-        existing.quantity += selectedQty.value;
+        existing.quantity += qtyToAdd;
       } else {
         const codeMatch = p.details?.match(/#[A-Za-z0-9]+/);
         let colorVal = selectedColor.value;
@@ -176,11 +239,12 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
           category: p.category,
           size: sizeVal,
           color: colorVal,
-          quantity: selectedQty.value,
+          quantity: qtyToAdd,
           price: p.price,
           img: p.img,
         };
         if (codeMatch) item.code = codeMatch[0];
+        if (capInfo.value?.approval) item.approval = true;
         if (waistLengthSkus.has(p.sku)) {
           item.waist = selectedWaist.value;
           item.length = selectedLength.value;
@@ -193,6 +257,10 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
       localStorage.setItem(`ce_cart_mn_${loginType.value || "clothing"}`, JSON.stringify(items));
       window.dispatchEvent(new CustomEvent("cart-updated"));
     } catch (err) { console.error("addToCart error:", err); }
+    capBlocked.value = false;
+    // Drop the hover state: this add may have just locked the button, and the
+    // cursor is still on it — don't pop the limit message until it re-enters.
+    hovering.value = false;
     addedInfo.value = selectedColor.value ? `${p.name} — ${colorName(selectedColor.value, "en")} / ${sizeVal}` : `${p.name} — ${sizeVal}`;
     added.value = true;
     selectedQty.value = 1;
@@ -483,15 +551,32 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
             <div class="product-modal__field product-modal__qty-group">
               <label class="product-modal__label">{t("modal.quantity", locale.value)}</label>
               <div class="product-modal__qty">
-                <button class="product-modal__qty-btn" aria-label="Decrease quantity" onClick$={() => { if (selectedQty.value > 1) selectedQty.value--; }}>-</button>
+                <button class="product-modal__qty-btn" aria-label="Decrease quantity" onClick$={() => { qtyNotice.value = ""; if (selectedQty.value > 1) selectedQty.value--; }}>-</button>
                 <span class="product-modal__qty-val">{selectedQty.value}</span>
-                <button class="product-modal__qty-btn" aria-label="Increase quantity" onClick$={() => (selectedQty.value++)}>+</button>
+                {/* "+" stays clickable even at the cap so the attempt can explain
+                    itself — it shows a note instead of silently doing nothing. */}
+                <button
+                  class={`product-modal__qty-btn ${!!capInfo.value && selectedQty.value >= capInfo.value.remaining ? "product-modal__qty-btn--maxed" : ""}`}
+                  aria-label="Increase quantity"
+                  onClick$={() => {
+                    if (capInfo.value && selectedQty.value >= capInfo.value.remaining) {
+                      const ci = capInfo.value;
+                      qtyNotice.value = `Limited to ${ci.cap} ${ci.label} per order${ci.remaining < ci.cap && ci.remaining > 0 ? ` — ${ci.remaining} more available` : ""}.`;
+                      return;
+                    }
+                    qtyNotice.value = "";
+                    selectedQty.value++;
+                  }}
+                >+</button>
               </div>
+              {qtyNotice.value && <p class="product-modal__qty-note" role="status">{qtyNotice.value}</p>}
             </div>
             <div class="product-modal__actions">
               <button
-                class={`btn btn--primary product-modal__add product-modal__add--branded ${added.value ? "product-modal__add--added" : ""}`}
+                class={`btn btn--primary product-modal__add product-modal__add--branded ${added.value ? "product-modal__add--added" : ""} ${(!!capInfo.value && capInfo.value.remaining <= 0) ? "product-modal__add--locked" : ""}`}
                 disabled={!selectedSize.value || (waistLengthSkus.has(p.sku) && (!selectedWaist.value || !selectedLength.value)) || (!!getVariantMap(p) && !selectedVariant.value)}
+                onMouseEnter$={() => { hovering.value = true; }}
+                onMouseLeave$={() => { hovering.value = false; }}
                 onClick$={addToCart}
               >
                 <span class="product-modal__add-label">
@@ -504,37 +589,35 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
                   <img class="product-modal__add-logo" src="/footer-mark.png" alt="" width="40" height="40" decoding="async" />
                 </span>
               </button>
+              {/* Explains WHY the Add button is locked. Hidden by default,
+                  revealed on hover of the button (CSS) or flashed on click. It's
+                  absolutely positioned below the button so it overlays the empty
+                  space already there rather than adding a line that shifts the
+                  page down. */}
+              {capInfo.value && capInfo.value.remaining <= 0 && (
+                <p class={`product-modal__limit ${(hovering.value || limitFlash.value) ? "product-modal__limit--show" : ""}`} role="status">
+                  You've reached your {capInfo.value.label} limit ({capInfo.value.cap} per order). Anything more needs office approval.
+                </p>
+              )}
             </div>
           </div>
         </div>
       </div>
       {(() => {
-        const visibleByLogin: Record<string, string[]> = {
-          clothing: ["Jackets", "Sweaters", "Shirts", "Polos", "Hats", "SWAG", "New Hire Kit"],
-          tech: ["Work Wear"],
-          safety: ["Flame Resistant", "Shirts", "Hats"],
-        };
-        const isGroupB = loginType.value === "labourers";
-        const visible = visibleByLogin[loginType.value] || visibleByLogin.clothing;
-        // Other products in the SAME category (excluding self + the retired
-        // CAR-12). If a product is the only one in its category (e.g. the single
-        // jacket), there's nothing to show as "More <Category>", so fall back to
-        // a general "More Apparel" row of other items.
-        // Site Clerks never sees "labourers-only" products, including in related rows.
-        const notLabourersOnly = (r: (typeof allProducts)[number]) =>
-          !((r as { portals?: string[] }).portals ?? []).includes("labourers-only");
-        const sameCat = allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && r.category === p.category && notLabourersOnly(r));
+        // Related items stay inside this role's allowed (season-aware) lineup so
+        // the carousel never links to a product the portal can't actually order.
+        const allow = isPortal(loginType.value) ? allowedSkus(loginType.value, currentSeason()) : null;
+        const inLineup = (r: (typeof allProducts)[number]) =>
+          r.sku !== p.sku && r.sku !== "CAR-12" && (allow ? allow.has(r.sku) : true);
+        // Other products in the SAME category first; if this product is the only
+        // one in its category within the lineup, fall back to a general "More
+        // Apparel" row of other allowed items.
+        const sameCat = allProducts.filter((r) => inLineup(r) && r.category === p.category);
         const hasSiblings = sameCat.length > 0;
-        // Group B: the "more products" row stays within the Group B lineup, not
-        // the full catalog.
-        const related = isGroupB
-          ? allProducts.filter((r) => r.sku !== p.sku && (r as { portals?: string[] }).portals?.includes("labourers")).slice(0, 8)
-          : hasSiblings
-          ? sameCat.slice(0, 8)
-          : allProducts.filter((r) => r.sku !== p.sku && r.sku !== "CAR-12" && visible.includes(r.category) && notLabourersOnly(r)).slice(0, 8);
-        // "More <Category>" when there are same-category siblings; otherwise (and
-        // for Group B, which shows no group label) the generic "More Apparel".
-        const headingSuffix = (!isGroupB && hasSiblings) ? catLabel : t("nav.apparel", locale.value);
+        const related = (hasSiblings ? sameCat : allProducts.filter(inLineup)).slice(0, 8);
+        // "More <Category>" when there are same-category siblings; otherwise the
+        // generic "More Apparel".
+        const headingSuffix = hasSiblings ? catLabel : t("nav.apparel", locale.value);
         // Card inner markup, shared by the grid + carousel below (inline, not a
         // component, to keep it a plain render helper).
         const cardInner = (item: typeof related[number], loading: "eager" | "lazy") => {
@@ -615,7 +698,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
       })()}
       {/* Kept mounted and toggled by the same `added` state as the button, so its
           fade-out runs on the same clock as the button's logo/glyph/label exit. */}
-      <div class={`toast ${added.value ? "toast--show" : ""}`}>{t("modal.added", locale.value)} — {addedInfo.value}</div>
+      <div class={`toast ${added.value ? "toast--show" : ""} ${capBlocked.value ? "toast--warn" : ""}`}>{capBlocked.value ? addedInfo.value : `${t("modal.added", locale.value)} — ${addedInfo.value}`}</div>
       {imgFullscreen.value && (
         <div class="product-fullscreen" onClick$={() => (imgFullscreen.value = false)}>
           <button class="product-fullscreen__close" aria-label="Close fullscreen" onClick$={(e) => { e.stopPropagation(); imgFullscreen.value = false; }}>&times;</button>

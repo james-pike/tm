@@ -1,16 +1,20 @@
-import { component$, useSignal, useComputed$, useContext, $, useVisibleTask$, useOnDocument, Slot } from "@builder.io/qwik";
+import { component$, useSignal, useComputed$, useContext, $, useTask$, useVisibleTask$, useOnDocument, Slot } from "@builder.io/qwik";
 import { useLocation, useNavigate } from "@builder.io/qwik-city";
 import { LocaleContext, t } from "../../i18n";
 import { allProducts, categoryLabel, colorName } from "../../routes/apparel/products";
+import { CLOTHING_CATEGORIES, CATEGORY_ICONS } from "../../lib/categories";
 import type { Product } from "../../routes/apparel/products";
 import { sizeGroups, sortColorsWhiteLast } from "../../routes/apparel/utils";
 import { stickyTop, LoginTypeContext } from "../../routes/layout";
+import { SecondaryBarContext } from "../../context/secondary-bar";
+import { allowedSkus, currentSeason, isPortal, portalLabel } from "../../lib/portals";
 
 // FIT (gender) sidebar facet is disabled for Tamarack.
 const SHOW_FIT_FACET = false;
 
 
-export const CLOTHING_CATEGORIES = ["All", "T-Shirts", "Polos", "Sweaters", "Jackets", "Hats"];
+// Category list + glyphs now live in a shared leaf module so the shell's menu
+// drawer uses the exact same source (see src/lib/categories.ts, imported above).
 
 // Electrical portal: shows ONLY these SKUs (an optional division lineup).
 // Tamarack runs a single open catalog, so this legacy hardcoded list is empty;
@@ -38,22 +42,7 @@ const CARD_HIDDEN_COLORS = new Set(["#c0392b", "#1e40af", "#6b3fa0"]);
 const CARD_SHOW_ALL_COLORS = new Set<string>([]);
 const EMPTY_COLOR_SET = new Set<string>();
 
-export const CATEGORY_ICONS: Record<string, string> = {
-  "All": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
-  "T-Shirts": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l4-2 1.6 1.8a3.2 3.2 0 004.8 0L16 3l4 2-2.2 4.2-1.8-1V21H8V8.2l-1.8 1L4 5z"/></svg>',
-  "Work Wear": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M4 6h16v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/><path d="M4 6l-2 4v2h4V8"/><path d="M20 6l2 4v2h-4V8"/></svg>',
-  "Jackets": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2l5 6v12a2 2 0 01-2 2h-3V12h-6v10H6a2 2 0 01-2-2V8l5-6"/><path d="M9 2a3 3 0 006 0"/><line x1="12" y1="12" x2="12" y2="22"/></svg>',
-  "Shirts": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>',
-  "Sweaters": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3 4 6 2 9.5 5 12v9h14v-9l3-2.5L20 6l-4.5-3-1.3 1.7a3.4 3.4 0 0 1-4.4 0z"/><path d="M9 4.2c.9 1.2 4.1 1.2 5 0"/></svg>',
-  "Footwear": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h3v8l7 2.5c1.5.5 2 1.4 2 2.5v2H4V6z"/><path d="M4 18h16"/><path d="M9 12l3 1"/></svg>',
-  "Polos": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2 12 5.5 8 2 3.62 3.46a2 2 0 00-1.34 1.93v15.12a2 2 0 001.34 1.93L8 24l4-3.5L16 24l4.38-1.46a2 2 0 001.34-1.93V5.39a2 2 0 00-1.34-1.93z"/></svg>',
-  "Hats": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 00-7 7c0 3 2 5 3 6h8c1-1 3-3 3-6a7 7 0 00-7-7z"/><path d="M5 15h14"/><path d="M6 18h12"/></svg>',
-  "SWAG": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>',
-  "New Hire Kit": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
-  "Flame Resistant": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>',
-  "Pants": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12l1 20h-5l-2-11-2 11H5L6 2z"/><path d="M6 2h12"/></svg>',
-  "Headwear": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M4 18a8 8 0 0116 0"/><path d="M2 18h20"/></svg>',
-};
+// CATEGORY_ICONS moved to src/lib/categories.ts (imported + re-exported above).
 
 // Longer category names shown ONLY in the desktop sidebar column; mobile/tablet
 // tabs keep the short cat.* labels (see the --short/--full spans + CSS).
@@ -428,14 +417,15 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
   const isSafety = useComputed$(() => false);
   const isElectrical = useComputed$(() => false);
   const isSingleCat = useComputed$(() => false);
-  // Group B: the second password's curated lineup. This ONLY narrows the product
-  // set — it drives no labels or layout changes, so Group B looks identical to
-  // the full catalog. Membership is the product's `portals` array including
-  // "labourers" (set per product in cm-admin).
+  // Each portal shows ONLY the SKUs its role may order this season (see
+  // src/lib/portals.ts). This narrows the product set and drops any category
+  // that ends up empty; it drives no labels or layout changes, so every portal
+  // looks like the same storefront.
   const loginType = useContext(LoginTypeContext);
-  const isGroupB = useComputed$(() => loginType.value === "labourers");
-  const activeCat = useSignal("All");
-  const searchQuery = useSignal("");
+  // Tab/search state is owned by the shell (SecondaryBarContext) so the unified
+  // secondary bar and this catalog stay in lockstep. These are the same signals,
+  // just provided one level up — every read/write below is unchanged.
+  const { activeCat, searchQuery, searchOpen, visibleCategories: publishedCats } = useContext(SecondaryBarContext);
   // Mobile tab strip: true once scrolled to the end (flips the chevron cue).
   const tabsAtEnd = useSignal(false);
   // Center the active category tab in the scrollable strip. The double rAF
@@ -447,7 +437,7 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
         ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }));
   });
-  const searchOpen = useSignal(false); // tablet: search field opens over the tab bar
+  // searchOpen now comes from SecondaryBarContext (declared above).
   const tabletCols = useSignal<number | "list">(3);
   // Desktop grid density: false = default (5 per row), true = Catalog view (8 per
   // row). Toggled from the sidebar; ignored on mobile/tablet.
@@ -497,13 +487,12 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
         .map((p) => (isFootwear(p.category) ? { ...p, category: "Footwear" } : p))
         .sort((a, b) => catRank(a.category) - catRank(b.category));
 
-    if (isGroupB.value) {
-      // Labourers see ONLY products tagged for them. The first password (full
-      // catalog) sees everything, so a Labourers product also shows there.
-      // Same category ordering as Site Clerks.
-      return byCategory(
-        allProducts.filter((p) => (p as { portals?: string[] }).portals?.includes("labourers")),
-      );
+    // Portal-restricted catalog: the role may only SEE what it may order this
+    // season. allowedSkus() returns the union of the portal's active allowance
+    // groups; byCategory keeps the shared T-Shirts → Polos → … ordering.
+    if (isPortal(loginType.value)) {
+      const allow = allowedSkus(loginType.value, currentSeason());
+      return byCategory(allProducts.filter((p) => allow.has(p.sku)));
     }
     if (isElectrical.value) {
       // Electrical membership is DB-driven (products.portals includes
@@ -664,14 +653,22 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
       const present = new Set(baseProducts.value.map((p) => p.category));
       return SAFETY_CATEGORIES.filter((c) => ALWAYS_SHOW.has(c) || present.has(c));
     }
-    // Group B (Labourers): a curated subset — drop clothing categories that have
-    // no products in this lineup (brand filters are computed separately and
-    // unaffected).
-    if (isGroupB.value) {
+    // Every portal is a curated subset, so drop clothing categories that have no
+    // products in this role/season lineup (brand filters are computed separately
+    // and unaffected).
+    if (isPortal(loginType.value)) {
       const present = new Set(baseProducts.value.map((p) => p.category));
       return CLOTHING_CATEGORIES.filter((c) => ALWAYS_SHOW.has(c) || present.has(c));
     }
     return CLOTHING_CATEGORIES;
+  });
+
+  // Publish the portal-aware category list to the shell (SecondaryBarContext) so
+  // the menu drawer's links stay in lockstep with the tab bar — Labourers drops
+  // categories with no products in their lineup (e.g. Headwear), and the menu
+  // then drops them too, with no second hand-maintained list to fall out of sync.
+  useTask$(({ track }) => {
+    publishedCats.value = track(() => visibleCategories.value);
   });
 
   // SKU count per category (from the unfiltered base set) for the sidebar
@@ -878,7 +875,9 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
           {!isSingleCat.value && (
             <nav class="home-catalog__catnav" aria-label="Collections">
               <div class="home-catalog__catnav-head">
-                <div class="home-catalog__catnav-title">{isElectrical.value ? t("login.portal.electrical", locale.value) : t("filter.collections", locale.value)}</div>
+                {/* The signed-in portal name replaces the generic "Collections"
+                    heading, so the employee always sees which lineup they're in. */}
+                <div class="home-catalog__catnav-title">{isPortal(loginType.value) ? portalLabel(loginType.value) : isElectrical.value ? t("login.portal.electrical", locale.value) : t("filter.collections", locale.value)}</div>
                 {/* Grid-density toggle removed — Tamarack uses one gallery grid. */}
               </div>
               {visibleCategories.value.map((cat) => (

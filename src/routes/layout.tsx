@@ -15,8 +15,13 @@ import {
 import type { Cookie } from "@builder.io/qwik-city";
 import { createClient } from "@libsql/client";
 import { LocaleContext, t } from "../i18n";
-import type { Locale, TranslationKey } from "../i18n";
-import { allProducts, colorName } from "./apparel/products";
+import { SecondaryBarContext } from "../context/secondary-bar";
+import type { Locale } from "../i18n";
+import { allProducts, colorName, categoryLabel } from "./apparel/products";
+import { CATEGORY_ICONS } from "../lib/categories";
+import { PORTALS, isPortal, currentSeason, remainingAllowance, isApprovalSku } from "../lib/portals";
+import type { Portal } from "../lib/portals";
+import { AllowancePanel } from "../components/allowance-panel/allowance-panel";
 import { getGiftCard, giftContribution, deductGiftCard } from "../lib/giftcards";
 import { sendConfirmationEmail } from "../lib/orders";
 import type { OrderEmailData, PaymentMethod } from "../lib/orders";
@@ -75,18 +80,17 @@ export const useLocaleLoader = routeLoader$(({ cookie }) => {
   return (saved === "fr" ? "fr" : "en") as Locale;
 });
 
-// "service" = the full catalog (first password). "labourers" = the second, curated
-// lineup (second password). The label "Group B" is internal only — it is never
-// shown to shoppers; the store looks identical either way, only the product set
-// differs.
-export type LoginType = "service" | "labourers" | null;
+// The four employee portals (see src/lib/portals.ts for the full rule set). The
+// picked tile decides which curated lineup + quantity caps apply; the store
+// looks identical either way. Portal names live only on the login screen.
+export type LoginType = Portal | null;
 
 export function getLoginType(cookie: Cookie): LoginType {
   const val = cookie.get(AUTH_COOKIE)?.value;
-  if (val === "service" || val === "labourers") return val;
-  // backward compat: the old clothing/authenticated (and the retired
-  // "electrical" scaffold) logins map to the full catalog.
-  if (val === "clothing" || val === "authenticated" || val === "electrical") return "service";
+  if (isPortal(val)) return val;
+  // backward compat: the retired full-catalog logins ("service" / "clothing" /
+  // "authenticated" / the "electrical" scaffold) now land on Site Clerks.
+  if (val === "service" || val === "clothing" || val === "authenticated" || val === "electrical") return "clerks";
   return null;
 }
 
@@ -96,7 +100,7 @@ function isAuthenticated(cookie: Cookie): boolean {
 
 export const useAuthCheck = routeLoader$(({ cookie }) => {
   const loginType = getLoginType(cookie);
-  return { loggedIn: loginType !== null, loginType: loginType || "service" };
+  return { loggedIn: loginType !== null, loginType: loginType || "clerks" };
 });
 
 export const useCartCountLoader = routeLoader$(({ cookie }) => {
@@ -105,21 +109,26 @@ export const useCartCountLoader = routeLoader$(({ cookie }) => {
 
 export const useLogin = routeAction$(
   ({ portal, password }, { cookie, fail, env }) => {
-    // Both portals share ONE password (APP_PASSWORD, set in Cloudflare). The
-    // picked portal only decides which catalog is shown — Site Clerks ("service",
-    // full catalog) or Labourers ("labourers", curated lineup) — not the credential.
-    // Portal names live only on the login screen, never in the store.
+    // All four portals share ONE password (APP_PASSWORD, set in Cloudflare). The
+    // picked tile only decides which curated lineup + quantity caps apply —
+    // Labourers, Service Technicians & Home Inspectors, Site Supervisors or Site
+    // Clerks — not the credential. Portal names live only on the login screen.
     const expected = env.get("APP_PASSWORD") || env.get("VITE_APP_PASSWORD");
     if (!expected) {
       return fail(500, { message: "Login not configured" });
     }
     if (password === expected) {
-      const granted = portal === "labourers" ? "labourers" : "service";
+      const granted = isPortal(portal) ? portal : "clerks";
+      // Production uses Secure + SameSite=None (the site can be embedded and the
+      // Stripe return is a cross-site nav). The dev server runs over plain
+      // http://localhost, where the browser drops a Secure/None cookie — so in
+      // dev fall back to a plain Lax cookie so login actually sticks. DEV is
+      // compile-time false in a production build, so prod is unaffected.
       cookie.set(AUTH_COOKIE, granted, {
         path: "/",
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        secure: !import.meta.env.DEV,
+        sameSite: import.meta.env.DEV ? "lax" : "none",
         maxAge: 60 * 60 * 24 * 3,
       });
       return { success: true };
@@ -127,7 +136,7 @@ export const useLogin = routeAction$(
     return fail(401, { message: "Invalid password" });
   },
   zod$({
-    portal: z.enum(["service", "labourers"]).optional().default("service"),
+    portal: z.enum(["labourers", "technicians", "supervisors", "clerks"]).optional().default("clerks"),
     password: z.string().min(1).max(128),
   }),
 );
@@ -160,12 +169,11 @@ export const useSubmitOrder = routeAction$(
     if (!isAuthenticated(cookie)) {
       return fail(401, { message: "Not authenticated" });
     }
-    const lt = getLoginType(cookie);
-    // Group B orders are tagged to their own vendor bucket so the admin can tell
-    // the two lineups apart; the full catalog uses the main Tamarack vendor.
-    // Both share the TM-<n> order numbering (the sequence counts vendor LIKE
-    // 'tamarack%').
-    const vendor = lt === "labourers" ? "tamarack-labourers" : "tamarack";
+    const lt = getLoginType(cookie) || "clerks";
+    // Each portal's orders go to their own vendor bucket so the admin can tell
+    // the four lineups apart; all share the TM-<n> order numbering (the sequence
+    // counts vendor LIKE 'tamarack%').
+    const vendor = `tamarack-${lt}`;
     // Read from non-prefixed names first, fall back to VITE_* for backward compat.
     // Both are safe at runtime — env.get() reads server env, never bundles.
     const tursoUrl = env.get("TURSO_URL") || env.get("VITE_TURSO_URL");
@@ -173,7 +181,16 @@ export const useSubmitOrder = routeAction$(
     const apiKey = env.get("RESEND_API_KEY") || env.get("VITE_RESEND_API_KEY");
     const stripeKey = env.get("STRIPE_SECRET_KEY") || env.get("VITE_STRIPE_SECRET_KEY");
 
-    const { employee, items, date, idempotencyKey } = data;
+    const { employee, date, idempotencyKey } = data;
+    // Derive the "needs approval" flag server-side from the portal's rules so a
+    // doctored client payload can't strip it: any coat in an approval group is
+    // flagged regardless of what the client sent. This travels with the item
+    // (stored in the items JSON and shown on the confirmation email).
+    const season = currentSeason();
+    const items = data.items.map((i) => ({
+      ...i,
+      approval: !!i.approval || (!!i.sku && isApprovalSku(lt as Portal, season, i.sku)),
+    }));
     const paymentMethod = (data.paymentMethod || "po") as PaymentMethod;
     const wantsGift = paymentMethod === "giftcard" || paymentMethod === "giftcard_card";
     const wantsCard = paymentMethod === "card" || paymentMethod === "giftcard_card";
@@ -520,6 +537,7 @@ export const useSubmitOrder = routeAction$(
           length: z.string().max(20).optional().nullable(),
           variant: z.string().max(40).optional().nullable(),
           code: z.string().max(40).optional().nullable(),
+          approval: z.boolean().optional(),
         }),
       )
       .min(1)
@@ -547,6 +565,7 @@ interface CartItem {
   length?: string;
   variant?: string;
   code?: string;
+  approval?: boolean;
 }
 
 export default component$(() => {
@@ -571,10 +590,9 @@ export default component$(() => {
   const orderAction = useSubmitOrder();
 
   const showLogin = useSignal(false);
-  // Which portal tile is picked on the login screen. "service" = Site Clerks
-  // (full catalog), "labourers" = Labourers (curated lineup). Submitted with the
-  // password so the server checks that portal's password.
-  const selectedPortal = useSignal<"service" | "labourers">("service");
+  // Which portal tile is picked on the login screen (see PORTALS). Submitted as
+  // a hidden field with the password; it decides the role's lineup + caps.
+  const selectedPortal = useSignal<Portal>("labourers");
   const overlayFading = useSignal(false);
   const menuOpen = useSignal(false);
   const savedLocale = useLocaleLoader();
@@ -615,6 +633,19 @@ export default component$(() => {
   const loginType = useSignal<string>(auth.value.loginType);
   useContextProvider(LoginTypeContext, loginType);
 
+  // Unified secondary-bar state (see SecondaryBarContext). Created here so the
+  // shell-level bar and the descendant ProductCatalog share one source of truth.
+  const barActiveCat = useSignal("All");
+  const barSearchQuery = useSignal("");
+  const barSearchOpen = useSignal(false);
+  const barVisibleCategories = useSignal<string[]>([]);
+  useContextProvider(SecondaryBarContext, {
+    activeCat: barActiveCat,
+    searchQuery: barSearchQuery,
+    searchOpen: barSearchOpen,
+    visibleCategories: barVisibleCategories,
+  });
+
   // Cart state
   const initialCartCount = useCartCountLoader();
   const cart = useStore<{ items: CartItem[] }>({ items: [] });
@@ -630,6 +661,9 @@ export default component$(() => {
   const checkoutOpen = useSignal(false);
   const checkoutStep = useSignal<"cart" | "details">("cart");
   const formError = useSignal("");
+  // Transient allowance warning shown in the cart when a "+" is blocked by a
+  // portal quantity cap. Cleared on the next successful quantity change.
+  const cartCapMsg = useSignal("");
   const formTouched = useSignal(false);
   const empFirstName = useSignal("");
   const empLastName = useSignal("");
@@ -753,11 +787,28 @@ export default component$(() => {
   });
 
   const updateQty = $(async (index: number, delta: number) => {
-    const newQty = cart.items[index].quantity + delta;
+    const item = cart.items[index];
+    // Enforce the portal's quantity cap on "+": a group (e.g. "5 shirts") can't
+    // be pushed past its allowance from the cart either. The item's current
+    // quantity is included in the running total, so remaining <= 0 means this
+    // increment would exceed the cap.
+    if (delta > 0 && item?.sku && isPortal(loginType.value)) {
+      const r = remainingAllowance(loginType.value, currentSeason(), item.sku, cart.items);
+      if (r.group && r.remaining <= 0) {
+        const msg = `Allowance reached: ${r.cap} ${r.group.label} per order. Anything more needs office approval.`;
+        cartCapMsg.value = msg;
+        // Auto-dismiss after a few seconds (only if a newer message hasn't
+        // replaced it in the meantime).
+        setTimeout(() => { if (cartCapMsg.value === msg) cartCapMsg.value = ""; }, 4000);
+        return;
+      }
+    }
+    cartCapMsg.value = "";
+    const newQty = item.quantity + delta;
     if (newQty < 1) {
       cart.items = cart.items.filter((_, i) => i !== index);
     } else {
-      cart.items = cart.items.map((item, i) => i === index ? { ...item, quantity: newQty } : item);
+      cart.items = cart.items.map((it, i) => i === index ? { ...it, quantity: newQty } : it);
     }
     await saveCart();
     window.dispatchEvent(new CustomEvent("cart-updated"));
@@ -1171,7 +1222,7 @@ export default component$(() => {
               <div class="login-modal__header">
                 <div class="login-modal__brand login-modal__brand--img">
                   <img src="/tamarack-logo-white.png" alt="Tamarack" class="login-modal__logo-white" width="1451" height="250" />
-                  <span class="brand-apparel">{t("brand.apparel", locale.value)}</span>
+                  <span class={`brand-apparel ${locale.value === "fr" ? "brand-apparel--fr" : ""}`}>{t("brand.apparel", locale.value)}</span>
                 </div>
               </div>
               <Form action={loginAction} reloadDocument class="login-modal__form">
@@ -1182,25 +1233,19 @@ export default component$(() => {
                     hidden field and its own password is checked server-side. */}
                 <input type="hidden" name="portal" value={selectedPortal.value} />
                 <div class="login-modal__field">
-                  <div class="login-portals" role="radiogroup" aria-label="Portal">
-                    <button
-                      type="button"
-                      role="radio"
-                      aria-checked={selectedPortal.value === "service"}
-                      class={`login-portal ${selectedPortal.value === "service" ? "is-selected" : ""}`}
-                      onClick$={() => { selectedPortal.value = "service"; }}
-                    >
-                      <span>Site Clerks</span>
-                    </button>
-                    <button
-                      type="button"
-                      role="radio"
-                      aria-checked={selectedPortal.value === "labourers"}
-                      class={`login-portal ${selectedPortal.value === "labourers" ? "is-selected" : ""}`}
-                      onClick$={() => { selectedPortal.value = "labourers"; }}
-                    >
-                      <span>Labourers</span>
-                    </button>
+                  <div class="login-portals login-portals--grid" role="radiogroup" aria-label="Portal">
+                    {PORTALS.map((p) => (
+                      <button
+                        key={p.key}
+                        type="button"
+                        role="radio"
+                        aria-checked={selectedPortal.value === p.key}
+                        class={`login-portal ${selectedPortal.value === p.key ? "is-selected" : ""}`}
+                        onClick$={() => { selectedPortal.value = p.key; }}
+                      >
+                        <span>{locale.value === "fr" ? p.labelFr : p.label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
                 <div class="login-modal__field">
@@ -1480,19 +1525,17 @@ export default component$(() => {
                 </Link>
               )}
               {loginType.value !== "tech" && (() => {
-                // Mirror the catalog tabs (CLOTHING_CATEGORIES in
-                // product-catalog.tsx, minus "All") so the menu's categories and
-                // labels always match the tab bar. "Footwear" is the tab that
-                // groups the Safety Boots / Safety Shoes data categories.
-                const NAV_CATS: { key: TranslationKey; cat: string; icon: string }[] = [
-                  { key: "cat.Jackets", cat: "Jackets", icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2l5 6v12a2 2 0 01-2 2h-3V12h-6v10H6a2 2 0 01-2-2V8l5-6"/><path d="M9 2a3 3 0 006 0"/><line x1="12" y1="12" x2="12" y2="22"/></svg>' },
-                  { key: "cat.Sweaters", cat: "Sweaters", icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3 4 6 2 9.5 5 12v9h14v-9l3-2.5L20 6l-4.5-3-1.3 1.7a3.4 3.4 0 0 1-4.4 0z"/><path d="M9 4.2c.9 1.2 4.1 1.2 5 0"/></svg>' },
-                  { key: "cat.Shirts",  cat: "Shirts",  icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>' },
-                  { key: "cat.Polos",   cat: "Polos",   icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2l-4 4-4-4-4.38 1.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/><path d="M12 6v5"/></svg>' },
-                  { key: "cat.CapsBeanies", cat: "Hats", icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 00-7 7c0 3 2 5 3 6h8c1-1 3-3 3-6a7 7 0 00-7-7z"/><path d="M5 15h14"/><path d="M6 18h12"/></svg>' },
-                  { key: "cat.SWAG",    cat: "SWAG",    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>' },
-                  ...(loginType.value !== "safety" ? [{ key: "nav.officewelcomekit" as TranslationKey, cat: "New Hire Kit", icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>' }] : []),
-                ];
+                // Derived from the portal-aware category list the catalog
+                // publishes to SecondaryBarContext (barVisibleCategories) — so the
+                // menu's categories always match the tab bar, and a portal with no
+                // products in a category (e.g. Labourers with no Headwear) drops it
+                // here too. "All" is the tab bar's show-everything pill, not a
+                // drawer section, so it's filtered out. Icons + labels come from
+                // the same shared source the tabs use (CATEGORY_ICONS /
+                // categoryLabel), so the two can never drift apart.
+                const NAV_CATS = barVisibleCategories.value
+                  .filter((cat) => cat !== "All")
+                  .map((cat) => ({ cat, icon: CATEGORY_ICONS[cat] || "", label: categoryLabel(cat, locale.value) }));
                 const catMatches = (pCat: string, tabCat: string) =>
                   tabCat === "Footwear"
                     ? (pCat === "Safety Boots" || pCat === "Safety Shoes")
@@ -1523,7 +1566,7 @@ export default component$(() => {
                                 }}
                               >
                                 <span class="nav-drawer__cat-icon" dangerouslySetInnerHTML={c.icon} />
-                                {t(c.key, locale.value)}
+                                {c.label}
                               </span>
                               <svg class="nav-drawer__cat-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                             </Accordion.Trigger>
@@ -1642,6 +1685,7 @@ export default component$(() => {
                               {item.color && item.color.startsWith("#") && <span class="cart-table__swatch" style={{ background: item.color }} aria-hidden="true" />}
                               <span>{item.color ? `${item.color.startsWith("#") ? colorName(item.color, locale.value) : item.color} / ` : ""}{item.size}</span>
                             </div>
+                            {item.approval && <span class="cart-table__approval">Needs approval</span>}
                             </div>
                             </div>
                           </td>
@@ -1683,6 +1727,9 @@ export default component$(() => {
                     )}
                   </table>
                 </div>
+                {cartCapMsg.value && (
+                  <p class="cart-drawer__cap-note" role="status">{cartCapMsg.value}</p>
+                )}
                 <div class="cart-drawer__footer">
                   <span class="cart-drawer__total">
                     {cartCount.value} {cartCount.value !== 1 ? t("cart.items", locale.value) : t("cart.item", locale.value)}{loginType.value !== "tech" && (empProvince.value ? ` — $${orderTotal.value.toFixed(2)}` : ` — $${subtotal.value.toFixed(2)} + ${t("cart.invoice.tax", locale.value).toLowerCase()}`)}
@@ -1697,6 +1744,13 @@ export default component$(() => {
                 </div>
               </>
             )}
+          </div>
+          {/* Allowance legend lives OUTSIDE the white cart card — in the greige
+              margin below it — so it never grows the card's height. Shown even when
+              the cart is empty (it's a reference of what the role may order). Its
+              own click is stopped so reading it doesn't close the cart. */}
+          <div class="cart-drawer__allowance" onClick$={(e) => e.stopPropagation()}>
+            <AllowancePanel portal={loginType.value} items={cart.items} />
           </div>
         </div>
       )}

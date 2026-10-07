@@ -1980,6 +1980,117 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   align-items: center;
   gap: 1.1rem;
 }
+
+/* Ordering-guide info icon + hover/focus popover (sits in the footer legal row). */
+.footer-guide { position: relative; display: inline-flex; align-items: center; }
+.footer-guide__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.footer-guide__btn:hover,
+.footer-guide:focus-within .footer-guide__btn { color: rgba(255, 255, 255, 0.95); }
+.footer-guide__pop {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: 0;
+  left: auto;
+  z-index: 200;
+  width: max-content;
+  max-width: 300px;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  color: var(--ce-gray-800);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.32);
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+}
+/* Little pointer at the bottom, aimed at the icon (right-anchored). */
+.footer-guide__pop::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 10px;
+  border: 7px solid transparent;
+  border-top-color: #fff;
+}
+.footer-guide__btn:hover + .footer-guide__pop,
+.footer-guide:focus-within .footer-guide__pop {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.footer-guide__title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--ce-green);
+  margin-bottom: 0.55rem;
+}
+.footer-guide__list { list-style: none; margin: 0; padding: 0; }
+.footer-guide__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.2rem 0;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.footer-guide__item:last-child { border-bottom: none; }
+.footer-guide__item-label { color: var(--ce-gray-800); }
+.footer-guide__item-cap {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--ce-gray-600);
+  white-space: nowrap;
+}
+.footer-guide__note {
+  margin: 0.55rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--ce-gray-500);
+}
+/* On wide left-anchored footers the popover could clip the viewport edge on
+   narrow phones; keep it within the gutter there. */
+@media (max-width: 600px) {
+  .footer-guide__pop { right: -8px; max-width: calc(100vw - 2rem); }
+}
+
+/* Downward variant (used where the icon sits near the top, e.g. the checkout
+   header) — flip the popover and its pointer below the icon. */
+.footer-guide--down .footer-guide__pop {
+  top: calc(100% + 10px);
+  bottom: auto;
+  transform: translateY(-4px);
+}
+.footer-guide--down:focus-within .footer-guide__pop,
+.footer-guide--down .footer-guide__btn:hover + .footer-guide__pop { transform: translateY(0); }
+.footer-guide--down .footer-guide__pop::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: #fff;
+}
+
+/* Checkout header sits on a light surface: the icon needs a dark tint, and the
+   popover reads better left-anchored under the title. */
+.footer-guide--checkout { vertical-align: middle; margin-left: 0.35rem; }
+.footer-guide--checkout .footer-guide__btn { color: var(--ce-gray-400); }
+.footer-guide--checkout .footer-guide__btn:hover,
+.footer-guide--checkout:focus-within .footer-guide__btn { color: var(--ce-green); }
+.footer-guide--checkout .footer-guide__pop { left: 0; right: auto; }
+.footer-guide--checkout .footer-guide__pop::after { left: 12px; right: auto; }
 /* Privacy Policy link under the contact email. */
 .site-footer__privacy-link {
   color: rgba(255,255,255,0.6);
@@ -3355,7 +3466,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   z-index: 1;                     /* above the .login-overlay::before dot texture */
   margin: 0 auto;
   width: calc(100% - 1rem);
-  max-width: 1536px;              /* a step past the content width */
+  max-width: 1680px;              /* a step past the content width */
   height: min(60vh, 600px);
   display: flex;
   align-items: stretch;
@@ -3396,6 +3507,12 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 
 /* Login portal picker — two tiles (Site Clerks / Labourers) on the green pane. */
 .login-modal__form .login-portals { display: flex; gap: 0.6rem; }
+/* Four portals: a 2×2 grid, each tile tall enough for a two-line role name. */
+.login-modal__form .login-portals--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
 .login-modal__form .login-portal {
   flex: 1 1 0;
   display: flex; align-items: center; justify-content: center;
@@ -3409,6 +3526,16 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   text-transform: uppercase; letter-spacing: 0.05em;
   cursor: pointer;
   transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+/* Long role labels wrap and need a shorter line, so the grid tiles read as
+   compact two-line captions rather than one squeezed line. */
+.login-modal__form .login-portals--grid .login-portal {
+  min-height: 56px;
+  padding: 10px 9px;
+  text-align: center;
+  font-size: 0.76rem;
+  line-height: 1.25;
+  letter-spacing: 0.03em;
 }
 .login-modal__form .login-portal:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.4); }
 .login-modal__form .login-portal.is-selected {
@@ -3444,8 +3571,13 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   /* Stretch the caps taller without widening the tracking, and nudge right so
      APPAREL sits under the "Tamarack" wordmark text. */
   display: inline-block;
-  transform: translateX(15px) scaleY(1.35);
+  transform: translateX(10px) scaleY(1.35);
   transform-origin: center;
+}
+/* French "VÊTEMENTS" is longer than "APPAREL"; centred, its left edge lands
+   further left, so shift it right to line up with where APPAREL begins. */
+.login-modal--split .login-modal__brand--img .brand-apparel--fr {
+  transform: translateX(46px) scaleY(1.35);
 }
 
 .login-modal--split .login-modal__form {
@@ -5032,6 +5164,151 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   transform: translateX(-50%) translateY(0);
   transition-duration: 0.5s;
 }
+/* Allowance-limit warning (reuses the toast, amber instead of green). */
+.toast--warn {
+  background: #fdf2d8;
+  color: #7a5200;
+  border-color: #e0ab3c;
+}
+
+/* Ordering-allowance legend in the cart + checkout — the full list of what this
+   portal may order this season, with a dot meter and "used / limit" per item. */
+.allowance {
+  margin: 0.9rem 1.25rem 0.2rem;
+  padding: 0.85rem 1rem 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: var(--ce-greige, #f6f3ee);
+  /* Half width (left-aligned) rather than spanning the whole cart/checkout. */
+  max-width: 50%;
+}
+/* Phones: too cramped at half width — go full. */
+@media (max-width: 600px) {
+  .allowance { max-width: 100%; }
+}
+
+/* Cart drawer: the allowance legend and the checkout footer share one row, so
+   the legend fills the left and the total + Checkout fill the right instead of
+   the legend stacking a half-empty block above the footer. */
+.cart-drawer__bottom {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.cart-drawer__bottom .allowance {
+  flex: 1 1 340px;
+  max-width: none;
+  margin: 0.7rem 0 0.7rem 1.25rem;
+}
+.cart-drawer__bottom .cart-drawer__footer {
+  flex: 1 1 280px;
+  margin: 0.7rem 1.25rem 0.7rem 0;
+}
+@media (max-width: 600px) {
+  .cart-drawer__bottom { gap: 0; }
+  .cart-drawer__bottom .allowance { flex-basis: 100%; margin: 0.6rem 0.75rem 0; }
+  .cart-drawer__bottom .cart-drawer__footer { flex-basis: 100%; margin: 0.5rem; }
+}
+.allowance__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+.allowance__title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--ce-green);
+}
+.allowance__season {
+  flex-shrink: 0;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(27, 101, 81, 0.1);
+  color: var(--ce-green);
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.allowance__list { list-style: none; margin: 0; padding: 0; }
+.allowance__row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0;
+  font-size: 0.82rem;
+  color: var(--ce-gray-800, #2b3a35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+}
+.allowance__row:last-child { border-bottom: none; }
+.allowance__name { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; }
+.allowance__tag {
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #fdf2d8;
+  color: #8a5a00;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.allowance__meter { display: inline-flex; gap: 4px; }
+.allowance__pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.13);
+}
+.allowance__pip.is-used { background: var(--ce-green); }
+.allowance__count {
+  min-width: 2.4em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  color: var(--ce-gray-500, #6b7772);
+}
+.allowance__count strong { color: var(--ce-gray-900, #1b2420); font-weight: 800; }
+/* A group at its cap reads amber, and its filled pips turn amber too. */
+.allowance__row--full .allowance__name,
+.allowance__row--full .allowance__count strong { color: #8a5a00; }
+.allowance__row--full .allowance__pip.is-used { background: #d79a2b; }
+.allowance__note {
+  margin: 0.65rem 0 0;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--ce-gray-500, #6b7772);
+}
+
+/* "Needs approval" chip on an approval-only item in the cart. */
+.cart-table__approval {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 1px 7px;
+  border-radius: 3px;
+  background: #fdf2d8;
+  color: #8a5a00;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Cart allowance warning line (when a "+" is blocked by a cap). */
+.cart-drawer__cap-note {
+  margin: 0;
+  padding: 0.6rem 1.25rem;
+  background: #fdf2d8;
+  color: #7a5200;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
 @keyframes toast-in {
   from { opacity: 0; transform: translateX(-50%) translateY(1rem); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -5309,6 +5586,23 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   border-color: var(--ce-green);
   color: var(--ce-white);
 }
+/* "+" at the per-order cap: looks muted/locked but stays clickable so the tap
+   can surface the reason (see .product-modal__qty-note). */
+.product-modal__qty-btn--maxed,
+.product-modal__qty-btn--maxed:hover {
+  background: #f2f2f1;
+  border-color: var(--ce-gray-200);
+  color: var(--ce-gray-400);
+  cursor: not-allowed;
+}
+/* The reason the quantity can't go higher, under the stepper. */
+.product-modal__qty-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #8a5a00;
+}
 .product-modal__qty-val {
   width: 34px;
   text-align: center;
@@ -5316,6 +5610,50 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   font-weight: 700;
   color: var(--ce-gray-900);
 }
+/* "Why is Add to Cart disabled" note — shown under the quantity row once the
+   portal's limit for this item is reached. */
+.product-modal__limit {
+  /* Hidden until the locked Add button is hovered, or flashed on click. Absolute
+     so it overlays the empty space below the button instead of adding a line that
+     shifts the rest of the page down. */
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  left: 0;
+  width: max-content;
+  max-width: 460px;
+  z-index: 3;
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  background: #fdf2d8;
+  color: #7a5200;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+.product-modal__actions { position: relative; }
+/* Shown via the --show class (driven by explicit hover/flash state in the
+   component), not CSS :hover, so a successful add that locks the button while
+   the cursor rests on it doesn't immediately pop the message. */
+.product-modal__limit--show {
+  display: block;
+}
+
+/* The Add button at the per-order cap: reads as locked (greyed, like :disabled)
+   but stays clickable so the click can flash the reason above. Needs the extra
+   .product-modal__add class to beat the green `.product-modal__add.btn--primary`
+   rule that sits later in the file, and must hold through :hover. */
+.product-modal__add.product-modal__add--locked.btn--primary,
+.product-modal__add.product-modal__add--locked.btn--primary:hover {
+  background: var(--ce-gray-200);
+  color: var(--ce-gray-500);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.product-modal__add--locked .product-modal__add-mark { box-shadow: none; }
+
 .product-modal__actions {
   display: flex;
   gap: 0.5rem;
@@ -8119,12 +8457,24 @@ details[open] > .cart-drawer__checkout-title::after {
     overflow: hidden;
     touch-action: none;
   }
+  /* Cart overlay ONLY (not /checkout): scroll the card + allowance legend as one
+     column so the legend sits under the card instead of inside it. */
+  .modal-overlay:has(.cart-drawer):not(.checkout-page) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow: visible;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
   .drawer.cart-drawer {
     position: absolute;
     /* Content height (not full viewport) so a short cart/checkout doesn't fill
-       the screen — the backdrop below stays visible and tappable to close, like
-       the menu drawer and the desktop cart. Capped at the available height so a
-       long cart still scrolls its items. */
+       the screen — the backdrop below stays visible and tappable to close.
+       Capped at the available height so a long cart still scrolls its items. */
     top: 0;
     left: 0;
     right: 0;
@@ -8137,6 +8487,17 @@ details[open] > .cart-drawer__checkout-title::after {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+  }
+  /* Cart overlay only: card in flow so the legend below follows it. */
+  .modal-overlay:has(.cart-drawer):not(.checkout-page) .drawer.cart-drawer {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    max-height: none;
+    overflow-y: visible;
+    flex: 0 0 auto;
   }
   .cart-drawer__site-header { display: none; }
   /* White ring + gray edge around each content card, sitting in the greige
@@ -9761,6 +10122,12 @@ details[open] > .cart-drawer__checkout-title::after {
     background: #ffffff;
     pointer-events: none;
   }
+  /* Tabs are a GALLERY-only control. On a product page the breadcrumb is the
+     secondary bar, so hide the catalog tab strip here. The catalog stays mounted
+     across catalog <-> PDP (shared shell), so this is a visibility swap in the
+     same pinned slot — the breadcrumb takes the tab strip's place, not a remount.
+     Mirrors desktop, where the whole secondary bar is dropped for the sidebar. */
+  body:has(.pdp-breadcrumb) .home-catalog__header { display: none !important; }
 }
 @media (max-width: 600px) {
   .pdp-breadcrumb { top: 64px; }
@@ -9769,6 +10136,12 @@ details[open] > .cart-drawer__checkout-title::after {
      coming up light against it. */
   .home-catalog__seam,
   .pdp-breadcrumb::after { height: 1px; }
+  /* STOPGAP (removed by the secondary-bar unification, step 4): on the PDP the
+     tab strip is hidden, but .apparel-catalog still reserves a bar's height on
+     top of .home-catalog__inner's reservation — a second, now-empty slot that
+     shows as a white gap between the breadcrumb and the image. .home-catalog__inner
+     already clears the pinned breadcrumb, so drop the duplicate here. */
+  body:has(.pdp-breadcrumb) .apparel-catalog { padding-top: 0 !important; }
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -10237,10 +10610,13 @@ details[open] > .cart-drawer__checkout-title::after {
   .home-catalog__catnav-title {
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    /* Tight tracking so the longest portal name ("FOREMAN & SUPERINTENDENTS")
+       stays on one line in the narrow sidebar. */
+    letter-spacing: 0.01em;
     color: var(--ce-gray-400);
     padding: 0.15rem 12px 0.25rem;
     margin: 0;
+    white-space: nowrap;
   }
   .home-catalog__catnav-item {
     display: flex;
@@ -12035,32 +12411,52 @@ body:has(.product-fullscreen) { overflow: hidden; }
     padding: 0;
     pointer-events: auto;
   }
+  /* Cart overlay ONLY (NOT the standalone /checkout route, which is also a
+     .modal-overlay.checkout-page): stack the white card and the allowance legend
+     as a centred column so the legend sits in the greige margin BELOW the card. */
+  .modal-overlay:has(.cart-drawer):not(.checkout-page) {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
   .drawer.cart-drawer {
     pointer-events: auto;
     /* Pull the card up a few px so its top ring tucks BEHIND the elevated site
-       header (which is z-above the drawer while open) — no darker line under the
-       header, just the header's own clean bottom edge like the home/PDP routes. */
+       header. Shared by the cart overlay AND the /checkout page, so the checkout
+       keeps this fixed, centred positioning (the cart overlay overrides below). */
     top: calc(var(--wt-header-pin) - 5px);
-    /* A small greige gap at the bottom mirroring the strip above the header, so
-       the card's bottom edge (and its ring) shows instead of running off the
-       viewport edge — like the other cards' bottom margin. */
     bottom: 4px;
     left: 50%;
     right: auto;
     transform: translateX(-50%);
     width: min(var(--site-max), 100%);
     max-width: none;
-    /* The same white ring the other cards carry (catalog / product / privacy),
-       so the cart reads as the same sign with white strips down its sides. The
-       card's own 1px edge is INSET so it doesn't paint over the white — the two
-       dark layers used to sit on top of the ring's inner 2px and cut the strip
-       to 1px, the desktop version of the grey x-border removed on mobile. Now
-       the full 3px white shows with the grey rim outside it. */
-    /* One thin grey edge only — matches the product / catalog / privacy cards:
-       no outer blur, so the ring reads the same light weight on
-       every side and never darker where it meets the header. */
+    /* One thin grey edge, matching the product / catalog / privacy cards. */
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
   }
+  /* Cart overlay only: the card becomes an in-flow column item so the legend
+     below it follows the card's content height (/checkout keeps the fixed card). */
+  .modal-overlay:has(.cart-drawer):not(.checkout-page) .drawer.cart-drawer {
+    position: relative;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+    margin-top: calc(var(--wt-header-pin) - 5px);
+    flex: 0 0 auto;
+  }
+  /* Allowance legend below the card, in the greige margin (cart overlay only).
+     The wrapper spans the card width so the legend's left edge lines up with the
+     card; the legend itself only takes the width it needs — capped under half. */
+  .modal-overlay:has(.cart-drawer):not(.checkout-page) .cart-drawer__allowance {
+    flex: 0 0 auto;
+    width: min(var(--site-max), 100%);
+    max-width: none;
+    margin: 8px 0 12px;
+  }
+  .modal-overlay:has(.cart-drawer):not(.checkout-page) .cart-drawer__allowance .allowance { width: min(100%, 580px); max-width: none; margin: 0; }
   /* The panel floats above the header (z 10001) so it stays interactive, but
      that also lifted the ring's TOP edge over the header's bottom seam — a
      doubled, too-thick white line. Lift the header above the panel while the
@@ -14456,8 +14852,11 @@ body .site-header__inner { border-top-left-radius: 0 !important; border-top-righ
 .site-header .logout-btn:hover { background: rgba(0, 0, 0, 0.09) !important; }
 .site-header .locale-btn--header .locale-btn__short { color: #2b2f34 !important; }
 .site-header .locale-btn--header svg,
-.site-header .logout-btn svg,
-.site-header .hamburger-btn svg { stroke: #2b2f34 !important; color: #2b2f34 !important; }
+.site-header .logout-btn svg { stroke: #2b2f34 !important; color: #2b2f34 !important; }
+/* The hamburger glyph stays WHITE on the header. The "light silvery-grey header"
+   theme above was written for an old bar colour; the bar is green (#1B6551) now,
+   so a dark glyph read as black. White matches the cart icon on the same bar. */
+.site-header .hamburger-btn svg { stroke: #fff !important; color: #fff !important; }
 /* Cart stays Tamarack blue (white text/icon set in its own rules). */
 /* Header bar: drop the heavy weathered dark edge shadows for a clean light bar. */
 .site-header__inner {

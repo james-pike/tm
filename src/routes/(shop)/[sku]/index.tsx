@@ -3,23 +3,18 @@ import { useLocation, routeLoader$ } from "@builder.io/qwik-city";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import { allProducts } from "../../apparel/products";
 import { getLoginType } from "../../layout";
+import { allowedSkus, currentSeason, isPortal } from "../../../lib/portals";
 import { ProductDetailPanel } from "../../../components/product-detail/product-detail";
 
 // Guards the /<sku>/ route. Unknown slugs (including the retired "/apparel"
-// path) redirect to the catalog. The full-catalog login sees every product; a
-// Group B session may only open products tagged for its lineup.
+// path) redirect to the catalog. A portal may only open the products in its own
+// lineup — using the SAME allowance config as the catalog (src/lib/portals) so
+// the two never disagree (a product visible in the grid is always openable).
 export const useProductGuard = routeLoader$((ev) => {
   const product = allProducts.find((p) => p.sku === ev.params.sku);
   if (!product) throw ev.redirect(302, "/");
   const lt = getLoginType(ev.cookie);
-  const portals = (product as { portals?: string[] }).portals ?? [];
-  // Labourers may only open products tagged for its lineup.
-  if (lt === "labourers" && !portals.includes("labourers")) {
-    throw ev.redirect(302, "/");
-  }
-  // "labourers-only" products are exclusive to the Labourers side — hide them
-  // from Site Clerks (the full-catalog session) even via a direct URL.
-  if (lt !== "labourers" && portals.includes("labourers-only")) {
+  if (isPortal(lt) && !allowedSkus(lt, currentSeason()).has(product.sku)) {
     throw ev.redirect(302, "/");
   }
   return {};
