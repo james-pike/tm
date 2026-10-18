@@ -23,7 +23,7 @@ import { PORTALS, isPortal, currentSeason, remainingAllowance, isApprovalSku } f
 import type { Portal } from "../lib/portals";
 import { AllowancePanel } from "../components/allowance-panel/allowance-panel";
 import { getGiftCard, giftContribution, deductGiftCard } from "../lib/giftcards";
-import { sendConfirmationEmail } from "../lib/orders";
+import { sendConfirmationEmail, sendApprovalRequestEmail } from "../lib/orders";
 import type { OrderEmailData, PaymentMethod } from "../lib/orders";
 import { createCheckoutSession } from "../lib/stripe";
 
@@ -83,11 +83,14 @@ export const useLocaleLoader = routeLoader$(({ cookie }) => {
 // The four employee portals (see src/lib/portals.ts for the full rule set). The
 // picked tile decides which curated lineup + quantity caps apply; the store
 // looks identical either way. Portal names live only on the login screen.
-export type LoginType = Portal | null;
+export type LoginType = Portal | "authorizer" | null;
 
 export function getLoginType(cookie: Cookie): LoginType {
   const val = cookie.get(AUTH_COOKIE)?.value;
   if (isPortal(val)) return val;
+  // The order authorizer — a separate login (special password) that renders the
+  // approvals area instead of the storefront. Not one of the employee portals.
+  if (val === "authorizer") return "authorizer";
   // backward compat: the retired full-catalog logins ("service" / "clothing" /
   // "authenticated" / the "electrical" scaffold) now land on Site Clerks.
   if (val === "service" || val === "clothing" || val === "authenticated" || val === "electrical") return "clerks";
@@ -116,6 +119,19 @@ export const useLogin = routeAction$(
     const expected = env.get("APP_PASSWORD") || env.get("VITE_APP_PASSWORD");
     if (!expected) {
       return fail(500, { message: "Login not configured" });
+    }
+    // Special "authorizer" password — entered in any portal, it grants the
+    // order-approval role (rendering the approvals area) rather than a portal.
+    const authorizerPw = env.get("AUTHORIZER_PASSWORD") || env.get("VITE_AUTHORIZER_PASSWORD");
+    if (authorizerPw && password === authorizerPw) {
+      cookie.set(AUTH_COOKIE, "authorizer", {
+        path: "/",
+        httpOnly: true,
+        secure: !import.meta.env.DEV,
+        sameSite: import.meta.env.DEV ? "lax" : "none",
+        maxAge: 60 * 60 * 24 * 3,
+      });
+      return { success: true };
     }
     if (password === expected) {
       const granted = isPortal(portal) ? portal : "clerks";
@@ -267,11 +283,12 @@ export const useSubmitOrder = routeAction$(
     }
 
     // ---- Persist the order (status depends on whether a card charge follows) ----
-    // 'pending'          — PO / invoice, settled offline
+    // 'awaiting_authorization' — PO order waiting for the authorizer to approve
+    //                      it; flips to 'pending' on approval (or 'rejected').
     // 'paid'             — gift card covered it in full
     // 'awaiting_payment' — a Stripe card charge is required; the webhook flips it
     //                      to 'paid' and deducts the gift card once payment lands.
-    const status = cardAmount > 0 ? "awaiting_payment" : paymentMethod === "po" ? "pending" : "paid";
+    const status = cardAmount > 0 ? "awaiting_payment" : paymentMethod === "po" ? "awaiting_authorization" : "paid";
     let orderNumber = "";
     let orderId: bigint | number | null = null;
     // Empty string must become NULL so orders without a key don't collide on the
@@ -393,6 +410,7 @@ export const useSubmitOrder = routeAction$(
       items: items as any,
       subtotal, taxPct, tax, total,
       payment: { method: paymentMethod, giftCardCode: giftCode || undefined, giftAmount, cardAmount },
+      pendingApproval: status === "awaiting_authorization",
     });
 
     // ---- DEV simulated card payment (no Stripe key) ----
@@ -505,6 +523,17 @@ export const useSubmitOrder = routeAction$(
       await sendConfirmationEmail({ apiKey, from: fromAddress, staffAddresses }, buildEmailData());
     } else {
       console.warn("RESEND_API_KEY not configured — order saved but email not sent");
+    }
+
+    // New PO orders wait for the authorizer — email them the approval request.
+    if (apiKey && status === "awaiting_authorization") {
+      const authorizerTo = (env.get("AUTHORIZER_EMAIL") || env.get("VITE_AUTHORIZER_EMAIL") || "")
+        .split(",").map((a) => a.trim()).filter(Boolean);
+      let siteBase = (env.get("SITE_URL") || url.origin || "").trim();
+      if (siteBase && !/^https?:\/\//i.test(siteBase)) siteBase = "https://" + siteBase;
+      let approveUrl = url.origin;
+      try { approveUrl = new URL(siteBase).origin; } catch { approveUrl = url.origin; }
+      await sendApprovalRequestEmail({ apiKey, from: fromAddress, to: authorizerTo }, buildEmailData(), approveUrl);
     }
 
     return { success: true, orderNumber };

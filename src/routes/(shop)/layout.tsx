@@ -1,6 +1,9 @@
-import { component$, Slot } from "@builder.io/qwik";
-import { useLocation, useNavigate } from "@builder.io/qwik-city";
+import { component$, Slot, useContext } from "@builder.io/qwik";
+import { useLocation, useNavigate, routeLoader$, routeAction$, zod$, z } from "@builder.io/qwik-city";
+import { createClient } from "@libsql/client";
 import { ProductCatalog } from "../../components/product-catalog/product-catalog";
+import { Approvals } from "../../components/approvals/approvals";
+import { getLoginType, LoginTypeContext, useLogout } from "../layout";
 
 // ONE shared shell for the whole shop: the catalog at "/" and each product at
 // "/<sku>/". The sidebar + header live inside ProductCatalog and stay mounted as
@@ -9,13 +12,108 @@ import { ProductCatalog } from "../../components/product-catalog/product-catalog
 // route the routed <Slot/> (the product detail) renders in ProductCatalog's main
 // column instead of the grid.
 //
+// The order authorizer (a separate login — see useLogin) sees the approvals
+// area here instead of the storefront.
+//
 // No server auth guard here: unauthenticated visitors are blocked client-side by
-// the login overlay (root layout locks scroll + covers the screen until login),
-// the same way the home route always worked. A server redirect to "/" would loop
-// here, since "/" is this very route.
+// the login overlay (root layout locks scroll + covers the screen until login).
+
+const dbFromEnv = (env: { get(k: string): string | undefined }) =>
+  createClient({
+    url: env.get("TURSO_URL") || env.get("VITE_TURSO_URL") || "",
+    authToken: env.get("TURSO_AUTH_TOKEN") || env.get("VITE_TURSO_AUTH_TOKEN") || undefined,
+  });
+
+export interface PendingOrder {
+  id: number;
+  orderNumber: string;
+  empName: string;
+  empDept: string;
+  po: string;
+  total: number;
+  items: { name: string; sku?: string; color?: string; size?: string; quantity: number; price: number }[];
+  createdAt: string;
+}
+
+// Orders awaiting the authorizer's approval. Only queried for the authorizer
+// login; everyone else gets an empty list (and never sees order data).
+export const usePendingApprovals = routeLoader$<PendingOrder[]>(async ({ cookie, env }) => {
+  if (getLoginType(cookie) !== "authorizer") return [];
+  try {
+    const db = dbFromEnv(env);
+    const r = await db.execute(
+      "SELECT id, emp_name, emp_dept, po_number, items, total, created_at FROM orders WHERE vendor='tamarack' AND status='awaiting_authorization' ORDER BY created_at DESC",
+    );
+    return r.rows.map((row: any) => ({
+      id: Number(row.id),
+      orderNumber: `TM-${Number(row.id)}`,
+      empName: String(row.emp_name || ""),
+      empDept: String(row.emp_dept || ""),
+      po: String(row.po_number || ""),
+      total: Number(row.total) || 0,
+      items: JSON.parse(row.items || "[]"),
+      createdAt: String(row.created_at || ""),
+    }));
+  } catch (e) {
+    console.error("Failed to load pending approvals:", e);
+    return [];
+  }
+});
+
+// Approve: flip awaiting_authorization -> pending (the order becomes a real,
+// fulfillable order). Guarded so it only acts on an order still awaiting.
+export const useApproveOrder = routeAction$(
+  async ({ id }, { cookie, env, fail }) => {
+    if (getLoginType(cookie) !== "authorizer") return fail(403, { message: "Not authorized" });
+    try {
+      const db = dbFromEnv(env);
+      await db.execute({
+        sql: "UPDATE orders SET status='pending', updated_at=datetime('now') WHERE id=? AND vendor='tamarack' AND status='awaiting_authorization'",
+        args: [id],
+      });
+      return { success: true, id };
+    } catch (e: any) {
+      return fail(500, { message: e?.message || "Could not approve order" });
+    }
+  },
+  zod$({ id: z.coerce.number().int().positive() }),
+);
+
+// Deny: flip awaiting_authorization -> rejected.
+export const useDenyOrder = routeAction$(
+  async ({ id }, { cookie, env, fail }) => {
+    if (getLoginType(cookie) !== "authorizer") return fail(403, { message: "Not authorized" });
+    try {
+      const db = dbFromEnv(env);
+      await db.execute({
+        sql: "UPDATE orders SET status='rejected', updated_at=datetime('now') WHERE id=? AND vendor='tamarack' AND status='awaiting_authorization'",
+        args: [id],
+      });
+      return { success: true, id };
+    } catch (e: any) {
+      return fail(500, { message: e?.message || "Could not deny order" });
+    }
+  },
+  zod$({ id: z.coerce.number().int().positive() }),
+);
+
 export default component$(() => {
   const loc = useLocation();
   const nav = useNavigate();
+  const loginType = useContext(LoginTypeContext);
+  const pending = usePendingApprovals();
+  const approve = useApproveOrder();
+  const deny = useDenyOrder();
+  const logout = useLogout();
+
+  if (loginType.value === "authorizer") {
+    return (
+      <div class="apparel-page dot-pattern">
+        <Approvals orders={pending.value} approve={approve} deny={deny} logout={logout} />
+      </div>
+    );
+  }
+
   return (
     <div
       class="apparel-page dot-pattern"
