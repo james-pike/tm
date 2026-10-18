@@ -15394,7 +15394,7 @@ html { background: rgb(223, 226, 230) !important; }
    it a touch left (header + footer) so it clears the "k". */
 .site-header__logo .brand-cluster__apparel--fr,
 .site-footer__brand .brand-cluster__apparel--fr {
-  transform: translate(calc(-50% - 8px), -50%);
+  transform: translate(calc(-50% - 16px), -50%);
 }
 /* Coming-soon logo runs larger (54px), so scale the overlay to match its scale. */
 .mobile-coming-soon__brand .brand-cluster__apparel { font-size: 1.2rem; }
