@@ -341,6 +341,11 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                       style={{ background: c, cursor: "pointer" }}
                       role="button"
                       title={c.startsWith("#") ? colorName(c, locale.value) : c}
+                      // Stop the click synchronously (during the native event) so it
+                      // never bubbles to the card's navigate handler. An imperative
+                      // e.stopPropagation() in the async onClick$ below runs too late
+                      // (Qwik resolves handlers lazily), which was opening the PDP.
+                      stoppropagation:click
                       onMouseEnter$={() => {
                         // Pre-warm this colour's image on hover so the click swaps
                         // instantly, with no first-time flash.
