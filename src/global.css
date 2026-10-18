@@ -15395,6 +15395,8 @@ html { background: rgb(223, 226, 230) !important; }
 .site-header__logo .brand-cluster__apparel--fr,
 .site-footer__brand .brand-cluster__apparel--fr {
   transform: translate(calc(-50% - 16px), -50%);
+  /* Slightly tighter tracking for the longer French word (English keeps 0.14em). */
+  letter-spacing: 0.11em;
 }
 /* Coming-soon logo runs larger (54px), so scale the overlay to match its scale. */
 .mobile-coming-soon__brand .brand-cluster__apparel { font-size: 1.2rem; }
