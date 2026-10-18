@@ -519,14 +519,24 @@ export const useSubmitOrder = routeAction$(
       await db.execute({ sql: "UPDATE orders SET paid_at = datetime('now') WHERE id = ?", args: [orderId as any] });
     }
 
-    if (apiKey) {
+    // Test PO: the order is saved to the DB exactly as a real one, but ALL
+    // Resend emails (customer confirmation + authorizer approval notice) are
+    // skipped — so test orders never email anyone. Default sentinel is
+    // "TEST-NOEMAIL" (matched trimmed + case-insensitively; override with
+    // TEST_NO_EMAIL_PO).
+    const testNoEmailPo = (env.get("TEST_NO_EMAIL_PO") || env.get("VITE_TEST_NO_EMAIL_PO") || "TEST-NOEMAIL").trim().toUpperCase();
+    const skipEmail = !!testNoEmailPo && (employee.po || "").trim().toUpperCase() === testNoEmailPo;
+
+    if (apiKey && !skipEmail) {
       await sendConfirmationEmail({ apiKey, from: fromAddress, staffAddresses }, buildEmailData());
+    } else if (skipEmail) {
+      console.warn(`[TEST PO] Order ${orderNumber} saved — skipping all emails (PO "${employee.po}").`);
     } else {
       console.warn("RESEND_API_KEY not configured — order saved but email not sent");
     }
 
     // New PO orders wait for the authorizer — email them the approval request.
-    if (apiKey && status === "awaiting_authorization") {
+    if (apiKey && !skipEmail && status === "awaiting_authorization") {
       const authorizerTo = (env.get("AUTHORIZER_EMAIL") || env.get("VITE_AUTHORIZER_EMAIL") || "")
         .split(",").map((a) => a.trim()).filter(Boolean);
       let siteBase = (env.get("SITE_URL") || url.origin || "").trim();
