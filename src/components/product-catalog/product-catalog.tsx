@@ -178,6 +178,17 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
   const activeImg = useSignal(item.img);
   const nav = useNavigate();
 
+  // Warm the browser cache and fully decode a colour's photo BEFORE it's shown,
+  // so the first swatch swap doesn't flash a half-painted image (after that the
+  // HTTP cache makes every swap instant). The <picture> serves the .webp
+  // sibling, so that's what we preload — called on hover to pre-warm, and
+  // awaited on click so the image only changes once the new one is ready.
+  const preload = $((src: string) => {
+    const im = new Image();
+    im.src = src.replace(/\.(jpe?g|png)$/i, ".webp");
+    return im.decode().catch(() => {});
+  });
+
   // Fit-to-one-line: keep the title at its full size, but scale it down just
   // enough to avoid wrapping to a second line. If it still can't fit even at the
   // floor, fall back to wrapping rather than clipping.
@@ -330,10 +341,20 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                       style={{ background: c, cursor: "pointer" }}
                       role="button"
                       title={c.startsWith("#") ? colorName(c, locale.value) : c}
-                      onClick$={(e) => {
+                      onMouseEnter$={() => {
+                        // Pre-warm this colour's image on hover so the click swaps
+                        // instantly, with no first-time flash.
+                        const i = (item.colors || []).indexOf(c);
+                        preload(i >= 0 && item.imgs && item.imgs[i] ? item.imgs[i] : item.img);
+                      }}
+                      onClick$={async (e) => {
                         e.stopPropagation();
                         const i = (item.colors || []).indexOf(c);
-                        activeImg.value = i >= 0 && item.imgs && item.imgs[i] ? item.imgs[i] : item.img;
+                        const src = i >= 0 && item.imgs && item.imgs[i] ? item.imgs[i] : item.img;
+                        // Decode before swapping so it paints at once; capped so a
+                        // slow/uncached decode can't block the swap.
+                        await Promise.race([preload(src), new Promise((r) => setTimeout(r, 400))]);
+                        activeImg.value = src;
                       }}
                     />
                   ))}

@@ -11,13 +11,13 @@ export const allProducts = [
     "badge": "",
     "colors": [
       "#1a1a18",
-      "#b6e021"
+      "#008652"
     ],
-    "price": 0,
+    "price": 13.25,
     "img": "/skus/ATC1000-tamarack.png",
     "imgs": [
       "/skus/ATC1000-tamarack.png",
-      "/skus/ATC1000-safetygreen-tamarack.png"
+      "/skus/ATC1000-kelly-tamarack.png"
     ],
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000",
@@ -33,13 +33,13 @@ export const allProducts = [
     "badge": "",
     "colors": [
       "#1a1a18",
-      "#b6e021"
+      "#008652"
     ],
-    "price": 0,
-    "img": "/skus/ATC1015-safetygreen-tamarack.png",
+    "price": 24.5,
+    "img": "/skus/ATC1015-kelly-tamarack.png",
     "imgs": [
       "/skus/ATC1015-tamarack.png",
-      "/skus/ATC1015-safetygreen-tamarack.png"
+      "/skus/ATC1015-kelly-tamarack.png"
     ],
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, 1x1 rib knit collar, Rib knit cuffs, Double needle cover stitch at sleeve & bottom hem, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1015",
@@ -56,7 +56,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 0,
+    "price": 45.5,
     "img": "/skus/L00555-tamarack.png",
     "imgs": [
       "/skus/L00555-tamarack.png"
@@ -77,7 +77,7 @@ export const allProducts = [
       "#1a1a18",
       "#a6e82c"
     ],
-    "price": 0,
+    "price": 13.25,
     "img": "/skus/ATC1000L-tamarack.png",
     "imgs": [
       "/skus/ATC1000L-tamarack.png",
@@ -99,7 +99,7 @@ export const allProducts = [
       "#1a1a18",
       "#a5e82c"
     ],
-    "price": 0,
+    "price": 15,
     "img": "/skus/S350-limeshock-tamarack.png",
     "imgs": [
       "/skus/S350-tamarack.png",
@@ -121,7 +121,7 @@ export const allProducts = [
       "#1a1a18",
       "#a5e82c"
     ],
-    "price": 0,
+    "price": 15,
     "img": "/skus/L350-limeshock-tamarack.png",
     "imgs": [
       "/skus/L350-tamarack.png",
@@ -129,26 +129,6 @@ export const allProducts = [
     ],
     "material": "100% performance polyester interlock",
     "details": "Wicking technology, Side seamed, Contoured fit, Breathable, #L350",
-    "portals": [
-      "labourers"
-    ]
-  },
-  {
-    "sku": "TM-8",
-    "name": "Lakeview Full-Zip Hooded Sweatshirt",
-    "category": "Sweaters",
-    "sizes": "S - 4XL",
-    "badge": "",
-    "colors": [
-      "#1a1a18"
-    ],
-    "price": 0,
-    "img": "/skus/L00670-tamarack.png",
-    "imgs": [
-      "/skus/L00670-tamarack.png"
-    ],
-    "material": "80% cotton / 20% recycled polyester fleece, 3-ply fleece",
-    "details": "Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, #L00670",
     "portals": [
       "labourers"
     ]
@@ -164,7 +144,7 @@ export const allProducts = [
       "#bbbcbc",
       "#53565a"
     ],
-    "price": 0,
+    "price": 39,
     "img": "/skus/L00545-athleticgrey-tamarack.png",
     "imgs": [
       "/skus/L00545-tamarack.png",
@@ -178,6 +158,70 @@ export const allProducts = [
     ]
   },
   {
+    "sku": "TM-22",
+    "name": "Vault Pullover Hooded Sweatshirt",
+    "category": "Sweaters",
+    "sizes": "XS - 4XL",
+    "badge": "New",
+    "colors": [
+      "#1a1a18",
+      "#008652"
+    ],
+    "price": 30,
+    "img": "/skus/L00550-black-tamarack.png",
+    "imgs": [
+      "/skus/L00550-black-tamarack.png",
+      "/skus/L00550-kelly-tamarack.png"
+    ],
+    "material": "70% ring-spun combed cotton / 30% polyester fleece",
+    "details": "Self-fabric lined hood with drawcord, 100% ring-spun combed cotton face for a superior print surface, Rib-knit cuff and hem, Kangaroo pocket, Tear-away label, #L00550",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-8",
+    "name": "Lakeview Full-Zip Hooded Sweatshirt",
+    "category": "Sweaters",
+    "sizes": "S - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 65,
+    "img": "/skus/L00670-tamarack.png",
+    "imgs": [
+      "/skus/L00670-tamarack.png"
+    ],
+    "material": "80% cotton / 20% recycled polyester fleece, 3-ply fleece",
+    "details": "Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, #L00670",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-20",
+    "name": "Carhartt Storm Defender Jacket",
+    "category": "Jackets",
+    "sizes": "S - 4XL / LT - 2XLT",
+    "badge": "",
+    "colors": [
+      "#44372b",
+      "#1a1a18"
+    ],
+    "price": 154.95,
+    "img": "/skus/105751-tarmac-tamarack.png",
+    "imgs": [
+      "/skus/105751-tarmac-tamarack.png",
+      "/skus/105751-black-tamarack.png"
+    ],
+    "material": "4.2 oz 100% nylon",
+    "details": "Storm Defender waterproof breathable technology, 10K/5K rating, Wind Fighter technology, Relaxed fit, Water-repellent front zip, Adjustable hood, Drawcord-adjustable droptail hem, Packable into left lower pocket, Zippered chest and two lower pockets, #105751",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
     "sku": "TM-12",
     "name": "Core365 Men's Optimum Short-Sleeve Twill Shirt",
     "category": "Polos",
@@ -186,7 +230,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 0,
+    "price": 45,
     "img": "/skus/88194-black-tamarack.jpg",
     "imgs": [
       "/skus/88194-black-tamarack.jpg"
@@ -206,7 +250,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 0,
+    "price": 52,
     "img": "/skus/88193-black-tamarack.jpg",
     "imgs": [
       "/skus/88193-black-tamarack.jpg"
@@ -227,7 +271,7 @@ export const allProducts = [
       "#1a1a18",
       "#079e75"
     ],
-    "price": 0,
+    "price": 19.5,
     "img": "/skus/8800-kellygreen-tamarack.png",
     "imgs": [
       "/skus/8800-black-tamarack.png",
@@ -248,7 +292,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 0,
+    "price": 52.5,
     "img": "/skus/78193-black-tamarack.png",
     "imgs": [
       "/skus/78193-black-tamarack.png"
@@ -268,7 +312,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 0,
+    "price": 45,
     "img": "/skus/78194-black-tamarack.png",
     "imgs": [
       "/skus/78194-black-tamarack.png"
@@ -288,7 +332,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 0,
+    "price": 189,
     "img": "/skus/106673-black-tamarack.png",
     "imgs": [
       "/skus/106673-black-tamarack.png"
@@ -309,7 +353,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 0,
+    "price": 20,
     "img": "/skus/i8502-tamarack.png",
     "imgs": [
       "/skus/i8502-tamarack.png",
@@ -328,7 +372,7 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 0,
+    "price": 14.75,
     "img": "/skus/DK24-tamarack.png",
     "imgs": [
       "/skus/DK24-tamarack.png"
@@ -346,7 +390,7 @@ export const allProducts = [
       "#1a1a18",
       "#008652"
     ],
-    "price": 0,
+    "price": 40,
     "img": "/skus/S445-kellygreen-tamarack.png",
     "imgs": [
       "/skus/S445-black-tamarack.png",
@@ -367,35 +411,13 @@ export const allProducts = [
     "colors": [
       "#1a1a18"
     ],
-    "price": 0,
+    "price": 199,
     "img": "/skus/106674-black-tamarack.png",
     "imgs": [
       "/skus/106674-black-tamarack.png"
     ],
     "material": "100% ring-spun cotton duck",
     "details": "Arctic-weight quilted lining, Corduroy-trimmed collar, Triple-stitched main seams, Two chest pockets, Two lower-front pockets, #106674",
-    "portals": [
-      "labourers"
-    ]
-  },
-  {
-    "sku": "TM-20",
-    "name": "Carhartt Storm Defender Jacket",
-    "category": "Jackets",
-    "sizes": "S - 4XL / LT - 2XLT",
-    "badge": "",
-    "colors": [
-      "#44372b",
-      "#1a1a18"
-    ],
-    "price": 0,
-    "img": "/skus/105751-tarmac-tamarack.png",
-    "imgs": [
-      "/skus/105751-tarmac-tamarack.png",
-      "/skus/105751-black-tamarack.png"
-    ],
-    "material": "4.2 oz 100% nylon",
-    "details": "Storm Defender waterproof breathable technology, 10K/5K rating, Wind Fighter technology, Relaxed fit, Water-repellent front zip, Adjustable hood, Drawcord-adjustable droptail hem, Packable into left lower pocket, Zippered chest and two lower pockets, #105751",
     "portals": [
       "labourers"
     ]
@@ -409,7 +431,7 @@ export const allProducts = [
     "colors": [
       "#C6D219"
     ],
-    "price": 0,
+    "price": 165,
     "img": "/skus/6328JG-safetygreen-tamarack.png",
     "imgs": [
       "/skus/6328JG-safetygreen-tamarack.png"
