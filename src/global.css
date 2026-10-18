@@ -15394,7 +15394,7 @@ html { background: rgb(223, 226, 230) !important; }
    it a touch left (header + footer) so it clears the "k". */
 .site-header__logo .brand-cluster__apparel--fr,
 .site-footer__brand .brand-cluster__apparel--fr {
-  transform: translate(calc(-50% - 16px), -50%);
+  transform: translate(calc(-50% - 13px), -50%);
   /* Slightly tighter tracking for the longer French word (English keeps 0.14em). */
   letter-spacing: 0.11em;
 }
