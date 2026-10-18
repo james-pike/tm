@@ -19,7 +19,7 @@ import { SecondaryBarContext } from "../context/secondary-bar";
 import type { Locale } from "../i18n";
 import { allProducts, colorName, categoryLabel } from "./apparel/products";
 import { CATEGORY_ICONS } from "../lib/categories";
-import { PORTALS, isPortal, currentSeason, remainingAllowance, isApprovalSku } from "../lib/portals";
+import { PORTALS, isPortal, portalLabel, currentSeason, remainingAllowance, isApprovalSku } from "../lib/portals";
 import type { Portal } from "../lib/portals";
 import { AllowancePanel } from "../components/allowance-panel/allowance-panel";
 import { getGiftCard, giftContribution, deductGiftCard } from "../lib/giftcards";
@@ -186,10 +186,11 @@ export const useSubmitOrder = routeAction$(
       return fail(401, { message: "Not authenticated" });
     }
     const lt = getLoginType(cookie) || "clerks";
-    // Each portal's orders go to their own vendor bucket so the admin can tell
-    // the four lineups apart; all share the TM-<n> order numbering (the sequence
-    // counts vendor LIKE 'tamarack%').
-    const vendor = `tamarack-${lt}`;
+    // All Tamarack orders share ONE vendor bucket ('tamarack') and the TM-<n>
+    // numbering; the portal (which lineup ordered) is kept as a tag in emp_dept
+    // so the admin / approvals list can still tell the four lineups apart.
+    const vendor = "tamarack";
+    const portalTag = portalLabel(lt) || lt;
     // Read from non-prefixed names first, fall back to VITE_* for backward compat.
     // Both are safe at runtime — env.get() reads server env, never bundles.
     const tursoUrl = env.get("TURSO_URL") || env.get("VITE_TURSO_URL");
@@ -326,7 +327,7 @@ export const useSubmitOrder = routeAction$(
             // NOT — for card orders they travel through Stripe metadata to the
             // webhook, never a column here. See the privacy policy.
             employee.name || "",
-            "",
+            portalTag, // emp_dept carries the portal tag (which lineup ordered)
             employee.po || "",
             JSON.stringify(items),
             total,

@@ -434,7 +434,7 @@ export default component$(() => {
         <Modal.Panel class="modal-overlay">
           <div class="modal order-confirm">
             <div class="order-confirm__badge" aria-hidden="true">
-              <img class="order-confirm__pinwheel" src="/logo.png" alt="" width="200" height="200" />
+              <img class="order-confirm__brandmark" src="/footer-mark.png" alt="" width="311" height="247" />
               <svg class="order-confirm__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <h2 class="order-confirm__title">{t("order.title", locale.value)}</h2>
