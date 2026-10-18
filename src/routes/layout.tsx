@@ -1298,7 +1298,7 @@ export default component$(() => {
             }}
           >
             <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
-            <span class="brand-cluster__apparel">{t("brand.apparel", locale.value)}</span>
+            <span class={`brand-cluster__apparel ${locale.value === "fr" ? "brand-cluster__apparel--fr" : ""}`}>{t("brand.apparel", locale.value)}</span>
           </Link>
           <nav class="site-header__categories">
             <Link href="/" class={loc.url.pathname === "/" ? "active" : ""}>{t("nav.home", locale.value)}</Link>
@@ -1600,7 +1600,7 @@ export default component$(() => {
         <div class="site-footer__inner">
           <div class="site-footer__brand brand-cluster">
             <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
-            <span class="brand-cluster__apparel">{t("brand.apparel", locale.value)}</span>
+            <span class={`brand-cluster__apparel ${locale.value === "fr" ? "brand-cluster__apparel--fr" : ""}`}>{t("brand.apparel", locale.value)}</span>
           </div>
           <div class="site-footer__col">
           {loginType.value === "safety" && (
