@@ -4,6 +4,7 @@ import { createClient } from "@libsql/client";
 import { ProductCatalog } from "../../components/product-catalog/product-catalog";
 import { Approvals } from "../../components/approvals/approvals";
 import { getLoginType, LoginTypeContext, useLogout } from "../layout";
+import { colorName } from "../apparel/products";
 
 // ONE shared shell for the whole shop: the catalog at "/" and each product at
 // "/<sku>/". The sidebar + header live inside ProductCatalog and stay mounted as
@@ -41,19 +42,34 @@ export const usePendingApprovals = routeLoader$<PendingOrder[]>(async ({ cookie,
   if (getLoginType(cookie) !== "authorizer") return [];
   try {
     const db = dbFromEnv(env);
+    // The TM-<n> number is the order's position within all 'tamarack' orders by
+    // id (matches cm-admin: 1st tamarack order = TM-1), or the persisted
+    // order_no when present — NOT the raw DB row id.
     const r = await db.execute(
-      "SELECT id, emp_name, emp_dept, po_number, items, total, created_at FROM orders WHERE vendor='tamarack' AND status='awaiting_authorization' ORDER BY created_at DESC",
+      `SELECT o.id, o.emp_name, o.emp_dept, o.po_number, o.items, o.total, o.created_at, o.order_no,
+              (SELECT COUNT(*) FROM orders x WHERE x.vendor='tamarack' AND x.id <= o.id) AS seq
+       FROM orders o
+       WHERE o.vendor='tamarack' AND o.status='awaiting_authorization'
+       ORDER BY o.created_at DESC`,
     );
-    return r.rows.map((row: any) => ({
-      id: Number(row.id),
-      orderNumber: `TM-${Number(row.id)}`,
-      empName: String(row.emp_name || ""),
-      empDept: String(row.emp_dept || ""),
-      po: String(row.po_number || ""),
-      total: Number(row.total) || 0,
-      items: JSON.parse(row.items || "[]"),
-      createdAt: String(row.created_at || ""),
-    }));
+    return r.rows.map((row: any) => {
+      const n = row.order_no ?? row.seq ?? row.id;
+      const items = (JSON.parse(row.items || "[]") as any[]).map((it) => ({
+        ...it,
+        // Resolve hex colours to their name (e.g. "#1a1a18" -> "Black").
+        color: typeof it.color === "string" && it.color.startsWith("#") ? colorName(it.color, "en") : it.color,
+      }));
+      return {
+        id: Number(row.id),
+        orderNumber: `TM-${Number(n)}`,
+        empName: String(row.emp_name || ""),
+        empDept: String(row.emp_dept || ""),
+        po: String(row.po_number || ""),
+        total: Number(row.total) || 0,
+        items,
+        createdAt: String(row.created_at || ""),
+      };
+    });
   } catch (e) {
     console.error("Failed to load pending approvals:", e);
     return [];
