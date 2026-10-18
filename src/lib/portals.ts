@@ -57,10 +57,10 @@ const DRESS_SHIRTS = ["TM-12", "TM-13", "TM-14", "TM-15", "TM-17", "TM-19"];
 const TECH_SUPERVISOR_ALLOWANCES: AllowanceGroup[] = [
   { key: "shirts", label: "dress & golf shirts", skus: DRESS_SHIRTS, cap: 5, season: "all" },
   { key: "cap", label: "ball cap", skus: ["TM-9"], cap: 1, season: "summer" },
-  { key: "fleece", label: "zip fleece or hooded sweatshirt", skus: ["TM-11", "TM-3", "TM-8"], cap: 1, season: "winter" },
-  // Both Carhartt duck coats count as the winter coat.
-  { key: "wintercoat", label: "winter coat", skus: ["TM-18", "TM-16"], cap: 1, season: "winter", approval: true },
-  { key: "raincoat", label: "rain coat", skus: ["TM-20"], cap: 1, season: "winter", approval: true },
+  { key: "fleece", label: "zip fleece / hooded sweatshirt", skus: ["TM-11", "TM-3", "TM-8"], cap: 1, season: "winter" },
+  // One winter-coat allowance covering both Carhartt duck coats and the Storm
+  // Defender rain jacket (any one of the three).
+  { key: "wintercoat", label: "winter coat / rain jacket", skus: ["TM-18", "TM-16", "TM-20"], cap: 1, season: "winter", approval: true },
   { key: "toque", label: "toque", skus: ["TM-10"], cap: 1, season: "winter" },
 ];
 
@@ -82,8 +82,7 @@ export const PORTAL_ALLOWANCES: Record<Portal, AllowanceGroup[]> = {
   // Site Clerks — one order per year, no seasonal split (every group is "all").
   clerks: [
     { key: "shirts", label: "dress & golf shirts", skus: DRESS_SHIRTS, cap: 5, season: "all" },
-    { key: "fleece", label: "zip fleece", skus: ["TM-11"], cap: 1, season: "all" },
-    { key: "hoodie", label: "hooded sweatshirt", skus: ["TM-22"], cap: 1, season: "all" },
+    { key: "fleece", label: "zip fleece / hooded sweatshirt", skus: ["TM-11", "TM-22"], cap: 1, season: "all" },
     { key: "cap", label: "ball cap", skus: ["TM-9"], cap: 1, season: "all" },
     // The Carhartt Iconic Duck jacket (TM-16) is a Labourers-only item; Site
     // Clerks' hi-vis coat is just the Viking Handyman (TM-21).
