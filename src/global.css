@@ -3702,11 +3702,43 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 @media (max-width: 600px) {
   .login-modal.login-modal--split {
     flex-direction: column;
-    height: auto; min-height: 0; aspect-ratio: auto;
-    width: calc(100% - 1rem); max-width: 420px;
+    height: auto; min-height: 100dvh; aspect-ratio: auto;
+    /* Full-bleed on mobile: fill the screen, no side gap or white sign-edge ring. */
+    width: 100%; max-width: none;
+    border: none;
   }
-  .login-modal--split .login-modal__form-pane { flex: none; max-width: 100%; }
-  .login-modal__carousel { flex: none; height: 190px; width: 100%; }
+  /* Form pane sits directly below the image (its green no longer covers the
+     photo), so the image's own bottom fade stays visible. */
+  .login-modal--split .login-modal__form-pane { flex: 1 1 auto; max-width: 100%; position: relative; z-index: 1; overflow: visible; justify-content: flex-start; }
+  /* Pull the logo (transparent header) + the rest of the content up into the
+     image's faded bottom, so everything sits higher. */
+  .login-modal--split .login-modal__header { margin-top: -108px; }
+  /* Hero photo sits ABOVE the logo/form on mobile; its bottom edge blends down
+     into the green form pane below it. */
+  .login-modal__carousel { flex: none; height: 190px; width: 100%; position: relative; order: -1; }
+  .login-modal__carousel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(27, 101, 81, 0) 30%, #1b6551 92%);
+    pointer-events: none;
+  }
+  /* Match the form's horizontal inset to the logo header (1.75rem) so the
+     portals and fields line up with the wider logo. */
+  .login-modal--split .login-modal__form { padding-left: 1.75rem; padding-right: 1.75rem; }
+  /* Localization chip to the top-right of the whole card (over the image band),
+     not above the logo. The image band above the form pane is 190px tall. */
+  .login-modal__lang { top: calc(14px - 190px); right: 12px; }
+  /* APPAREL / VÊTEMENTS kicker scales with viewport width like the logo image,
+     so it stops overflowing on narrow phones (capped at the desktop 1.5rem). */
+  .login-modal--split .login-modal__brand--img .brand-apparel {
+    font-size: clamp(0.6rem, 5.6vw, 1.5rem);
+  }
+  /* Portal labels shrink with viewport width so a long role name stays on 2
+     lines (never 3) on narrow phones, keeping all four tiles the same height. */
+  .login-modal__form .login-portals--grid .login-portal {
+    font-size: clamp(0.56rem, 3.1vw, 0.76rem);
+  }
 }
 
 
