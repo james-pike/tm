@@ -1,5 +1,5 @@
 import { component$ } from "@builder.io/qwik";
-import type { PendingOrder } from "../../routes/(shop)/layout";
+import type { PendingOrder, DecisionRow } from "../../routes/(shop)/layout";
 
 // The order-approval area, shown to the authorizer login instead of the
 // storefront. Lists orders awaiting authorization with Approve / Deny. The
@@ -7,6 +7,7 @@ import type { PendingOrder } from "../../routes/(shop)/layout";
 // list without a manual refresh. `approve`/`deny` are the route action stores.
 interface Props {
   orders: PendingOrder[];
+  history: DecisionRow[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   approve: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,7 +16,7 @@ interface Props {
 
 const money = (n: number) => `$${(Number(n) || 0).toFixed(2)}`;
 
-export const Approvals = component$<Props>(({ orders, approve, deny }) => {
+export const Approvals = component$<Props>(({ orders, history, approve, deny }) => {
   return (
     <div class="approvals">
       <div class="approvals__head">
@@ -78,6 +79,27 @@ export const Approvals = component$<Props>(({ orders, approve, deny }) => {
             );
           })}
         </ul>
+      )}
+
+      {history.length > 0 && (
+        <div class="approvals__history">
+          <h2 class="approvals__history-title">Recent decisions</h2>
+          <ul class="approvals__history-list">
+            {history.map((h) => (
+              <li key={h.id} class={`approvals__history-row approvals__history-row--${h.decision}`}>
+                <span class={`approvals__history-badge approvals__history-badge--${h.decision}`}>
+                  {h.decision === "approved" ? "Approved" : "Denied"}
+                </span>
+                <span class="approvals__history-no">{h.orderNumber || "—"}</span>
+                <span class="approvals__history-emp">
+                  {h.empName}{h.empDept ? ` · ${h.empDept}` : ""}
+                </span>
+                <span class="approvals__history-total">{money(h.total)}</span>
+                <span class="approvals__history-at">{h.at}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

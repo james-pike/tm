@@ -15599,3 +15599,18 @@ html body .site-header .site-header__inner { background: transparent !important;
 .approvals__btn--deny:not(:disabled):hover { background: #fdf2f2; }
 .approvals__logout { align-self: flex-start; padding: 0.4rem 0.9rem; border-radius: 6px; border: 1px solid var(--ce-gray-300, #d1d5db); background: #fff; color: var(--ce-gray-600, #4b5563); font-weight: 600; font-size: 0.82rem; cursor: pointer; }
 .approvals__logout:hover { background: var(--ce-gray-50, #f9fafb); }
+
+/* Decision history — what the authorizer has approved / denied. */
+.approvals__history { max-width: 860px; margin: 2.5rem auto 0; padding: 0 1rem 1rem; }
+.approvals__history-title { font-size: 1.05rem; font-weight: 700; color: var(--ce-gray-700, #374151); margin: 0 0 0.75rem; }
+.approvals__history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+.approvals__history-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0.8rem; background: #fff; border: 1px solid var(--ce-gray-200, #e5e7eb); border-radius: 8px; font-size: 0.86rem; }
+.approvals__history-row--denied { background: #fef2f2; border-color: #fcdcdc; }
+.approvals__history-badge { flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; }
+.approvals__history-badge--approved { background: #dcfce7; color: #166534; }
+.approvals__history-badge--denied { background: #fee2e2; color: #991b1b; }
+.approvals__history-no { font-weight: 700; color: var(--ce-green-dark, #12463a); min-width: 54px; }
+.approvals__history-emp { flex: 1 1 auto; color: var(--ce-gray-700, #374151); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.approvals__history-total { font-weight: 700; color: var(--ce-gray-800, #1f2937); }
+.approvals__history-at { color: var(--ce-gray-400, #9ca3af); font-size: 0.78rem; white-space: nowrap; }
+@media (max-width: 600px) { .approvals__history-at { display: none; } }

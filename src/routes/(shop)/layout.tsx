@@ -73,6 +73,45 @@ export const usePendingApprovals = routeLoader$<PendingOrder[]>(async ({ cookie,
   }
 });
 
+export interface DecisionRow {
+  id: number;
+  orderNumber: string; // TM-<n> for approved; "" for denied (never numbered)
+  empName: string;
+  empDept: string;
+  total: number;
+  decision: "approved" | "denied";
+  at: string; // updated_at (when the decision was made)
+}
+
+// Recent approve/deny decisions, so the authorizer can see what they've actioned.
+// Approved = it got a persistent order_no; denied = status 'rejected'. Auto-
+// revalidates after each approve/deny, so a just-actioned order appears here.
+export const useDecisionHistory = routeLoader$<DecisionRow[]>(async ({ cookie, env }) => {
+  if (getLoginType(cookie) !== "authorizer") return [];
+  try {
+    const db = dbFromEnv(env);
+    const r = await db.execute(
+      `SELECT id, emp_name, emp_dept, total, status, order_no, updated_at
+       FROM orders
+       WHERE vendor='tamarack' AND (status='rejected' OR order_no IS NOT NULL)
+       ORDER BY updated_at DESC
+       LIMIT 40`,
+    );
+    return r.rows.map((row: any) => ({
+      id: Number(row.id),
+      orderNumber: row.order_no ? `TM-${Number(row.order_no)}` : "",
+      empName: String(row.emp_name || ""),
+      empDept: String(row.emp_dept || ""),
+      total: Number(row.total) || 0,
+      decision: (row.status === "rejected" ? "denied" : "approved") as "approved" | "denied",
+      at: String(row.updated_at || ""),
+    }));
+  } catch (e) {
+    console.error("Failed to load decision history:", e);
+    return [];
+  }
+});
+
 // Approve: flip awaiting_authorization -> pending (the order becomes a real,
 // fulfillable order). Guarded so it only acts on an order still awaiting.
 export const useApproveOrder = routeAction$(
@@ -119,13 +158,14 @@ export default component$(() => {
   const nav = useNavigate();
   const loginType = useContext(LoginTypeContext);
   const pending = usePendingApprovals();
+  const history = useDecisionHistory();
   const approve = useApproveOrder();
   const deny = useDenyOrder();
 
   if (loginType.value === "authorizer") {
     return (
       <div class="apparel-page dot-pattern">
-        <Approvals orders={pending.value} approve={approve} deny={deny} />
+        <Approvals orders={pending.value} history={history.value} approve={approve} deny={deny} />
       </div>
     );
   }
