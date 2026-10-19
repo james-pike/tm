@@ -15604,8 +15604,13 @@ html body .site-header .site-header__inner { background: transparent !important;
 .approvals__history { max-width: 860px; margin: 2.5rem auto 0; padding: 0 1rem 1rem; }
 .approvals__history-title { font-size: 1.05rem; font-weight: 700; color: var(--ce-gray-700, #374151); margin: 0 0 0.75rem; }
 .approvals__history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
-.approvals__history-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0.8rem; background: #fff; border: 1px solid var(--ce-gray-200, #e5e7eb); border-radius: 8px; font-size: 0.86rem; }
+.approvals__history-row { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--ce-gray-200, #e5e7eb); border-radius: 8px; overflow: hidden; }
 .approvals__history-row--denied { background: #fef2f2; border-color: #fcdcdc; }
+.approvals__history-head { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.55rem 0.8rem; background: none; border: none; cursor: pointer; text-align: left; font-size: 0.86rem; font-family: inherit; color: inherit; }
+.approvals__history-head:hover { background: rgba(0, 0, 0, 0.025); }
+.approvals__history-chev { margin-left: 0.25rem; color: var(--ce-gray-400, #9ca3af); font-size: 0.8rem; }
+.approvals__history-items { list-style: none; margin: 0; padding: 0.4rem 0.85rem 0.7rem; border-top: 1px solid var(--ce-gray-100, #f3f4f6); display: flex; flex-direction: column; gap: 0.3rem; background: rgba(0, 0, 0, 0.015); }
+.approvals__history-items li { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.85rem; }
 .approvals__history-badge { flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; }
 .approvals__history-badge--approved { background: #dcfce7; color: #166534; }
 .approvals__history-badge--denied { background: #fee2e2; color: #991b1b; }

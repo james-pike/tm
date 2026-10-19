@@ -1,4 +1,4 @@
-import { component$ } from "@builder.io/qwik";
+import { component$, useSignal } from "@builder.io/qwik";
 import type { PendingOrder, DecisionRow } from "../../routes/(shop)/layout";
 
 // The order-approval area, shown to the authorizer login instead of the
@@ -17,6 +17,7 @@ interface Props {
 const money = (n: number) => `$${(Number(n) || 0).toFixed(2)}`;
 
 export const Approvals = component$<Props>(({ orders, history, approve, deny }) => {
+  const openId = useSignal<number | null>(null);
   return (
     <div class="approvals">
       <div class="approvals__head">
@@ -83,19 +84,40 @@ export const Approvals = component$<Props>(({ orders, history, approve, deny }) 
 
       {history.length > 0 && (
         <div class="approvals__history">
-          <h2 class="approvals__history-title">Recent decisions</h2>
+          <h2 class="approvals__history-title">Recent Orders</h2>
           <ul class="approvals__history-list">
             {history.map((h) => (
-              <li key={h.id} class={`approvals__history-row approvals__history-row--${h.decision}`}>
-                <span class={`approvals__history-badge approvals__history-badge--${h.decision}`}>
-                  {h.decision === "approved" ? "Approved" : "Denied"}
-                </span>
-                <span class="approvals__history-no">{h.orderNumber || "—"}</span>
-                <span class="approvals__history-emp">
-                  {h.empName}{h.empDept ? ` · ${h.empDept}` : ""}
-                </span>
-                <span class="approvals__history-total">{money(h.total)}</span>
-                <span class="approvals__history-at">{h.at}</span>
+              <li key={h.id} class={`approvals__history-row approvals__history-row--${h.decision} ${openId.value === h.id ? "is-open" : ""}`}>
+                <button
+                  type="button"
+                  class="approvals__history-head"
+                  aria-expanded={openId.value === h.id}
+                  onClick$={() => (openId.value = openId.value === h.id ? null : h.id)}
+                >
+                  <span class={`approvals__history-badge approvals__history-badge--${h.decision}`}>
+                    {h.decision === "approved" ? "Approved" : "Denied"}
+                  </span>
+                  <span class="approvals__history-no">{h.orderNumber || "—"}</span>
+                  <span class="approvals__history-emp">
+                    {h.empName}{h.empDept ? ` · ${h.empDept}` : ""}
+                  </span>
+                  <span class="approvals__history-total">{money(h.total)}</span>
+                  <span class="approvals__history-at">{h.at}</span>
+                  <span class="approvals__history-chev" aria-hidden="true">{openId.value === h.id ? "▾" : "▸"}</span>
+                </button>
+                {openId.value === h.id && (
+                  <ul class="approvals__history-items">
+                    {h.items.map((it, i) => (
+                      <li key={i}>
+                        <span class="approvals__item-name">{it.name}</span>
+                        <span class="approvals__item-detail">
+                          {[it.color, it.size].filter(Boolean).join(" / ")}
+                          {it.quantity ? ` ×${it.quantity}` : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>

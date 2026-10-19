@@ -81,6 +81,7 @@ export interface DecisionRow {
   total: number;
   decision: "approved" | "denied";
   at: string; // updated_at (when the decision was made)
+  items: { name: string; sku?: string; color?: string; size?: string; quantity: number; price: number }[];
 }
 
 // Recent approve/deny decisions, so the authorizer can see what they've actioned.
@@ -91,7 +92,7 @@ export const useDecisionHistory = routeLoader$<DecisionRow[]>(async ({ cookie, e
   try {
     const db = dbFromEnv(env);
     const r = await db.execute(
-      `SELECT id, emp_name, emp_dept, total, status, order_no, updated_at
+      `SELECT id, emp_name, emp_dept, total, status, order_no, updated_at, items
        FROM orders
        WHERE vendor='tamarack' AND (status='rejected' OR order_no IS NOT NULL)
        ORDER BY updated_at DESC
@@ -105,6 +106,10 @@ export const useDecisionHistory = routeLoader$<DecisionRow[]>(async ({ cookie, e
       total: Number(row.total) || 0,
       decision: (row.status === "rejected" ? "denied" : "approved") as "approved" | "denied",
       at: String(row.updated_at || ""),
+      items: (JSON.parse(row.items || "[]") as any[]).map((it) => ({
+        ...it,
+        color: typeof it.color === "string" && it.color.startsWith("#") ? colorName(it.color, "en") : it.color,
+      })),
     }));
   } catch (e) {
     console.error("Failed to load decision history:", e);
