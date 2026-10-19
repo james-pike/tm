@@ -204,8 +204,13 @@ export const useSubmitOrder = routeAction$(
     // flagged regardless of what the client sent. This travels with the item
     // (stored in the items JSON and shown on the confirmation email).
     const season = currentSeason();
+    // Re-price every line from the live catalog (never trust the client's cart
+    // price — a stale cart snapshot could carry a $0 or outdated price). Fall
+    // back to the submitted price only for an item not found in the catalog.
+    const priceBySku = new Map(allProducts.map((p) => [p.sku, Number(p.price) || 0]));
     const items = data.items.map((i) => ({
       ...i,
+      price: i.sku && priceBySku.has(i.sku) ? (priceBySku.get(i.sku) as number) : (Number(i.price) || 0),
       approval: !!i.approval || (!!i.sku && isApprovalSku(lt as Portal, season, i.sku)),
     }));
     const paymentMethod = (data.paymentMethod || "po") as PaymentMethod;

@@ -3804,11 +3804,19 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   display: flex; justify-content: space-between; align-items: center;
   flex-wrap: wrap; gap: 1rem;
 }
-/* Authorizer (admin) mode: the logo + shop links are hidden, so the footer is
-   just the contact block — centre it on every breakpoint (overrides the desktop
-   row / tablet grid). */
-.site-footer--admin .site-footer__inner { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.site-footer--admin .site-footer__contact-block { align-items: center; justify-self: center; }
+/* Authorizer (admin) mode: logo + shop links are hidden, so the footer is just
+   the contact block — email centred, with Privacy Policy + language on one line
+   pinned to the right corner. */
+.site-footer--admin .site-footer__inner { display: flex; flex-direction: row; align-items: center; justify-content: center; position: relative; min-height: 2.25rem; }
+.site-footer--admin .site-footer__contact-block { display: contents; }
+.site-footer--admin .site-footer__contact--inline { justify-content: center; }
+.site-footer--admin .site-footer__legal-row { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: row; align-items: center; gap: 1.1rem; margin: 0; }
+.site-footer--admin .site-footer__privacy-link { display: inline !important; }
+.site-footer--admin .site-footer__locale { display: inline-flex !important; }
+@media (max-width: 600px) {
+  .site-footer--admin .site-footer__inner { flex-direction: column; }
+  .site-footer--admin .site-footer__legal-row { position: static; transform: none; margin-top: 0.4rem; }
+}
 .site-footer__brand {
   display: flex; align-items: center; gap: 0.75rem;
   font-weight: 500; color: rgba(255,255,255,0.5); font-size: 0.85rem;
