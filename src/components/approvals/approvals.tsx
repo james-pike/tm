@@ -37,7 +37,7 @@ export const Approvals = component$<Props>(({ orders, history, approve, deny }) 
               <li key={o.id} class="approvals__card">
                 <div class="approvals__card-head">
                   <div>
-                    <div class="approvals__order-no">{o.po ? `PO ${o.po}` : o.orderNumber}</div>
+                    <div class="approvals__order-no">{o.po ? `PO# ${o.po}` : o.orderNumber}</div>
                     <div class="approvals__meta">
                       {o.empName || "—"}{o.empDept ? ` · ${o.empDept}` : ""}
                     </div>
