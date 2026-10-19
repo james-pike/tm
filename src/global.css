@@ -15601,7 +15601,9 @@ html body .site-header .site-header__inner { background: transparent !important;
 .approvals__logout:hover { background: var(--ce-gray-50, #f9fafb); }
 
 /* Decision history — what the authorizer has approved / denied. */
-.approvals__history { max-width: 860px; margin: 2.5rem auto 0; padding: 0 1rem 1rem; }
+/* Align with the pending list above — the parent .approvals already provides the
+   max-width + side padding, so don't add more here. */
+.approvals__history { margin-top: 2.5rem; padding-bottom: 1rem; }
 .approvals__history-title { font-size: 1.05rem; font-weight: 700; color: var(--ce-gray-700, #374151); margin: 0 0 0.75rem; }
 .approvals__history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
 .approvals__history-row { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--ce-gray-200, #e5e7eb); border-radius: 8px; overflow: hidden; }
