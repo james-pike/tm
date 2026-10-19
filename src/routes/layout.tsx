@@ -318,14 +318,14 @@ export const useSubmitOrder = routeAction$(
 
       try {
         const result = await db.execute({
-          sql: `INSERT INTO orders (vendor, emp_number, emp_name, emp_dept, po_number, items, total, status, payment_method, gift_card_code, gift_amount, card_amount, device, idempotency_key, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+          sql: `INSERT INTO orders (vendor, emp_number, emp_name, emp_dept, po_number, items, total, status, payment_method, gift_card_code, gift_amount, card_amount, device, idempotency_key, province, ship_address, ship_city, ship_postal, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
           args: [
             vendor,
             "",
-            // The name IS stored (so the admin knows who ordered); email/phone are
-            // NOT — for card orders they travel through Stripe metadata to the
-            // webhook, never a column here. See the privacy policy.
+            // The name + shipping address ARE stored (so the admin can fulfill the
+            // order); email/phone are NOT — for card orders they travel through
+            // Stripe metadata to the webhook, never a column here.
             employee.name || "",
             portalTag, // emp_dept carries the portal tag (which lineup ordered)
             employee.po || "",
@@ -338,6 +338,10 @@ export const useSubmitOrder = routeAction$(
             cardAmount,
             data.device || null,
             idemKey,
+            province,
+            employee.address1 || "",
+            employee.city || "",
+            employee.postal || "",
           ],
         });
         orderId = (result.lastInsertRowid as any) ?? null;
