@@ -207,7 +207,7 @@ export async function sendApprovalRequestEmail(
     await resend.emails.send({
       from: cfg.from,
       to: cfg.to,
-      subject: `Approval needed — Order ${o.orderNumber} — ${o.employee.name}`,
+      subject: `Approval needed${o.orderNumber ? ` — Order ${o.orderNumber}` : ""} — ${o.employee.name}`,
       html: banner + buildOrderEmailHtml(o),
     });
   } catch (err) {

@@ -3,7 +3,7 @@ import { useLocation, useNavigate, routeLoader$, routeAction$, zod$, z } from "@
 import { createClient } from "@libsql/client";
 import { ProductCatalog } from "../../components/product-catalog/product-catalog";
 import { Approvals } from "../../components/approvals/approvals";
-import { getLoginType, LoginTypeContext, useLogout } from "../layout";
+import { getLoginType, LoginTypeContext } from "../layout";
 import { colorName } from "../apparel/products";
 
 // ONE shared shell for the whole shop: the catalog at "/" and each product at
@@ -42,18 +42,15 @@ export const usePendingApprovals = routeLoader$<PendingOrder[]>(async ({ cookie,
   if (getLoginType(cookie) !== "authorizer") return [];
   try {
     const db = dbFromEnv(env);
-    // The TM-<n> number is the order's position within all 'tamarack' orders by
-    // id (matches cm-admin: 1st tamarack order = TM-1), or the persisted
-    // order_no when present — NOT the raw DB row id.
+    // These are unapproved requests — they have no TM number yet (it's assigned
+    // on approval as order_no), so they show as "New request".
     const r = await db.execute(
-      `SELECT o.id, o.emp_name, o.emp_dept, o.po_number, o.items, o.total, o.created_at, o.order_no,
-              (SELECT COUNT(*) FROM orders x WHERE x.vendor='tamarack' AND x.id <= o.id) AS seq
+      `SELECT o.id, o.emp_name, o.emp_dept, o.po_number, o.items, o.total, o.created_at, o.order_no
        FROM orders o
        WHERE o.vendor='tamarack' AND o.status='awaiting_authorization'
        ORDER BY o.created_at DESC`,
     );
     return r.rows.map((row: any) => {
-      const n = row.order_no ?? row.seq ?? row.id;
       const items = (JSON.parse(row.items || "[]") as any[]).map((it) => ({
         ...it,
         // Resolve hex colours to their name (e.g. "#1a1a18" -> "Black").
@@ -61,7 +58,7 @@ export const usePendingApprovals = routeLoader$<PendingOrder[]>(async ({ cookie,
       }));
       return {
         id: Number(row.id),
-        orderNumber: `TM-${Number(n)}`,
+        orderNumber: row.order_no ? `TM-${Number(row.order_no)}` : "New request",
         empName: String(row.emp_name || ""),
         empDept: String(row.emp_dept || ""),
         po: String(row.po_number || ""),
@@ -83,9 +80,13 @@ export const useApproveOrder = routeAction$(
     if (getLoginType(cookie) !== "authorizer") return fail(403, { message: "Not authorized" });
     try {
       const db = dbFromEnv(env);
+      // Assign the next persistent TM number ON APPROVAL (gap-free, in approval
+      // order). Unapproved orders have no order_no — they aren't numbered yet.
+      const nx = await db.execute("SELECT COALESCE(MAX(order_no), 0) + 1 AS n FROM orders WHERE vendor='tamarack'");
+      const orderNo = Number((nx.rows[0] as { n?: number } | undefined)?.n) || 1;
       await db.execute({
-        sql: "UPDATE orders SET status='pending', updated_at=datetime('now') WHERE id=? AND vendor='tamarack' AND status='awaiting_authorization'",
-        args: [id],
+        sql: "UPDATE orders SET status='pending', order_no=?, updated_at=datetime('now') WHERE id=? AND vendor='tamarack' AND status='awaiting_authorization'",
+        args: [orderNo, id],
       });
       return { success: true, id };
     } catch (e: any) {
@@ -120,12 +121,11 @@ export default component$(() => {
   const pending = usePendingApprovals();
   const approve = useApproveOrder();
   const deny = useDenyOrder();
-  const logout = useLogout();
 
   if (loginType.value === "authorizer") {
     return (
       <div class="apparel-page dot-pattern">
-        <Approvals orders={pending.value} approve={approve} deny={deny} logout={logout} />
+        <Approvals orders={pending.value} approve={approve} deny={deny} />
       </div>
     );
   }

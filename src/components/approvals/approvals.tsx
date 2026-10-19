@@ -11,13 +11,11 @@ interface Props {
   approve: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deny: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logout: any;
 }
 
 const money = (n: number) => `$${(Number(n) || 0).toFixed(2)}`;
 
-export const Approvals = component$<Props>(({ orders, approve, deny, logout }) => {
+export const Approvals = component$<Props>(({ orders, approve, deny }) => {
   return (
     <div class="approvals">
       <div class="approvals__head">
@@ -25,7 +23,6 @@ export const Approvals = component$<Props>(({ orders, approve, deny, logout }) =
           <h1 class="approvals__title">Order approvals</h1>
           <span class="approvals__count">{orders.length} awaiting approval</span>
         </div>
-        <button type="button" class="approvals__logout" onClick$={() => logout.submit()}>Log out</button>
       </div>
 
       {orders.length === 0 ? (

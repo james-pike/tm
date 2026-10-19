@@ -377,12 +377,10 @@ export const useSubmitOrder = routeAction$(
         console.error("Order row not found after insert — order not confirmed", orderId);
         return fail(500, { message: "Order could not be confirmed. Please try again." });
       }
-      const seq = await db.execute({
-        sql: "SELECT COUNT(*) AS n FROM orders WHERE vendor LIKE 'tamarack%' AND id <= ?",
-        args: [orderId as any],
-      });
-      const n = Number((seq.rows[0] as any)?.n) || Number(orderId);
-      orderNumber = `TM-${n}`;
+      // The TM-<n> number is assigned on APPROVAL (a persistent order_no), not at
+      // placement — an unapproved order isn't a numbered order yet. So we leave
+      // orderNumber empty here; the emails omit the number accordingly.
+      orderNumber = "";
     } catch (err) {
       console.error("Failed to save order to database:", err);
       return fail(500, { message: "Order could not be saved. Please try again." });
@@ -1349,7 +1347,7 @@ export default component$(() => {
             <Link href="/" class={(!loc.url.pathname.startsWith("/privacy") && !loc.url.pathname.startsWith("/checkout")) ? "active" : ""}>{loginType.value === "tech" ? t("cat.Work Wear", locale.value) : t("nav.apparel", locale.value)}</Link>
           </nav>
           <nav class="site-header__nav">
-            {showSearch.value && (
+            {loginType.value !== "authorizer" && showSearch.value && (
               <button class="site-header__search-btn" onClick$={() => {
                 // If the cart drawer is open, close it first.
                 cartOpen.value = false;
@@ -1441,7 +1439,8 @@ export default component$(() => {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
               </button>
             )}
-            {/* EN/FR toggle moved to the footer. */}
+            {/* EN/FR toggle moved to the footer. Cart is hidden in authorizer mode. */}
+            {loginType.value !== "authorizer" && (
             <button class={`cart-btn ${cart.items.length > 0 ? "cart-btn--active" : ""}`} onClick$={() => { if (isCheckout.value) { cartOpen.value = true; nav("/"); return; } cartOpen.value = !cartOpen.value; if (cartOpen.value) menuOpen.value = false; if (!cartOpen.value) checkoutStep.value = "cart"; }}>
               <span class="cart-btn__label">{t("cart.mycart", locale.value)}</span>
               {cartOpen.value && !isCheckout.value ? (
@@ -1453,6 +1452,7 @@ export default component$(() => {
                 </>
               )}
             </button>
+            )}
             <Form action={logoutAction} reloadDocument class="logout-form">
               <button type="submit" class="logout-btn" aria-label={t("login.logout", locale.value)}>
                 <span class="logout-btn__label">{t("login.logout", locale.value)}</span>
@@ -1464,7 +1464,7 @@ export default component$(() => {
                 to hold the width → no shift); on mobile it's an in-flow flex
                 field that fills up to the hamburger (which stays at the far
                 right). */}
-            {showSearch.value && (
+            {loginType.value !== "authorizer" && showSearch.value && (
               <div class="site-header__search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                 <input
@@ -1642,10 +1642,12 @@ export default component$(() => {
 
       <footer class="site-footer">
         <div class="site-footer__inner">
+          {loginType.value !== "authorizer" && (
           <div class="site-footer__brand brand-cluster">
             <img class="brand-cluster__logo" src="/tamarack-logo-white.png" alt="Tamarack Apparel" width="1451" height="250" />
             <span class={`brand-cluster__apparel ${locale.value === "fr" ? "brand-cluster__apparel--fr" : ""}`}>{t("brand.apparel", locale.value)}</span>
           </div>
+          )}
           <div class="site-footer__col">
           {loginType.value === "safety" && (
           <nav class="site-footer__links">
