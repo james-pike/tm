@@ -3804,6 +3804,11 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   display: flex; justify-content: space-between; align-items: center;
   flex-wrap: wrap; gap: 1rem;
 }
+/* Authorizer (admin) mode: the logo + shop links are hidden, so the footer is
+   just the contact block — centre it on every breakpoint (overrides the desktop
+   row / tablet grid). */
+.site-footer--admin .site-footer__inner { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.site-footer--admin .site-footer__contact-block { align-items: center; justify-self: center; }
 .site-footer__brand {
   display: flex; align-items: center; gap: 0.75rem;
   font-weight: 500; color: rgba(255,255,255,0.5); font-size: 0.85rem;

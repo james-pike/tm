@@ -1640,7 +1640,7 @@ export default component$(() => {
         <Slot />
       </main>
 
-      <footer class="site-footer">
+      <footer class={`site-footer ${loginType.value === "authorizer" ? "site-footer--admin" : ""}`}>
         <div class="site-footer__inner">
           {loginType.value !== "authorizer" && (
           <div class="site-footer__brand brand-cluster">
@@ -1657,7 +1657,7 @@ export default component$(() => {
             <Link class="site-footer__links-privacy" href="/privacy/">{t("footer.privacypolicy", locale.value)}</Link>
           </nav>
           )}
-          {(loginType.value !== "tech" && loginType.value !== "safety") && (
+          {(loginType.value !== "tech" && loginType.value !== "safety" && loginType.value !== "authorizer") && (
           <nav class="site-footer__links">
             <Link href="/#shirts" onClick$={(e) => { if (loc.url.pathname === "/") { e.preventDefault(); } window.dispatchEvent(new CustomEvent("select-category", { detail: "Shirts" })); const headerH = stickyTop(); const catalog = document.querySelector('.home-catalog'); if (catalog) { const top = catalog.getBoundingClientRect().top + window.scrollY - headerH + 2; window.scrollTo({ top, behavior: 'instant' }); } }}>{t("cat.Shirts", locale.value)}</Link>
             <Link href="/#jackets" onClick$={(e) => { if (loc.url.pathname === "/") { e.preventDefault(); } window.dispatchEvent(new CustomEvent("select-category", { detail: "Jackets" })); const headerH = stickyTop(); const catalog = document.querySelector('.home-catalog'); if (catalog) { const top = catalog.getBoundingClientRect().top + window.scrollY - headerH + 2; window.scrollTo({ top, behavior: 'instant' }); } }}>{t("cat.Jackets", locale.value)}</Link>
