@@ -99,19 +99,21 @@ export function buildOrderEmailHtml(o: OrderEmailData): string {
 
   return `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
-      <div style="background:#12463a;padding:18px 24px;border-radius:8px 8px 0 0">
-        ${o.logoUrl
-          ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-              <td style="vertical-align:middle;padding-right:12px"><img src="${o.logoUrl}" width="46" height="46" alt="Tamarack" style="display:block;width:46px;height:46px;border:0" /></td>
-              <td style="vertical-align:middle;font-family:sans-serif">
-                <div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:0.02em;line-height:1.15">TAMARACK</div>
-                <div style="color:#fff;font-size:15px;font-weight:600;letter-spacing:0.02em;line-height:1.15">APPAREL</div>
-                <div style="color:#cfe0ec;font-size:15px;font-weight:500;letter-spacing:0.16em;line-height:1.15">APPAREL</div>
+      <!-- Banner adopts cm's Outlook-safe format: a bgcolor <table> (Outlook
+           ignores CSS background on a <div>) with a prominent Order # line. -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#12463a" style="background-color:#12463a;border-radius:8px 8px 0 0;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <tr>
+          <td bgcolor="#12463a" style="background-color:#12463a;padding:20px 24px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+              ${o.logoUrl ? `<td style="padding-right:12px;vertical-align:middle"><img src="${esc(o.logoUrl)}" alt="Tamarack Apparel logo" width="54" height="54" style="display:block;width:54px;height:54px;margin-left:-5px"></td>` : ""}
+              <td style="vertical-align:middle">
+                <h1 style="color:#ffffff;margin:0;font-size:20px">Tamarack Apparel</h1>
+                ${o.orderNumber ? `<p style="color:#ffffff;margin:6px 0 0;font-size:19px;font-weight:700;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>` : ""}
               </td>
-            </tr></table>`
-          : `<h1 style="color:#fff;margin:0;font-size:20px">Tamarack Apparel</h1>`}
-        ${o.orderNumber ? `<p style="color:#cfe0ec;margin:10px 0 0;font-size:13px;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>` : ""}
-      </div>
+            </tr></table>
+          </td>
+        </tr>
+      </table>
       <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
         <p style="margin:0 0 16px;font-size:16px">${o.pendingApproval
           ? "We've received your order — it's now pending approval. You'll be contacted once it's approved."
