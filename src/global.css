@@ -3341,6 +3341,24 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   display: flex;
   align-items: center;
   gap: 5px;
+  position: relative;
+}
+
+/* Hovered colour name, shown just to the right of the swatches. Multi-colour
+   cards have no persistent name there, so it overlays (absolute) to avoid
+   shifting the size text — matches the mn2 storefront. Background matches the
+   card body (.product-card__info) so it reads cleanly over the sizes text. */
+.product-card__color-name--overlay {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 6px;
+  padding: 0 2px;
+  background: #f2f2f2;
+  white-space: nowrap;
+  z-index: 3;
+  pointer-events: none;
 }
 
 /* "+N" chip standing in for colours beyond the first four, so a many-coloured
@@ -3354,8 +3372,8 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 }
 
 .product-card__color-dot {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 3px;
   border: 1px solid var(--ce-border);
   cursor: pointer;
@@ -3698,12 +3716,14 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 }
 .login-modal__close:hover { background: rgba(255, 255, 255, 0.3); color: #fff; }
 
-/* Mobile: stack the form over a shorter image band. */
-@media (max-width: 600px) {
+/* Mobile + tablet: stack the form over a shorter image band. Both get the same
+   full-screen stacked login; the desktop side-by-side split is ≥1025px only
+   (tablet used to inherit the desktop 12:5 split and came out cramped). */
+@media (max-width: 1024px) {
   .login-modal.login-modal--split {
     flex-direction: column;
-    height: auto; min-height: 100dvh; aspect-ratio: auto;
-    /* Full-bleed on mobile: fill the screen, no side gap or white sign-edge ring. */
+    height: auto; min-height: 100dvh; max-height: none; aspect-ratio: auto;
+    /* Full-bleed: fill the screen, no side gap or white sign-edge ring. */
     width: 100%; max-width: none;
     border: none;
   }
@@ -3727,8 +3747,16 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
      portals and fields line up with the wider logo. */
   .login-modal--split .login-modal__form { padding-left: 1.75rem; padding-right: 1.75rem; }
   /* Localization chip to the top-right of the whole card (over the image band),
-     not above the logo. The image band above the form pane is 190px tall. */
-  .login-modal__lang { top: calc(14px - 190px); right: 12px; }
+     not above the logo. The image band above the form pane is 190px tall. Solid
+     Tamarack green (instead of the translucent white) so it reads clearly over
+     the photo. */
+  .login-modal__lang {
+    top: calc(14px - 190px); right: 12px;
+    background: #1B6551;
+    border-color: rgba(255, 255, 255, 0.55);
+    color: #fff;
+  }
+  .login-modal__lang:hover { background: #12463a; border-color: rgba(255, 255, 255, 0.7); }
   /* APPAREL / VÊTEMENTS kicker scales with viewport width like the logo image,
      so it stops overflowing on narrow phones (capped at the desktop 1.5rem). */
   .login-modal--split .login-modal__brand--img .brand-apparel {
@@ -3739,6 +3767,40 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   .login-modal__form .login-portals--grid .login-portal {
     font-size: clamp(0.56rem, 3.1vw, 0.76rem);
   }
+}
+
+/* Tablet (601–1024px): a contained, centred login "window" — not the phone's
+   full-bleed layout. Photo banner on top, green form pane below, framed by the
+   white sign-edge ring like the desktop split, with fixed proportional sizing so
+   the card reads the same at any tablet width. Comes after the ≤1024 phone block
+   so these win for 601–1024px. */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .login-overlay { align-items: center; }
+  .login-modal.login-modal--split {
+    width: min(540px, 90vw);
+    max-width: 540px;
+    min-height: 0;
+    margin: 1.5rem auto;
+    border: var(--wt-box-my) solid #fff;
+  }
+  /* Photo banner sized to the card; its bottom fades into the green form pane. */
+  .login-modal__carousel { height: 232px; }
+  /* Logo + content sit just into the photo's bottom fade. */
+  .login-modal--split .login-modal__header {
+    margin-top: -34px;
+    padding: 0 2.25rem 1.35rem;
+  }
+  .login-modal--split .login-modal__logo-white { height: 72px; }
+  .login-modal--split .login-modal__brand--img .brand-apparel { font-size: 1.7rem; }
+  /* Form + portal tiles: comfortable fixed gutters inside the card. */
+  .login-modal--split .login-modal__form { padding: 0.5rem 2.25rem 1.9rem; }
+  .login-modal__form .login-portals--grid .login-portal {
+    font-size: 0.86rem;
+    min-height: 58px;
+    padding: 10px 8px;
+  }
+  /* Language chip over the photo banner. */
+  .login-modal__lang { top: calc(14px - 232px); right: 14px; }
 }
 
 
@@ -3849,7 +3911,11 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   }
   /* Row 1: logo top-left, email with the Privacy Policy stacked beneath it
      top-right. */
-  .site-footer__brand { grid-column: 1; grid-row: 1; }
+  /* Hug the logo (don't stretch across the 1fr column), so the absolutely-placed
+     APPAREL/VÊTEMENTS overprint — positioned at left:70% of this box — lands on
+     the wordmark exactly like it does in the header, instead of floating off to
+     the right of a full-column-width box. */
+  .site-footer__brand { grid-column: 1; grid-row: 1; justify-self: start; }
   .site-footer__brand .brand-cluster__mark { width: 56px !important; height: 56px !important; }
   .site-footer__brand .brand-cluster__word { font-size: 1.05rem !important; }
   .site-footer__contact-block {
@@ -3900,6 +3966,13 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   /* The inline privacy link is hidden here (it's under the email), so drop the
      trailing dot on the last visible link. */
   .site-footer__links a:nth-last-child(2)::after { content: none; }
+}
+/* Tablet + mobile: drop the footer's category link list entirely. The footer
+   keeps the brand, the contact email and the legal row (Privacy Policy + the
+   language toggle, which live outside this nav). Last rule wins over both the
+   base ≤1024 and the tablet-only grid rules above. */
+@media (max-width: 1024px) {
+  .site-footer__links { display: none; }
 }
 
 /* ===== Apparel Catalog ===== */
@@ -15140,10 +15213,13 @@ html { background: rgb(223, 226, 230) !important; }
    scroll is locked so nothing shows behind it.
    ============================================================ */
 .mobile-coming-soon { display: none; }
+/* GATE OPENED — mobile + tablet now render the real responsive site. The
+   overlay styles below are kept (but not shown) so the gate can be re-enabled
+   fast if needed: flip the two values back to `overflow:hidden` + `display:flex`. */
 @media (max-width: 1024px) {
-  html:has(.mobile-coming-soon), body:has(.mobile-coming-soon) { overflow: hidden !important; }
+  html:has(.mobile-coming-soon), body:has(.mobile-coming-soon) { overflow: visible; }
   .mobile-coming-soon {
-    display: flex;
+    display: none;
     position: fixed;
     inset: 0;
     z-index: 2147483647;

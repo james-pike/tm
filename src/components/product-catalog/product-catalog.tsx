@@ -1,4 +1,4 @@
-import { component$, useSignal, useComputed$, useContext, $, useTask$, useVisibleTask$, useOnDocument, Slot } from "@builder.io/qwik";
+import { component$, useSignal, useComputed$, useContext, $, useTask$, useVisibleTask$, useOnDocument, Slot, type QRL } from "@builder.io/qwik";
 import { useLocation, useNavigate } from "@builder.io/qwik-city";
 import { LocaleContext, t } from "../../i18n";
 import { allProducts, categoryLabel, colorName } from "../../routes/apparel/products";
@@ -167,7 +167,7 @@ function scrollProductsBelowBar() {
 // 80+ requests and megabytes of photos on the first paint.
 const EAGER_CARDS = 4;
 
-const ProductCard = component$<{ item: Product; sku: string; index: number }>(({ item, sku, index }) => {
+export const ProductCard = component$<{ item: Product; sku: string; index: number; onSelect$?: QRL<(sku: string) => void> }>(({ item, sku, index, onSelect$ }) => {
   const locale = useContext(LocaleContext);
   const isTech = false; // Tamarack: single catalog, always show prices
   const eager = index < EAGER_CARDS;
@@ -176,6 +176,9 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
   // colour's variant (imgs[i] lines up with colors[i]) without leaving the
   // gallery. Reset to the primary image if a colour has no dedicated image.
   const activeImg = useSignal(item.img);
+  // Resolved name of the swatch being hovered — shown inline just right of the
+  // swatches (overlaid so it doesn't shift layout), matching the mn2 storefront.
+  const hoverColorName = useSignal("");
   const nav = useNavigate();
 
   // Warm the browser cache and fully decode a colour's photo BEFORE it's shown,
@@ -263,8 +266,8 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
       tabIndex={0}
       style={{ cursor: "pointer" }}
       class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}
-      onClick$={() => nav(`/${sku}/`)}
-      onKeyDown$={(e) => { if (e.key === "Enter") nav(`/${sku}/`); }}
+      onClick$={() => (onSelect$ ? onSelect$(sku) : nav(`/${sku}/`))}
+      onKeyDown$={(e) => { if (e.key === "Enter") { onSelect$ ? onSelect$(sku) : nav(`/${sku}/`); } }}
     >
       <div class="product-card__image">
         {/* Bound directly to the activeImg signal so a swatch click updates the
@@ -340,18 +343,22 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                       class="product-card__color-dot"
                       style={{ background: c, cursor: "pointer" }}
                       role="button"
-                      title={c.startsWith("#") ? colorName(c, locale.value) : c}
+                      // aria-label (not title) — a native title tooltip double-ups
+                      // with the inline colour-name label below.
+                      aria-label={c.startsWith("#") ? colorName(c, locale.value) : c}
                       // Stop the click synchronously (during the native event) so it
                       // never bubbles to the card's navigate handler. An imperative
                       // e.stopPropagation() in the async onClick$ below runs too late
                       // (Qwik resolves handlers lazily), which was opening the PDP.
                       stoppropagation:click
                       onMouseEnter$={() => {
+                        hoverColorName.value = c.startsWith("#") ? colorName(c, locale.value) : c;
                         // Pre-warm this colour's image on hover so the click swaps
                         // instantly, with no first-time flash.
                         const i = (item.colors || []).indexOf(c);
                         preload(i >= 0 && item.imgs && item.imgs[i] ? item.imgs[i] : item.img);
                       }}
+                      onMouseLeave$={() => { hoverColorName.value = ""; }}
                       onClick$={async (e) => {
                         e.stopPropagation();
                         const i = (item.colors || []).indexOf(c);
@@ -366,7 +373,9 @@ const ProductCard = component$<{ item: Product; sku: string; index: number }>(({
                   {extra > 0 && (
                     <span class="product-card__color-more" aria-label={`+${extra} more colours`}>+{extra}</span>
                   )}
-                  {singleColorName && <span class="product-card__color-name">{singleColorName}</span>}
+                  {(hoverColorName.value || singleColorName) && (
+                    <span class={`product-card__color-name${singleColorName ? "" : " product-card__color-name--overlay"}`}>{hoverColorName.value || singleColorName}</span>
+                  )}
                 </div>
               ) : <span />;
             })()}

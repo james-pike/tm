@@ -6,6 +6,7 @@ import { allProducts, colorName, categoryLabel } from "../../routes/apparel/prod
 import { expandSizes, sizeGroups, sortColorsWhiteLast, cardTitle, productGender } from "../../routes/apparel/utils";
 import { LoginTypeContext } from "../../routes/layout";
 import { ProductImage } from "../product-image/product-image";
+import { ProductCard } from "../product-catalog/product-catalog";
 import { allowedSkus, currentSeason, isPortal, remainingAllowance } from "../../lib/portals";
 
 // Tall sizes are rendered on their own row, separate from the regular sizes.
@@ -618,50 +619,16 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
         // "More <Category>" when there are same-category siblings; otherwise the
         // generic "More Apparel".
         const headingSuffix = hasSiblings ? catLabel : t("nav.apparel", locale.value);
-        // Card inner markup, shared by the grid + carousel below (inline, not a
-        // component, to keep it a plain render helper).
-        const cardInner = (item: typeof related[number], loading: "eager" | "lazy") => {
-          const g = productGender(item.name);
-          return (
-          <>
-            <div class="product-card__image">
-              <ProductImage src={item.img} alt={item.name} width={440} height={440} loading={loading} />
-            </div>
-            <div class="product-card__info">
-              <div class="product-card__name-row">
-                <div class="product-card__name">{cardTitle(item.name)}</div>
-                <div class="product-card__price-group">
-                  {!hidePrice && <div class="product-card__price">${(Number(item.price) || 0).toFixed(2)}</div>}
-                  <span class="product-card__sizes">
-                    {(g === "Men" || g === "Women") && (
-                      <span class="product-card__sizes-gender">{t(g === "Men" ? "gender.mens" : "gender.womens", locale.value)}{" "}</span>
-                    )}
-                    {(item.sizes === "One Size" ? [t("modal.onesize", locale.value)] : sizeGroups(item.sizes)).map((sg) => (
-                      <span key={sg} class="product-card__sizes-line">{sg}</span>
-                    ))}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </>
-          );
-        };
+        // Related cards reuse the gallery's <ProductCard> so they carry the same
+        // swatches, colour-name label, and size/variant formatting.
         return (
           <div class="related-items">
             <h3 class="related-items__title">{t("product.more", locale.value)} {headingSuffix}</h3>
             {/* In-frame: related items switch the panel in place (button + onSelectSku$).
                 Route: they navigate (Link). */}
             <div class="related-items__grid">
-              {related.slice(0, 4).map((item) => (
-                inFrame ? (
-                  <button key={item.sku} type="button" class="product-card product-card-link" onClick$={() => props.onSelectSku$?.(item.sku)}>
-                    {cardInner(item, "eager")}
-                  </button>
-                ) : (
-                  <Link key={item.sku} href={`/${item.sku}/`} class="product-card product-card-link">
-                    {cardInner(item, "eager")}
-                  </Link>
-                )
+              {related.slice(0, 4).map((item, i) => (
+                <ProductCard key={item.sku} item={item} sku={item.sku} index={i} onSelect$={inFrame ? props.onSelectSku$ : undefined} />
               ))}
             </div>
             <Carousel.Root class="related-carousel" slidesPerView={relatedPerView.value} gap={0.4} align="start" sensitivity={{ touch: 1.5, mouse: 1.5 }} rewind>
@@ -672,17 +639,9 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
                 </Carousel.Previous>
                 )}
                 <Carousel.Scroller class="related-carousel__scroller">
-                  {related.map((item) => (
+                  {related.map((item, i) => (
                     <Carousel.Slide key={item.sku} class="related-carousel__slide">
-                      {inFrame ? (
-                        <button type="button" class="product-card product-card-link" onClick$={() => props.onSelectSku$?.(item.sku)}>
-                          {cardInner(item, "lazy")}
-                        </button>
-                      ) : (
-                        <Link href={`/${item.sku}/`} class="product-card product-card-link">
-                          {cardInner(item, "lazy")}
-                        </Link>
-                      )}
+                      <ProductCard item={item} sku={item.sku} index={i} onSelect$={inFrame ? props.onSelectSku$ : undefined} />
                     </Carousel.Slide>
                   ))}
                 </Carousel.Scroller>
