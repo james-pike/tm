@@ -97,13 +97,13 @@ export const allProducts = [
     "badge": "",
     "colors": [
       "#1a1a18",
-      "#a5e82c"
+      "#007a53"
     ],
     "price": 15,
-    "img": "/skus/S350-limeshock-tamarack.png",
+    "img": "/skus/S350-kellygreen-tamarack.png",
     "imgs": [
       "/skus/S350-tamarack.png",
-      "/skus/S350-limeshock-tamarack.png"
+      "/skus/S350-kellygreen-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
     "details": "Wicking technology, Side seamed, Breathable, Classic fit, #S350",
@@ -119,13 +119,13 @@ export const allProducts = [
     "badge": "",
     "colors": [
       "#1a1a18",
-      "#a5e82c"
+      "#007a53"
     ],
     "price": 15,
-    "img": "/skus/L350-limeshock-tamarack.png",
+    "img": "/skus/L350-kellygreen-tamarack.png",
     "imgs": [
       "/skus/L350-tamarack.png",
-      "/skus/L350-limeshock-tamarack.png"
+      "/skus/L350-kellygreen-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
     "details": "Wicking technology, Side seamed, Contoured fit, Breathable, #L350",
@@ -458,6 +458,7 @@ const colorNames: Record<string, Record<string, string>> = {
   "#1a1a18": { en: "Black", fr: "Noir" },
   "#008652": { en: "Kelly Green", fr: "Vert Kelly" },
   "#079e75": { en: "Kelly Green", fr: "Vert Kelly" },
+  "#007a53": { en: "Kelly Green", fr: "Vert Kelly" },
   "#44372b": { en: "Tarmac", fr: "Tarmac" },
   "#c6d219": { en: "Hi-Vis Yellow", fr: "Jaune haute visibilité" },
   "#bbbcbc": { en: "Athletic Grey", fr: "Gris athlétique" },

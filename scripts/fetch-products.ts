@@ -76,6 +76,7 @@ const colorNames: Record<string, Record<string, string>> = {
   "#1a1a18": { en: "Black", fr: "Noir" },
   "#008652": { en: "Kelly Green", fr: "Vert Kelly" },
   "#079e75": { en: "Kelly Green", fr: "Vert Kelly" },
+  "#007a53": { en: "Kelly Green", fr: "Vert Kelly" },
   "#44372b": { en: "Tarmac", fr: "Tarmac" },
   "#c6d219": { en: "Hi-Vis Yellow", fr: "Jaune haute visibilité" },
   "#bbbcbc": { en: "Athletic Grey", fr: "Gris athlétique" },
