@@ -3,7 +3,7 @@ import { Carousel } from "@qwik-ui/headless";
 import { Link } from "@builder.io/qwik-city";
 import { LocaleContext, t } from "../../i18n";
 import { allProducts, colorName, categoryLabel } from "../../routes/apparel/products";
-import { expandSizes, sizeGroups, sortColorsWhiteLast, cardTitle, productGender } from "../../routes/apparel/utils";
+import { expandSizes, sortColorsWhiteLast } from "../../routes/apparel/utils";
 import { LoginTypeContext } from "../../routes/layout";
 import { ProductImage } from "../product-image/product-image";
 import { ProductCard } from "../product-catalog/product-catalog";

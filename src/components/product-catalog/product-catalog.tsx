@@ -266,8 +266,8 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
       tabIndex={0}
       style={{ cursor: "pointer" }}
       class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}
-      onClick$={() => (onSelect$ ? onSelect$(sku) : nav(`/${sku}/`))}
-      onKeyDown$={(e) => { if (e.key === "Enter") { onSelect$ ? onSelect$(sku) : nav(`/${sku}/`); } }}
+      onClick$={() => { if (onSelect$) onSelect$(sku); else nav(`/${sku}/`); }}
+      onKeyDown$={(e) => { if (e.key === "Enter") { if (onSelect$) onSelect$(sku); else nav(`/${sku}/`); } }}
     >
       <div class="product-card__image">
         {/* Bound directly to the activeImg signal so a swatch click updates the
