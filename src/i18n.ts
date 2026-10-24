@@ -9,6 +9,7 @@ const translations = {
   // Footer / privacy
   "footer.privacypolicy": { en: "Privacy Policy", fr: "Politique de confidentialité" },
   "privacy.title": { en: "Privacy Policy", fr: "Politique de confidentialité" },
+  "privacy.crumb": { en: "Privacy", fr: "Confidentialité" },
   "privacy.body": { en: "This application is intended for internal use only. Customer names are stored in our database with order details. Email addresses and phone numbers are not stored in our database; this information appears only in order confirmation emails, which are processed by a third-party email provider (Resend) and retained for up to 30 days before deletion. To learn more, please contact info@tamarackapparel.ca.", fr: "Cette application est réservée à un usage interne. Le nom du client est conservé dans notre base de données, avec le détail de la commande. Les adresses courriel et les numéros de téléphone ne sont pas conservés dans notre base de données; ces renseignements figurent uniquement dans les courriels de confirmation de commande, traités par un fournisseur de courriel tiers (Resend) et conservés pendant un maximum de 30 jours avant leur suppression. Pour en savoir plus, veuillez communiquer avec info@tamarackapparel.ca." },
   // Header nav
   "logo.apparel": { en: "Apparel", fr: "Vêtements" },
@@ -160,6 +161,7 @@ const translations = {
 
   // Cart drawer
   "cart.mycart": { en: "My Cart", fr: "Panier" },
+  "cart.short": { en: "Cart", fr: "Panier" },
   "cart.title": { en: "MY CART", fr: "PANIER" },
   "cart.empty": { en: "Your cart is empty", fr: "Votre panier est vide" },
   "cart.backtoapparel": { en: "Back to Apparel", fr: "Retour aux vêtements" },

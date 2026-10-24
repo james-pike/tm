@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Device Preview — Tamarack</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #23272e; font-family: ui-sans-serif, system-ui, sans-serif; }
+  .toolbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 40px; z-index: 10;
+    display: flex; align-items: center; gap: 12px; padding: 0 14px;
+    background: #15181d; color: #cdd3dc; font-size: 13px; border-bottom: 1px solid #333;
+  }
+  .toolbar strong { color: #fff; }
+  .toolbar button {
+    font: inherit; font-size: 12px; color: #cdd3dc; background: #2a2f37;
+    border: 1px solid #434a54; border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  }
+  .toolbar button.active { background: #2f6f57; border-color: #2f6f57; color: #fff; }
+  .stage { padding: 56px 20px 40px; }
+  .scaler { transform-origin: top left; }
+  .wrap { display: flex; gap: 40px; align-items: flex-start; width: max-content; }
+  .device h2 { color: #aeb6c2; font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+  .device h2 span { color: #6f7885; font-weight: 400; }
+  .screen { border: 10px solid #0d0f12; border-radius: 22px; background: #fff; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+  .screen iframe { display: block; border: 0; }
+  .mini   .screen iframe { width: 320px; height: 568px; }
+  .iphone .screen iframe { width: 430px; height: 932px; }
+  .ipad   .screen iframe { width: 768px; height: 1024px; }
+  .ipadpro .screen iframe { width: 1024px; height: 1180px; }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <strong>Tamarack · Device Preview</strong>
+    <span id="scaleLabel"></span>
+    <button id="fit" class="active">Fit width</button>
+    <button id="full">100%</button>
+    <button id="reload">Reload both</button>
+  </div>
+  <div class="stage">
+    <div class="scaler" id="scaler">
+      <div class="wrap" id="wrap">
+        <div class="device mini">
+          <h2>iPhone SE <span>· 320 × 568 (narrow)</span></h2>
+          <div class="screen"><iframe id="f0" src="/" title="iPhone SE"></iframe></div>
+        </div>
+        <div class="device iphone">
+          <h2>iPhone 14 Pro Max <span>· 430 × 932</span></h2>
+          <div class="screen"><iframe id="f1" src="/" title="iPhone"></iframe></div>
+        </div>
+        <div class="device ipad">
+          <h2>iPad Mini <span>· 768 × 1024 (tablet)</span></h2>
+          <div class="screen"><iframe id="f2" src="/" title="iPad"></iframe></div>
+        </div>
+        <div class="device ipadpro">
+          <h2>iPad Pro 12.9" <span>· 1024 × 1180 (widest tablet)</span></h2>
+          <div class="screen"><iframe id="f3" src="/" title="iPad Pro"></iframe></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    var scaler = document.getElementById('scaler');
+    var wrap = document.getElementById('wrap');
+    var stage = document.querySelector('.stage');
+    var label = document.getElementById('scaleLabel');
+    var mode = 'fit';
+    function apply() {
+      var avail = document.documentElement.clientWidth - 40;
+      var content = wrap.scrollWidth;
+      var s = mode === 'full' ? 1 : Math.min(1, avail / content);
+      scaler.style.transform = 'scale(' + s + ')';
+      // reserve height so the page can scroll to the scaled content
+      stage.style.height = (wrap.scrollHeight * s + 96) + 'px';
+      label.textContent = Math.round(s * 100) + '%';
+    }
+    document.getElementById('fit').onclick = function(){ mode='fit'; this.classList.add('active'); document.getElementById('full').classList.remove('active'); apply(); };
+    document.getElementById('full').onclick = function(){ mode='full'; this.classList.add('active'); document.getElementById('fit').classList.remove('active'); apply(); };
+    document.getElementById('reload').onclick = function(){ ['f0','f1','f2','f3'].forEach(function(id){ var f=document.getElementById(id); f.src = f.src; }); };
+    window.addEventListener('resize', apply);
+    apply();
+  </script>
+</body>
+</html>

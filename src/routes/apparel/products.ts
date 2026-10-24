@@ -26,6 +26,28 @@ export const allProducts = [
     ]
   },
   {
+    "sku": "TM-6",
+    "name": "Women's ATC Everyday Cotton Tee",
+    "category": "T-Shirts",
+    "sizes": "XS - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18",
+      "#a6e82c"
+    ],
+    "price": 13.25,
+    "img": "/skus/ATC1000L-tamarack.png",
+    "imgs": [
+      "/skus/ATC1000L-tamarack.png",
+      "/skus/ATC1000L-limeshock-tamarack.png"
+    ],
+    "material": "100% cotton",
+    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, OEKO-TEX® STANDARD 100 certified, #ATC1000L",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
     "sku": "TM-2",
     "name": "ATC Everyday Cotton LS Tee",
     "category": "T-Shirts",
@@ -49,7 +71,7 @@ export const allProducts = [
   },
   {
     "sku": "TM-3",
-    "name": "Surfer Full-Zip Hooded Sweatshirt - Black",
+    "name": "Surfer Full-Zip Hooded Sweater",
     "category": "Sweaters",
     "sizes": "XS - 4XL",
     "badge": "",
@@ -63,28 +85,6 @@ export const allProducts = [
     ],
     "material": "70% ring-spun combed cotton / 30% polyester fleece",
     "details": "Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555",
-    "portals": [
-      "labourers"
-    ]
-  },
-  {
-    "sku": "TM-6",
-    "name": "Women's ATC Everyday Cotton Tee",
-    "category": "T-Shirts",
-    "sizes": "XS - 4XL",
-    "badge": "",
-    "colors": [
-      "#1a1a18",
-      "#a6e82c"
-    ],
-    "price": 13.25,
-    "img": "/skus/ATC1000L-tamarack.png",
-    "imgs": [
-      "/skus/ATC1000L-tamarack.png",
-      "/skus/ATC1000L-limeshock-tamarack.png"
-    ],
-    "material": "100% cotton",
-    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, OEKO-TEX® STANDARD 100 certified, #ATC1000L",
     "portals": [
       "labourers"
     ]
@@ -181,7 +181,7 @@ export const allProducts = [
   },
   {
     "sku": "TM-8",
-    "name": "Lakeview Full-Zip Hooded Sweatshirt",
+    "name": "Lakeview Full-Zip Hooded Sweater",
     "category": "Sweaters",
     "sizes": "S - 4XL",
     "badge": "",

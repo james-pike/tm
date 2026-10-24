@@ -1928,6 +1928,16 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   margin-left: auto;
   margin-right: auto;
 }
+/* Mobile/tablet: the PDP + catalog reserve the fixed-header height via
+   .home-catalog__inner, so a shared rule zeroes .apparel-catalog's own
+   padding-top (body:has(.pdp-breadcrumb) .apparel-catalog). The privacy page
+   has no such spacer, so that left its content tucked under the fixed header
+   and the sticky breadcrumb overlapped the title. Restore the header clearance
+   here (higher specificity than that shared rule) so the breadcrumb sits just
+   below the header and the document flows below the breadcrumb. */
+@media (max-width: 1024px) {
+  .privacy-page.apparel-page .apparel-catalog { padding-top: var(--wt-header-pin) !important; }
+}
 /* The off-white reading card inside the shared content card — same treatment
    as the product-detail panel. */
 .doc-panel {
@@ -2568,9 +2578,11 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   width: 100%;
   padding: 10px 14px;
   font-size: 1rem;
-  font-weight: 400;
-  color: var(--ce-gray-700);
-  background: #e0e3e6;
+  font-weight: 600;
+  /* Brand-green section headers (was a flat grey that blended into the bar above
+     it). The white product rows nest clearly beneath each green category. */
+  color: #ffffff;
+  background: #1B6551;
   border: none;
   border-radius: 2px;
   cursor: pointer;
@@ -2587,12 +2599,15 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   top: 6px;
   bottom: 6px;
   width: 1px;
-  background: var(--ce-gray-200);
+  background: rgba(255, 255, 255, 0.3);
 }
 .nav-drawer__cat-trigger:hover {
-  background: var(--ce-gray-100);
-  color: var(--ce-gray-900);
+  background: #23825f;
+  color: #ffffff;
 }
+.nav-drawer__cat-trigger .nav-drawer__cat-icon { opacity: 1; }
+.nav-drawer__cat-trigger .nav-drawer__cat-icon svg { stroke: #ffffff; }
+.nav-drawer__cat-trigger .nav-drawer__cat-chevron { opacity: 0.85; stroke: #ffffff; }
 .nav-drawer__cat-label {
   display: inline-flex;
   align-items: center;
@@ -2606,7 +2621,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
    view — subtle underline so it reads as clickable without shouting. */
 .nav-drawer__cat-trigger[data-open] .nav-drawer__cat-label {
   text-decoration: underline;
-  text-decoration-color: rgba(0, 0, 0, 0.25);
+  text-decoration-color: rgba(255, 255, 255, 0.55);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   cursor: pointer;
@@ -2656,6 +2671,29 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   background: var(--ce-gray-100);
   color: var(--ce-gray-900);
   border-color: var(--ce-gray-300);
+}
+/* Product name takes the row's free width; the colour swatches ride the right
+   edge (same treatment as the gallery cards, just smaller). */
+.nav-drawer__cat-item-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-drawer__cat-item-swatches {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.nav-drawer__cat-item-swatch {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  border: 1px solid var(--ce-border, rgba(0, 0, 0, 0.18));
+  flex-shrink: 0;
 }
 .nav-drawer__cat-empty {
   padding: 8px 12px 8px 48px;
@@ -3581,7 +3619,9 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   align-items: center;
   gap: 0.4rem;
 }
-.login-modal--split .login-modal__logo-white { height: 62px; width: auto; display: block; }
+/* Height scales down on narrow phones so the fixed-ratio wordmark never gets
+   squished by the form pane's width (it crushed to a 3.96 ratio at 320px). */
+.login-modal--split .login-modal__logo-white { height: clamp(40px, 13vw, 62px); width: auto; display: block; }
 .login-modal--split .login-modal__brand--img .brand-apparel {
   margin-left: 0;
   font-size: 1.5rem;
@@ -3740,7 +3780,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   .login-modal--split .login-modal__form-pane { flex: 1 1 auto; max-width: 100%; position: relative; z-index: 1; overflow: visible; justify-content: flex-start; }
   /* Pull the logo (transparent header) + the rest of the content up into the
      image's faded bottom, so everything sits higher. */
-  .login-modal--split .login-modal__header { margin-top: -108px; }
+  .login-modal--split .login-modal__header { margin-top: -84px; }
   /* Hero photo sits ABOVE the logo/form on mobile; its bottom edge blends down
      into the green form pane below it. */
   .login-modal__carousel { flex: none; height: 190px; width: 100%; position: relative; order: -1; }
@@ -3784,15 +3824,23 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
    after the ≤1280 phone block so these win for 601–1280px. */
 @media (min-width: 601px) and (max-width: 1280px) {
   .login-overlay { align-items: center; }
+  /* Near-full-screen on tablet: fill the viewport with only a slim gutter and a
+     slight rounding (replaces the small centred card that left big margins). */
   .login-modal.login-modal--split {
-    width: min(540px, 90vw);
-    max-width: 540px;
+    width: calc(100vw - 20px);
+    max-width: none;
+    height: calc(100dvh - 20px);
     min-height: 0;
-    margin: 1.5rem auto;
-    border: var(--wt-box-my) solid #fff;
+    max-height: none;
+    margin: 10px auto;
+    border: 3px solid #fff;
+    border-radius: 16px;
+    overflow: hidden;
   }
-  /* Photo banner sized to the card; its bottom fades into the green form pane. */
-  .login-modal__carousel { height: 232px; }
+  /* Photo fills the top portion of the full-height card; the form pane takes the
+     rest and centres its content vertically. */
+  .login-modal__carousel { height: auto; flex: 1 1 44%; min-height: 0; }
+  .login-modal--split .login-modal__form-pane { flex: 1 1 56%; justify-content: center; }
   /* Logo + content sit just into the photo's bottom fade. */
   .login-modal--split .login-modal__header {
     margin-top: -34px;
@@ -3800,15 +3848,38 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   }
   .login-modal--split .login-modal__logo-white { height: 72px; }
   .login-modal--split .login-modal__brand--img .brand-apparel { font-size: 1.7rem; }
-  /* Form + portal tiles: comfortable fixed gutters inside the card. */
-  .login-modal--split .login-modal__form { padding: 0.5rem 2.25rem 1.9rem; }
+  /* The card is near-full-width, so cap the form column and centre it — otherwise
+     the portals/fields stretch awkwardly across the whole pane. */
+  /* Percentage width → the side gutter is the SAME proportion on every tablet
+     width (the wider iPad Pro scales the form up to fill rather than just adding
+     more padding). Capped so it can't get absurdly wide on the largest tablets. */
+  .login-modal--split .login-modal__form {
+    width: min(84%, 900px);
+    max-width: none;
+    margin: 0 auto;
+    padding: 0.5rem 0 1.9rem;
+  }
   .login-modal__form .login-portals--grid .login-portal {
     font-size: 0.86rem;
     min-height: 58px;
     padding: 10px 8px;
   }
-  /* Language chip over the photo banner. */
-  .login-modal__lang { top: calc(14px - 232px); right: 14px; }
+  /* Password field + LOGIN button share one row (neither needs the full width). */
+  .login-modal__signin-row { display: flex; align-items: flex-end; gap: 0.75rem; }
+  .login-modal__signin-row .login-modal__field { flex: 1 1 auto; margin: 0; }
+  /* .btn in the selector so it outranks `.login-modal--split .login-modal__submit.btn
+     { width: 100% }` (0,3,0) — otherwise the button stretched full-width and
+     crushed the password field. */
+  .login-modal--split .login-modal__signin-row .login-modal__submit.btn {
+    flex: 0 0 auto;
+    width: auto;
+    margin-top: 0;
+    white-space: nowrap;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  /* Language chip at the card's top-right, over the photo. */
+  .login-modal__lang { top: 16px; right: 16px; }
 }
 
 
@@ -3926,10 +3997,14 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   .site-footer__brand { grid-column: 1; grid-row: 1; justify-self: start; }
   .site-footer__brand .brand-cluster__mark { width: 56px !important; height: 56px !important; }
   .site-footer__brand .brand-cluster__word { font-size: 1.05rem !important; }
+  /* Email on the left, Privacy + Français on the right, justified apart across
+     the full width (the logo is hidden on tablet, so there's room). */
   .site-footer__contact-block {
-    grid-column: 2; grid-row: 1;
-    justify-self: end;
-    align-items: flex-end;
+    grid-column: 1 / -1; grid-row: 1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
     margin: 0;
   }
   /* Slightly larger email + privacy text on tablet. */
@@ -4627,6 +4702,11 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   box-shadow: inset 0 1px 4px rgba(0,0,0,0.08), inset 0 0 6px rgba(0,0,0,0.04);
 }
 .site-header__search-btn svg { stroke: var(--ce-gray-700); }
+/* The header action buttons carry text labels that are revealed only in the
+   tablet range (601–1024px), where they render as labeled pills — see that
+   media block near the desktop section. Hidden by default (phone + desktop). */
+.site-header__search-label { display: none; }
+.cart-btn__label-short { display: none; }
 .site-header__search {
   /* Shown only in search mode (phones). It sits as a flex child filling the
      space to the right of the logo — the logo stays visible, only the icon
@@ -5333,7 +5413,10 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
 }
 @media (max-width: 600px) {
   .cart-drawer__bottom { gap: 0; }
-  .cart-drawer__bottom .allowance { flex-basis: 100%; margin: 0.6rem 0.75rem 0; }
+  /* Line the legend's side edges up with the cart-items box above (which sits at
+     2px side gutters), pull it up tight under those items, and square it off a
+     little (10px → 5px) so it reads as part of the same cart area. */
+  .cart-drawer__bottom .allowance { flex-basis: 100%; margin: 0.4rem 2px 0; border-radius: 5px; }
   .cart-drawer__bottom .cart-drawer__footer { flex-basis: 100%; margin: 0.5rem; }
 }
 .allowance__head {
@@ -7125,6 +7208,78 @@ details[open] > .cart-drawer__checkout-title::after {
   .hero { margin-top: 0; padding-top: 0; }
 }
 
+/* ===== Tablet header: mn2-style buttons (601–1024px) ================
+   Search, cart and log-out are full-header-height buttons with a single 1px
+   border — no fill, no inset shadow, square corners — the mn2 tablet
+   treatment. Only the cart carries a label ("Cart"); search and log-out stay
+   icon-only. Placed after the <=900 and base rules so it wins for 601–1024px;
+   desktop (>=1025) and phones (<=600) keep their own treatments. */
+@media (min-width: 601px) and (max-width: 1024px) {
+  /* Cart shows the short "Cart"; search + logout stay icon-only (their label
+     spans stay hidden via the base rules). The full "My Cart" span is hidden
+     with high specificity + !important because a 768–1024 rule elsewhere forces
+     `.site-header .cart-btn__label { display: inline !important }` (which would
+     otherwise leave both "My Cart" and "Cart" showing). */
+  .site-header .cart-btn .cart-btn__label-full { display: none !important; }
+  .cart-btn__label-short { display: inline; }
+  .logout-form { display: inline-flex; }
+
+  /* Full header height WITHOUT disturbing the centred logo: the inner keeps its
+     base align-items:center (so the logo spacing is unchanged); only the nav and
+     its buttons take an explicit 100% height so they fill the bar top-to-bottom.
+     The inner has a definite height (58px base / 67px at <=900), so height:100%
+     resolves cleanly down the chain. */
+  .site-header__nav { height: 100%; align-items: stretch; gap: 0; margin-right: 2px; }
+  /* Buttons sit flush as one connected group — collapse the doubled 1px borders
+     between adjacent buttons into a single shared seam. */
+  .site-header__nav > * + * { margin-left: -1px; }
+  .logout-form { height: 100%; }
+
+  /* Full-height, single-1px-border buttons — no fill, no inset shadow, square. */
+  .site-header__search-btn,
+  .site-header .cart-btn,
+  .site-header .logout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 7px;
+    padding: 0 14px;
+    min-width: 0;
+    border-radius: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background: transparent;
+    color: var(--ce-gray-800);
+    box-shadow: none;
+  }
+  .site-header__search-btn svg,
+  .site-header .cart-btn svg,
+  .site-header .logout-btn svg { width: 19px; height: 19px; stroke: var(--ce-gray-800); }
+
+  /* Catalog's green textured header: white 1px border + white icon/text,
+     transparent fill (the dark border reads wrong on green). Wins over the
+     catalog's borderless-icon cart rule (later + !important). */
+  body:has(.home-catalog) .site-header .site-header__search-btn,
+  body:has(.home-catalog) .site-header .cart-btn,
+  body:has(.home-catalog) .site-header .logout-btn {
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+  }
+  body:has(.home-catalog) .site-header .site-header__search-btn svg,
+  body:has(.home-catalog) .site-header .cart-btn svg,
+  body:has(.home-catalog) .site-header .logout-btn svg { stroke: #ffffff !important; }
+  body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff !important; }
+  /* Selected (has items) cart fills solid green so it still stands out. */
+  body:has(.home-catalog) .site-header .cart-btn.cart-btn--active {
+    border-color: #1B6551 !important;
+    background: #1B6551 !important;
+  }
+}
+
 /* ===== Desktop (1025px+) ===== */
 /* Tab labels: short cat name by default (mobile/tablet); desktop sidebar swaps in the longer label below. */
 .apparel-titlebar__tab-full { display: none; }
@@ -8390,8 +8545,36 @@ details[open] > .cart-drawer__checkout-title::after {
   .section { padding: 4rem 1rem; }
   .cta-section { padding: 4rem 1rem; }
   .cta-section__inner { padding: 3rem 1.5rem; }
-  .apparel-grid { grid-template-columns: repeat(2, 1fr); gap: 2px; margin-top: -3px; padding: 0; }
-  .product-card__name { font-size: 0.87rem; line-height: 1.3; }
+  .apparel-grid { grid-template-columns: repeat(2, 1fr); gap: 1px; margin-top: -3px; padding: 0; }
+  /* Tighter gutter between gallery tiles on phones (the home gallery uses the
+     higher-specificity .home-catalog .apparel-grid, so match it here). */
+  .home-catalog .apparel-grid { gap: 1px; }
+  .product-card__name { font-size: 0.95rem; line-height: 1.22; white-space: normal; }
+  /* Single-colour products show a persistent colour name beside the swatch;
+     hide it in the phone gallery (the swatch alone is enough there). */
+  .product-card__colors .product-card__color-name:not(.product-card__color-name--overlay) { display: none; }
+  /* Reserve two lines for every card title so a short (one-line) name still
+     occupies the same footprint — the swatch/size rows then line up across the
+     grid instead of staggering where one card's title wraps and its neighbour's
+     doesn't. 2 × font-size × line-height. */
+  .product-card__name-row { min-height: calc(0.95rem * 1.22 * 2); align-items: flex-start; }
+  /* When a swatch is tapped, the selected colour name overlays to the right of
+     the swatches (absolute, over the sizes text) and collides with the gender
+     prefix ("Women's "/"Men's "). Drop the gender prefix while that overlay is
+     showing so the colour name has clear room. */
+  .product-card__color-size-row:has(.product-card__color-name--overlay) .product-card__sizes-gender { display: none; }
+  /* Phones let a long gallery title wrap onto a second line (the fit-to-one-line
+     script is skipped <=600px) rather than shrinking it; clamp at 2 lines so an
+     extra-long name still can't push the card out of alignment. */
+  .product-card__name-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
   .product-card__name-code { display: none; }
   .product-card__price-group { flex-direction: row; align-items: baseline; align-self: flex-start; }
   .product-card { border-radius: 2px; }
@@ -8457,21 +8640,13 @@ details[open] > .cart-drawer__checkout-title::after {
     flex-direction: row;
     position: relative;
   }
-  /* Image runs flush to the preview rail — no x-gap between them. */
-  .product-image-row:has(.product-thumbs--column) { padding-right: 16%; }
-  .product-thumbs--column {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: 16%;
-    gap: 4px;
-    overflow-y: auto;
-  }
-  .product-thumbs__item { width: 100%; flex-shrink: 0; }
-  .product-carousel__indicators { display: none; }
+  /* Phones drop the right-hand preview column entirely; the image spans the full
+     width and paging uses the carousel's own boxes in the bottom-right corner
+     (mn2-style — the .product-carousel__indicators, already square + positioned
+     there). */
+  .product-image-row:has(.product-thumbs--column) { padding-right: 0; }
+  .product-thumbs--column { display: none; }
+  .product-carousel__indicators { display: flex; }
   /* Full-width image mode (breadcrumb toggle): previews hidden, carousel spans
      the row, dots return for paging. */
   .product-detail--imgfull .product-image-row:has(.product-thumbs--column) { padding-right: 0.15rem; }
@@ -9646,7 +9821,7 @@ details[open] > .cart-drawer__checkout-title::after {
 /* 3px header padding + box-h + 2px seam = header height (65 / 53) — see the
    seam block. Split at 600/601 to match the header-height breakpoints (601-767
    uses the 65px tablet header, so it needs the tablet bar too). */
-@media (min-width: 601px) and (max-width: 1024px) { :root { --wt-box-h: 74px; --wt-box-my: 5px; } }
+@media (min-width: 601px) and (max-width: 1024px) { :root { --wt-box-h: 64px; --wt-box-my: 5px; } }
 @media (max-width: 600px) { :root { --wt-box-h: 58px; --wt-box-my: 6px; --wt-seam: 1px; }
 }
 
@@ -12165,6 +12340,10 @@ details[open] > .cart-drawer__checkout-title::after {
    left alone (no touch-action) — it's the one gesture worth having on a
    full-size product photo. */
 html { scrollbar-gutter: stable; }
+/* The login is a full-screen overlay that doesn't scroll, so don't reserve the
+   scrollbar gutter there — otherwise its 15px sat empty as a white strip down
+   the right edge (the html background) beside the green login. */
+html:has(.login-overlay) { overflow-y: auto; scrollbar-gutter: auto; }
 html:has(.product-fullscreen),
 body:has(.product-fullscreen) { overflow: hidden; }
 .product-fullscreen { overscroll-behavior: contain; }
@@ -13486,7 +13665,10 @@ body:has(.product-fullscreen) { overflow: hidden; }
   .cart-drawer__back-btn { top: var(--wt-header-pin); }
   .cart-table thead { top: var(--wt-header-pin); }
   /* The footer matches the header + tab strip; the header half is a token. */
-  .site-footer { min-height: calc(var(--wt-header-pin) + 44px); height: auto; padding-bottom: 1.5rem; }
+  /* Hug the content with even top/bottom padding. The old min-height reserved
+     ~110px and the content sat at the very top (0 top padding), so the footer
+     read as a thin strip of content with a big empty gap beneath it. */
+  .site-footer { min-height: 0; height: auto; padding-top: 1.15rem; padding-bottom: 1.1rem; }
 }
 
 /* ============================================================
@@ -14138,19 +14320,24 @@ body:has(.product-fullscreen) { overflow: hidden; }
   .site-header .logout-form { display: inline-flex !important; }
   /* `body` prefix so these beat the dark-icon logout rules that share the plain
      `.site-header .logout-btn` specificity — the icon reads white on the blue bar. */
-  body .site-header .logout-btn { display: inline-flex !important; height: 62px !important; min-height: 62px !important; aspect-ratio: auto !important; padding: 0 22px !important; justify-content: center !important; color: #fff !important; background: rgb(57, 98, 124) !important; border: none !important; box-shadow: none !important; }
+  /* mn2 tablet buttons: full header height, single 1px border, no fill/shadow. */
+  body .site-header .logout-btn { display: inline-flex !important; height: 100% !important; min-height: 0 !important; aspect-ratio: auto !important; padding: 0 18px !important; justify-content: center !important; color: #fff !important; background: transparent !important; border: 1px solid rgba(255,255,255,0.5) !important; box-shadow: none !important; border-radius: 0 !important; }
   body .site-header .logout-btn svg { width: 22px !important; height: 22px !important; stroke: #fff !important; }
   .site-header .cart-btn,
-  .site-header .site-header__search-btn { height: 62px !important; min-height: 62px !important; }
+  .site-header .site-header__search-btn { height: 100% !important; min-height: 0 !important; border-radius: 0 !important; }
   /* My Cart button — Tamarack blue (#1B6551) with white text, the site's
      primary CTA colour. Uses the :has(.home-catalog) specificity so it beats the
      rule that dissolves the button to transparent on the catalog route. */
+  body .site-header .site-header__search-btn,
   body .site-header .cart-btn,
+  body:has(.home-catalog) .site-header .site-header__search-btn,
   body:has(.home-catalog) .site-header .cart-btn,
-  body:has(.home-catalog) .site-header .cart-btn.cart-btn--active { background: #1B6551 !important; border: none !important; color: #ffffff !important; box-shadow: none !important; }
+  body:has(.home-catalog) .site-header .cart-btn.cart-btn--active { background: transparent !important; border: 1px solid rgba(255,255,255,0.5) !important; color: #ffffff !important; box-shadow: none !important; }
   body .site-header .cart-btn:hover,
+  body .site-header .site-header__search-btn:hover,
   body:has(.home-catalog) .site-header .cart-btn:hover,
-  body:has(.home-catalog) .site-header .cart-btn.cart-btn--active:hover { background: #23825f !important; color: #ffffff !important; }
+  body:has(.home-catalog) .site-header .cart-btn.cart-btn--active:hover { background: rgba(255,255,255,0.12) !important; color: #ffffff !important; }
+  body .site-header .site-header__search-btn svg { stroke: #ffffff !important; }
   body .site-header .cart-btn svg,
   body:has(.home-catalog) .site-header .cart-btn svg { stroke: #ffffff !important; }
   body .site-header .cart-btn .cart-btn__label,
@@ -14329,6 +14516,11 @@ body:has(.nav-drawer-overlay) .site-header__logo {
    overridden (two base display:flex rules + a cascade/nesting quirk upstream);
    this late !important rule wins definitively. Footer keeps its contact/links. */
 @media (max-width: 600px) {
+  .site-footer__brand { display: none !important; }
+}
+/* Tablet: drop the footer logo too (same as mobile) — the tablet grid placed it
+   top-left, but the footer reads cleaner with just contact + links. */
+@media (min-width: 601px) and (max-width: 1024px) {
   .site-footer__brand { display: none !important; }
 }
 
@@ -15474,8 +15666,18 @@ html { background: rgb(223, 226, 230) !important; }
 
 /* ── Tamarack wordmark logo ──────────────────────────────────────────────── */
 .brand-cluster__logo { display: block; width: auto; height: auto; max-width: 100%; object-fit: contain; }
-.site-header__logo .brand-cluster__logo { height: 40px; }
+/* Header logo scales down on narrow phones so there's always room for the
+   search + cart + hamburger cluster (it overflowed at 320px). Caps at 40px, so
+   anything ~400px and wider is unchanged. */
+.site-header__logo .brand-cluster__logo { height: clamp(30px, 10vw, 40px); }
 .site-footer__brand .brand-cluster__logo { height: 40px; }
+/* Kicker ("APPAREL") tracks the logo size on narrow phones (caps at 0.9rem). */
+.site-header__logo .brand-cluster__apparel { font-size: clamp(0.7rem, 3.6vw, 0.9rem); }
+/* On the narrowest phones nudge the kicker left so its final "L" clears the "k"
+   of the Tamarack wordmark it overprints (it drifted right as the logo shrank). */
+@media (max-width: 400px) {
+  .site-header__logo .brand-cluster__apparel { left: 63%; }
+}
 .login-card__brand .brand-cluster__logo { height: 66px; margin: 0 auto; }
 .mobile-coming-soon__brand .brand-cluster__logo { height: 54px; margin: 0 auto; }
 
@@ -15713,3 +15915,60 @@ html body .site-header .site-header__inner { background: transparent !important;
 .approvals__history-total { font-weight: 700; color: var(--ce-gray-800, #1f2937); }
 .approvals__history-at { color: var(--ce-gray-400, #9ca3af); font-size: 0.78rem; white-space: nowrap; }
 @media (max-width: 600px) { .approvals__history-at { display: none; } }
+
+/* ============================================================
+   FINAL tablet header buttons — mn2 style (601–1024px).
+   The tablet header has several overlapping treatments upstream (fixed heights,
+   blue/green fills). This authoritative block (last in the file, high
+   specificity + !important) settles them into one look: search, cart and
+   log-out are full-header-height buttons with a transparent fill and a single
+   1px border, square corners. Cart shows "Cart"; search + log-out are icon-only.
+   The tablet header is always the dark sign surface, so content stays white.
+   ============================================================ */
+@media (min-width: 601px) and (max-width: 1024px) {
+  body .site-header .site-header__search-btn,
+  body .site-header .cart-btn,
+  body .site-header .cart-btn.cart-btn--active,
+  body .site-header .logout-btn,
+  body:has(.home-catalog) .site-header .site-header__search-btn,
+  body:has(.home-catalog) .site-header .cart-btn,
+  body:has(.home-catalog) .site-header .cart-btn.cart-btn--active,
+  body:has(.home-catalog) .site-header .logout-btn {
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 0 16px !important;
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+  }
+  body .site-header .site-header__search-btn svg,
+  body .site-header .cart-btn svg,
+  body .site-header .logout-btn svg,
+  body:has(.home-catalog) .site-header .cart-btn svg,
+  body:has(.home-catalog) .site-header .logout-btn svg { stroke: #ffffff !important; }
+  body .site-header .cart-btn .cart-btn__label,
+  body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff !important; }
+  /* Search + log-out are icon-only → square (width follows the reduced header
+     height). The cart carries text, so it stays its natural wider width. */
+  body .site-header .site-header__search-btn,
+  body .site-header .logout-btn,
+  body:has(.home-catalog) .site-header .site-header__search-btn,
+  body:has(.home-catalog) .site-header .logout-btn {
+    aspect-ratio: 1 !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+  }
+  /* Hover: faint white wash, border unchanged. */
+  body .site-header .site-header__search-btn:hover,
+  body .site-header .cart-btn:hover,
+  body .site-header .cart-btn.cart-btn--active:hover,
+  body .site-header .logout-btn:hover,
+  body:has(.home-catalog) .site-header .cart-btn:hover,
+  body:has(.home-catalog) .site-header .cart-btn.cart-btn--active:hover,
+  body:has(.home-catalog) .site-header .logout-btn:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+  }
+}

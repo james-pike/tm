@@ -18,6 +18,7 @@ import { LocaleContext, t } from "../i18n";
 import { SecondaryBarContext } from "../context/secondary-bar";
 import type { Locale } from "../i18n";
 import { allProducts, colorName, categoryLabel } from "./apparel/products";
+import { sortColorsWhiteLast } from "./apparel/utils";
 import { CATEGORY_ICONS } from "../lib/categories";
 import { PORTALS, isPortal, portalLabel, currentSeason, remainingAllowance, isApprovalSku } from "../lib/portals";
 import type { Portal } from "../lib/portals";
@@ -1297,20 +1298,22 @@ export default component$(() => {
                     ))}
                   </div>
                 </div>
-                <div class="login-modal__field">
-                  <label for="password">{t("login.password", locale.value)}</label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    placeholder={t("login.password.placeholder", locale.value)}
-                  />
+                <div class="login-modal__signin-row">
+                  <div class="login-modal__field">
+                    <label for="password">{t("login.password", locale.value)}</label>
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autoComplete="current-password"
+                      required
+                      placeholder={t("login.password.placeholder", locale.value)}
+                    />
+                  </div>
+                  <button type="submit" class="btn login-modal__submit">
+                    {loginAction.isRunning ? t("login.submitting", locale.value) : t("login.submit", locale.value)}
+                  </button>
                 </div>
-                <button type="submit" class="btn login-modal__submit">
-                  {loginAction.isRunning ? t("login.submitting", locale.value) : t("login.submit", locale.value)}
-                </button>
               </Form>
             </div>
             <div class="login-modal__carousel" aria-hidden="true">
@@ -1443,13 +1446,15 @@ export default component$(() => {
                   open();
                 }
               }} aria-label="Search apparel">
+                <span class="site-header__search-label">{t("search.placeholder", locale.value)}</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
               </button>
             )}
             {/* EN/FR toggle moved to the footer. Cart is hidden in authorizer mode. */}
             {loginType.value !== "authorizer" && (
             <button class={`cart-btn ${cart.items.length > 0 ? "cart-btn--active" : ""}`} onClick$={() => { if (isCheckout.value) { cartOpen.value = true; nav("/"); return; } cartOpen.value = !cartOpen.value; if (cartOpen.value) menuOpen.value = false; if (!cartOpen.value) checkoutStep.value = "cart"; }}>
-              <span class="cart-btn__label">{t("cart.mycart", locale.value)}</span>
+              <span class="cart-btn__label cart-btn__label-full">{t("cart.mycart", locale.value)}</span>
+              <span class="cart-btn__label-short">{t("cart.short", locale.value)}</span>
               {cartOpen.value && !isCheckout.value ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
               ) : (
@@ -1478,7 +1483,7 @@ export default component$(() => {
                   type="text"
                   class="site-header__search-input"
                   aria-label="Search apparel"
-                  placeholder={narrowSearch.value ? t("search.placeholder.short", locale.value) : t("search.placeholder", locale.value)}
+                  placeholder={narrowSearch.value ? "" : t("search.placeholder", locale.value)}
                   value={searchValue.value}
                   onInput$={(_, el) => {
                     searchValue.value = el.value;
@@ -1544,7 +1549,6 @@ export default component$(() => {
                 (like the cart button), so this strip carries no redundant close. */}
             <div class="nav-drawer__header">
               <Link href="/" class="nav-drawer__title" onClick$={() => { menuOpen.value = false; requestAnimationFrame(() => window.scrollTo(0, 0)); }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 {t("nav.home", locale.value)}
               </Link>
               {/* Language toggle in the middle of the bar — an inline icon + FR/EN
@@ -1628,7 +1632,14 @@ export default component$(() => {
                             ) : items.map((p) => (
                               <a key={p.sku} href={`/${p.sku}/`} class="nav-drawer__cat-item" onClick$={() => (menuOpen.value = false)}>
                                 <img src={p.img} alt="" width="24" height="24" class="nav-drawer__cat-item-img" loading="lazy" decoding="async" />
-                                {p.name.replace(/#\S+/g, '').replace(/\s*-\s*$/, '').trim()}
+                                <span class="nav-drawer__cat-item-name">{p.name.replace(/#\S+/g, '').replace(/\s*-\s*$/, '').trim()}</span>
+                                {p.colors && p.colors.length > 0 && (
+                                  <span class="nav-drawer__cat-item-swatches" aria-hidden="true">
+                                    {sortColorsWhiteLast(p.colors).slice(0, 5).map((c) => (
+                                      <span key={c} class="nav-drawer__cat-item-swatch" style={{ background: c }} />
+                                    ))}
+                                  </span>
+                                )}
                               </a>
                             ))}
                           </Accordion.Content>

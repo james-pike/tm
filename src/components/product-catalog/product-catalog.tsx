@@ -201,6 +201,25 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
     const el = nameRef.value;
     if (!el) return;
     const fit = () => {
+      // Phones (<=600px): the title wraps to (up to) two lines (see
+      // .product-card__name-text in global.css). If it would spill onto a third
+      // line, scale the font down a touch so it always fits in two rows rather
+      // than truncating. Re-runs on resize; clear inline styles first.
+      if (window.matchMedia("(max-width: 600px)").matches) {
+        el.style.whiteSpace = "";
+        el.style.overflow = "";
+        el.style.fontSize = "";
+        const textEl = (el.querySelector(".product-card__name-text") as HTMLElement) || el;
+        const base = parseFloat(getComputedStyle(el).fontSize);
+        let px = base;
+        const min = base * 0.72;
+        let guard = 0;
+        while (textEl.scrollHeight > textEl.clientHeight + 1 && px > min && guard++ < 40) {
+          px -= 0.5;
+          el.style.fontSize = `${px}px`;
+        }
+        return;
+      }
       el.style.fontSize = "";
       el.style.whiteSpace = "nowrap";
       el.style.overflow = "hidden";
