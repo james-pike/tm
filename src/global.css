@@ -3495,12 +3495,17 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   box-shadow: none;
   animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* Desktop/tablet: lock the shape to 12:5 so the right image pane holds ~16:10
-   regardless of viewport height. */
+/* Desktop: lock the shape to 12:5 so the right image pane holds ~16:10
+   regardless of viewport height. Overridden below 1280px by the stacked
+   tablet/phone blocks, so this effectively governs the ≥1281px split only.
+   min-height guarantees the card is always tall enough for the form pane, so
+   the gold submit button can never be clipped in the 1281–1344px band where a
+   pure 12:5 card would otherwise come out a touch short. */
 @media (min-width: 601px) {
   .login-modal.login-modal--split {
     height: auto;
     aspect-ratio: 12 / 5;
+    min-height: 560px;
     max-height: 88vh;
   }
 }
@@ -3717,9 +3722,12 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 .login-modal__close:hover { background: rgba(255, 255, 255, 0.3); color: #fff; }
 
 /* Mobile + tablet: stack the form over a shorter image band. Both get the same
-   full-screen stacked login; the desktop side-by-side split is ≥1025px only
-   (tablet used to inherit the desktop 12:5 split and came out cramped). */
-@media (max-width: 1024px) {
+   full-screen stacked login; the desktop side-by-side split is ≥1281px only.
+   The split needs ~1275px before its 33%-wide form pane is wide enough for the
+   2×2 portal grid AND its 12:5 card is tall enough for the fields + button;
+   below that it came out cramped (portals clipped under the photo, submit
+   button cut off), so the clean stacked card now runs all the way to 1280px. */
+@media (max-width: 1280px) {
   .login-modal.login-modal--split {
     flex-direction: column;
     height: auto; min-height: 100dvh; max-height: none; aspect-ratio: auto;
@@ -3769,12 +3777,12 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   }
 }
 
-/* Tablet (601–1024px): a contained, centred login "window" — not the phone's
-   full-bleed layout. Photo banner on top, green form pane below, framed by the
-   white sign-edge ring like the desktop split, with fixed proportional sizing so
-   the card reads the same at any tablet width. Comes after the ≤1024 phone block
-   so these win for 601–1024px. */
-@media (min-width: 601px) and (max-width: 1024px) {
+/* Tablet + narrow desktop (601–1280px): a contained, centred login "window" —
+   not the phone's full-bleed layout. Photo banner on top, green form pane below,
+   framed by the white sign-edge ring like the desktop split, with fixed
+   proportional sizing so the card reads the same at any width in range. Comes
+   after the ≤1280 phone block so these win for 601–1280px. */
+@media (min-width: 601px) and (max-width: 1280px) {
   .login-overlay { align-items: center; }
   .login-modal.login-modal--split {
     width: min(540px, 90vw);
