@@ -231,6 +231,26 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
         px -= 0.5;
         el.style.fontSize = `${px}px`;
       }
+      // Tablet (601–1024px): the cards are wide and the price sits inline, so
+      // grow the title to fill the space left in its slot (the row width minus
+      // the inline price) instead of leaving a small title with a lot of empty
+      // row. Capped so it stays proportionate. The name is content-sized, so we
+      // measure the available slot from the row rather than el.clientWidth.
+      if (window.matchMedia("(min-width: 601px) and (max-width: 1024px)").matches) {
+        const row = el.closest(".product-card__name-row") as HTMLElement | null;
+        const price = row ? (row.querySelector(".product-card__price-group") as HTMLElement | null) : null;
+        const gap = row ? (parseFloat(getComputedStyle(row).columnGap) || 8) : 8;
+        const avail = row ? row.clientWidth - (price ? price.offsetWidth : 0) - gap : el.clientWidth;
+        const max = base * 1.2;
+        while (el.scrollWidth <= avail - 2 && px < max && guard++ < 80) {
+          px += 0.5;
+          el.style.fontSize = `${px}px`;
+        }
+        if (el.scrollWidth > avail) {
+          px -= 0.5;
+          el.style.fontSize = `${px}px`;
+        }
+      }
       if (el.scrollWidth > el.clientWidth + 0.5) {
         el.style.whiteSpace = "";
         el.style.overflow = "";

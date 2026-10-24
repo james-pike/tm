@@ -4800,6 +4800,11 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   /* Search field takes the hamburger's space too: hide it while search is open
      so the flex field expands over it (the field's own X closes search). */
   .site-header--search-open .hamburger-btn { display: none; }
+  /* Same when the menu drawer is open: the hamburger is shown as the drawer's X
+     (forced visible by `body:has(.nav-drawer-overlay) … !important`), so override
+     that here too — otherwise the search field stops short of the X instead of
+     covering it. The field's own X still closes search. */
+  body:has(.nav-drawer-overlay) .site-header--search-open .hamburger-btn { display: none !important; }
 }
 /* Narrow phones (incl. iPhone SE, 375px): drop the logo gap so the field
    keeps its width. */
@@ -8549,15 +8554,23 @@ details[open] > .cart-drawer__checkout-title::after {
   /* Tighter gutter between gallery tiles on phones (the home gallery uses the
      higher-specificity .home-catalog .apparel-grid, so match it here). */
   .home-catalog .apparel-grid { gap: 1px; }
-  .product-card__name { font-size: 0.95rem; line-height: 1.22; white-space: normal; }
+  /* Title (and the price, locked to it) scale down a touch on narrower phones so
+     the first line has room (e.g. "Viking Handyman" stays together instead of
+     "Handyman" dropping to line 2). */
+  .product-card__name { font-size: clamp(0.84rem, 3.8vw, 0.95rem); line-height: 1.22; white-space: normal; }
+  .product-card__name-row .product-card__price { font-size: clamp(0.84rem, 3.8vw, 0.95rem); }
   /* Single-colour products show a persistent colour name beside the swatch;
      hide it in the phone gallery (the swatch alone is enough there). */
   .product-card__colors .product-card__color-name:not(.product-card__color-name--overlay) { display: none; }
+  /* Size-variant text shrinks on narrower phones (it was a touch big at 320). */
+  .product-card__color-size-row .product-card__sizes { font-size: clamp(0.66rem, 3vw, 0.8rem); }
+  /* Colour swatches shrink on narrower phones too. */
+  .product-card__colors .product-card__color-dot { width: clamp(14px, 4.4vw, 18px); height: clamp(14px, 4.4vw, 18px); }
   /* Reserve two lines for every card title so a short (one-line) name still
      occupies the same footprint — the swatch/size rows then line up across the
      grid instead of staggering where one card's title wraps and its neighbour's
      doesn't. 2 × font-size × line-height. */
-  .product-card__name-row { min-height: calc(0.95rem * 1.22 * 2); align-items: flex-start; }
+  .product-card__name-row { min-height: calc(clamp(0.84rem, 3.8vw, 0.95rem) * 1.22 * 2); align-items: flex-start; }
   /* When a swatch is tapped, the selected colour name overlays to the right of
      the swatches (absolute, over the sizes text) and collides with the gender
      prefix ("Women's "/"Men's "). Drop the gender prefix while that overlay is
@@ -15926,6 +15939,17 @@ html body .site-header .site-header__inner { background: transparent !important;
    The tablet header is always the dark sign surface, so content stays white.
    ============================================================ */
 @media (min-width: 601px) and (max-width: 1024px) {
+  /* Buttons sit flush as one group: no nav gap, no per-button side margins
+     (earlier rules leave a 1px nav gap + 2px button margins), and adjacent
+     1px borders collapse into a single shared seam. */
+  body .site-header .site-header__nav { gap: 0 !important; margin-right: -2px !important; }
+  body .site-header .site-header__nav > * { margin-left: 0 !important; margin-right: 0 !important; }
+  body .site-header .site-header__nav > * + * { margin-left: -1px !important; }
+  /* Logout (last button) sits flush to the header's right edge — drop the inner's
+     right padding on tablet. */
+  body .site-header .site-header__inner { padding-right: 0 !important; }
+  /* Remove the empty darker-grey block on the right of the category tab bar. */
+  .home-catalog__right { display: none !important; }
   body .site-header .site-header__search-btn,
   body .site-header .cart-btn,
   body .site-header .cart-btn.cart-btn--active,
@@ -15937,7 +15961,9 @@ html body .site-header .site-header__inner { background: transparent !important;
     height: 100% !important;
     min-height: 0 !important;
     padding: 0 16px !important;
-    background: transparent !important;
+    /* Solid green fill (the header's base colour) so the chevron texture doesn't
+       show through the button interior — flat buttons with a white border. */
+    background: #1B6551 !important;
     border: 1px solid rgba(255, 255, 255, 0.5) !important;
     border-radius: 0 !important;
     box-shadow: none !important;
