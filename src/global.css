@@ -15630,6 +15630,18 @@ html { background: rgb(223, 226, 230) !important; }
   /* Tuck the top ring behind the (now elevated) header — see the cart rule. */
   top: calc(var(--wt-header-pin, 73px) - 5px);
 }
+/* The checkout overlay is transparent and sits below the sticky header, so the
+   persistent site footer — which is dark green with the header texture — flows to
+   the TOP of the page BEHIND it and peeked out as a green strip between the header
+   and the drawer (with the greige page ground showing below it). In dev the grey
+   "Back to Cart" bar happened to cover it; in the production build it was exposed.
+   Hide the footer on this route (as the privacy page does), and on phones/tablets
+   paint the overlay an opaque white ground so nothing shows through above the
+   content. */
+body:has(.checkout-page) .site-footer { display: none; }
+@media (max-width: 999px) {
+  .modal-overlay.checkout-page { background: #ffffff; }
+}
 
 /* --- Standardised checkout surfaces ---
    On a full page the drawer's mixed greige/white fills read as inconsistent.

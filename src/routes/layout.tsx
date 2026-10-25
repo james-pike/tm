@@ -1334,7 +1334,10 @@ export default component$(() => {
                       // keyboard covers the password row. Lift the login card just
                       // enough that the field + submit sit above the keyboard, using
                       // the visual viewport (its height is the space above the
-                      // keyboard). Reset on blur. Only ever nudges upward.
+                      // keyboard). React to the viewport actually resizing rather
+                      // than a fixed delay — the keyboard animates in slower on
+                      // tablet, so a one-shot timeout fired before it had shrunk and
+                      // nothing lifted. Reset on blur. Only ever nudges upward.
                       onFocus$={() => {
                         const vv = typeof window !== "undefined" ? window.visualViewport : null;
                         if (!vv) return;
@@ -1343,12 +1346,21 @@ export default component$(() => {
                           const card = document.querySelector(".login-modal--split") as HTMLElement | null;
                           if (!row || !card) return;
                           const hidden = row.getBoundingClientRect().bottom - (vv.offsetTop + vv.height - 12);
-                          card.style.transition = "transform 0.25s ease";
+                          card.style.transition = "transform 0.2s ease";
                           card.style.transform = hidden > 0 ? `translateY(${-Math.ceil(hidden)}px)` : "";
                         };
-                        setTimeout(nudge, 300);
+                        (window as unknown as { __loginKbNudge?: () => void }).__loginKbNudge = nudge;
+                        vv.addEventListener("resize", nudge);
+                        // a couple of fallbacks in case resize doesn't fire
+                        setTimeout(nudge, 350);
+                        setTimeout(nudge, 700);
                       }}
                       onBlur$={() => {
+                        const w = window as unknown as { __loginKbNudge?: () => void };
+                        if (window.visualViewport && w.__loginKbNudge) {
+                          window.visualViewport.removeEventListener("resize", w.__loginKbNudge);
+                        }
+                        w.__loginKbNudge = undefined;
                         const card = document.querySelector(".login-modal--split") as HTMLElement | null;
                         if (card) card.style.transform = "";
                       }}
