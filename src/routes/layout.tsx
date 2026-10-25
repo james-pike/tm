@@ -1329,6 +1329,29 @@ export default component$(() => {
                       autoComplete="current-password"
                       required
                       placeholder={t("login.password.placeholder", locale.value)}
+                      // iOS Safari won't scroll a focused input that lives inside a
+                      // position:fixed overlay into view (Chrome does), so the
+                      // keyboard covers the password row. Lift the login card just
+                      // enough that the field + submit sit above the keyboard, using
+                      // the visual viewport (its height is the space above the
+                      // keyboard). Reset on blur. Only ever nudges upward.
+                      onFocus$={() => {
+                        const vv = typeof window !== "undefined" ? window.visualViewport : null;
+                        if (!vv) return;
+                        const nudge = () => {
+                          const row = document.querySelector(".login-modal__signin-row") as HTMLElement | null;
+                          const card = document.querySelector(".login-modal--split") as HTMLElement | null;
+                          if (!row || !card) return;
+                          const hidden = row.getBoundingClientRect().bottom - (vv.offsetTop + vv.height - 12);
+                          card.style.transition = "transform 0.25s ease";
+                          card.style.transform = hidden > 0 ? `translateY(${-Math.ceil(hidden)}px)` : "";
+                        };
+                        setTimeout(nudge, 300);
+                      }}
+                      onBlur$={() => {
+                        const card = document.querySelector(".login-modal--split") as HTMLElement | null;
+                        if (card) card.style.transform = "";
+                      }}
                     />
                   </div>
                   <button type="submit" class="btn login-modal__submit">
