@@ -16016,10 +16016,10 @@ html body .site-header .site-header__inner { background: transparent !important;
 @media (min-width: 601px) and (max-width: 999px) {
   /* Buttons sit flush as one group (no nav gap, no per-button margins), pulled
      flush to the header's right edge. */
-  /* The inner sits 2px below the header top (sign edge), so the full-height nav
-     left a 2px gap above the buttons and poked ~2px into the tab bar below. Pull
-     it up 2px so the buttons span the header flush — top edge to the tab bar. */
-  body .site-header .site-header__nav { gap: 0 !important; margin-right: -2px !important; margin-top: -2px !important; }
+  /* The white seam strip above the header is now removed (see the padding-top:0
+     override), so the inner sits at the header's top edge — the nav no longer
+     needs the -2px compensating pull (which was overshooting it above the bar). */
+  body .site-header .site-header__nav { gap: 0 !important; margin-right: -2px !important; margin-top: 0 !important; }
   body .site-header .site-header__nav > * { margin-left: 0 !important; margin-right: 0 !important; }
   body .site-header .site-header__inner { padding-right: 0 !important; }
   /* Remove the empty darker-grey block on the right of the category tab bar. */
@@ -16293,4 +16293,36 @@ html body .site-header .site-header__inner { background: transparent !important;
     padding-top: 19px;
     padding-bottom: 19px;
   }
+}
+
+/* Checkout page (tablet): the catalog's tonal-green logout styling is scoped to
+   body:has(.home-catalog), so on checkout the logout button fell through to the
+   sign-blue fill. Match it to the same tonal green as the rest of the header. */
+@media (min-width: 601px) and (max-width: 999px) {
+  body:has(.checkout-page) .site-header .logout-btn,
+  body:has(.checkout-page) .site-header .logout-btn:hover {
+    background: #22705A !important;
+  }
+}
+
+/* Checkout (mobile/tablet): extra bottom clearance inside the scroll container so
+   the Place Order button can always be scrolled fully into view above the phone's
+   URL bar / dynamic viewport (it was flush at the very bottom and got cut off). */
+@media (max-width: 999px) {
+  .checkout-page .cart-drawer__footer { padding-bottom: 96px !important; }
+}
+
+/* Checkout (mobile): the drawer sits inside an overlay already offset below the
+   header, so the default `top: header-pin - 5` double-counted that offset and
+   left a gray band between the fixed "Back to Cart" bar and the order summary.
+   Offset the drawer by just the back bar's height instead. */
+@media (max-width: 600px) {
+  .checkout-page .drawer.cart-drawer { top: 42px; }
+}
+
+/* Narrow tablet: drop the thin white seam strip above the header. It read as a
+   gap/strip above the bar (visible on scroll) and pushed the header buttons
+   ~1.6px down so their tonal backgrounds didn't reach the header's top edge. */
+@media (min-width: 601px) and (max-width: 999px) {
+  .site-header { padding-top: 0 !important; }
 }

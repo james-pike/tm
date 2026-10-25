@@ -113,6 +113,12 @@ export default component$(() => {
       cartHydrated.value = true;
     };
     loadCart();
+    // On phones the order summary starts collapsed — it's long and otherwise
+    // pushes the form (and Place Order) well down the page. Wider screens keep
+    // it open.
+    if (typeof window !== "undefined" && window.innerWidth <= 600) {
+      summaryOpen.value = false;
+    }
     window.addEventListener("cart-updated", loadCart);
     cleanup(() => window.removeEventListener("cart-updated", loadCart));
   });
