@@ -8680,7 +8680,9 @@ details[open] > .cart-drawer__checkout-title::after {
      separate full-width band. */
   /* Sit the "More …" carousel right under the info panel on the same 2px seam
      the rest of the site uses, not a 1rem gap; a small title lead-in below it. */
-  .related-items { margin-top: 3px; margin-left: var(--wt-box-my); margin-right: var(--wt-box-my); }
+  /* Full-bleed like the PDP image/details panel above it (was inset by the box
+     margin, which read as too much x padding vs the edge-to-edge PDP content). */
+  .related-items { margin-top: 3px; margin-left: 0; margin-right: 0; }
   .related-items__grid { display: none; }
   .related-items__title { font-size: 0.9rem; margin-bottom: 0.35rem; padding: 0.4rem 0.35rem 0; }
   .product-modal__category { display: none; }
@@ -16325,4 +16327,14 @@ html body .site-header .site-header__inner { background: transparent !important;
    ~1.6px down so their tonal backgrounds didn't reach the header's top edge. */
 @media (min-width: 601px) and (max-width: 999px) {
   .site-header { padding-top: 0 !important; }
+}
+
+/* "More …" carousel: soften the scroll-snap so it scrolls smoothly on
+   mobile/tablet. The default `both mandatory` snap resisted small swipes (they
+   had to pass the snap threshold to register, reading as choppy); x-proximity
+   keeps the slide snapping but lets it free-scroll in between. */
+.related-carousel__scroller {
+  scroll-snap-type: x proximity !important;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }

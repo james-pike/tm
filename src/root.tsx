@@ -24,7 +24,11 @@ export default component$(() => {
     <QwikCityProvider viewTransition={false}>
       <head>
         <meta charset="utf-8" />
-        <meta name="theme-color" content="#1B6551" />
+        {/* Keep the iOS/Safari browser chrome a normal light bar — NOT the header
+            green. A green theme-color made Safari's top bar blend into the green
+            header, so the header read as taller. The header stays green via CSS;
+            only the browser chrome is neutral here. */}
+        <meta name="theme-color" content="#ffffff" />
         <meta name="google" content="notranslate" />
         {/* Tamarack mark. Explicit tags — without them the browser silently falls
             back to /favicon.ico, which used to be the inherited pinwheel. */}
