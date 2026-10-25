@@ -283,6 +283,27 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
     const p0 = product.value;
     if (!p0) return;
     selectedColor.value = sortColorsWhiteLast(p0.colors)[0];
+    // Open on the colour the gallery card was showing (its default image colour,
+    // or whatever swatch the user switched to before clicking through). The card
+    // stashes it in sessionStorage right before navigating; consume it once.
+    try {
+      const raw = typeof sessionStorage !== "undefined" ? sessionStorage.getItem("pdp-initial-color") : null;
+      if (raw) {
+        const saved = JSON.parse(raw) as { sku?: string; color?: string };
+        if (saved && saved.sku === p0.sku && saved.color && p0.colors.includes(saved.color)) {
+          selectedColor.value = saved.color;
+          // Point the carousel at that colour's image too, so the PDP opens
+          // showing the same photo the gallery card was (the colour-aligned
+          // image-switch otherwise only reacts to later swatch changes).
+          const imgs = p0.imgs && p0.imgs.length ? p0.imgs : [p0.img];
+          if (imgs.length === p0.colors.length) {
+            const ci = p0.colors.indexOf(saved.color);
+            if (ci >= 0) imgIndex.value = ci;
+          }
+        }
+        sessionStorage.removeItem("pdp-initial-color");
+      }
+    } catch { /* sessionStorage unavailable (SSR / private mode) — keep default */ }
     if (waistLengthSkus.has(p0.sku)) {
       selectedSize.value = "W/L";
     } else if (getVariantMap(p0)) {

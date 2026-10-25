@@ -177,6 +177,15 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
   // colour's variant (imgs[i] lines up with colors[i]) without leaving the
   // gallery. Reset to the primary image if a colour has no dedicated image.
   const activeImg = useSignal(item.img);
+  // Colour currently shown on the card — the colour whose image is the default
+  // (item.img), or whatever swatch the user clicks. Passed to the PDP on navigate
+  // so it opens on the same colour the card was displaying.
+  const activeColor = useSignal(
+    (() => {
+      const idx = (item.imgs || []).indexOf(item.img);
+      return idx >= 0 ? (item.colors?.[idx] ?? "") : "";
+    })(),
+  );
   // Resolved name of the swatch being hovered — shown inline just right of the
   // swatches (overlaid so it doesn't shift layout), matching the mn2 storefront.
   const hoverColorName = useSignal("");
@@ -345,8 +354,8 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
       tabIndex={0}
       style={{ cursor: "pointer" }}
       class={`product-card product-card-link ${sku === "CAR-21" ? "product-card--cover" : ""}`}
-      onClick$={() => { if (onSelect$) onSelect$(sku); else nav(`/${sku}/`); }}
-      onKeyDown$={(e) => { if (e.key === "Enter") { if (onSelect$) onSelect$(sku); else nav(`/${sku}/`); } }}
+      onClick$={() => { try { sessionStorage.setItem("pdp-initial-color", JSON.stringify({ sku, color: activeColor.value })); } catch { /* ignore */ } if (onSelect$) onSelect$(sku); else nav(`/${sku}/`); }}
+      onKeyDown$={(e) => { if (e.key === "Enter") { try { sessionStorage.setItem("pdp-initial-color", JSON.stringify({ sku, color: activeColor.value })); } catch { /* ignore */ } if (onSelect$) onSelect$(sku); else nav(`/${sku}/`); } }}
     >
       <div class="product-card__image">
         {/* Bound directly to the activeImg signal so a swatch click updates the
@@ -446,6 +455,7 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
                         // slow/uncached decode can't block the swap.
                         await Promise.race([preload(src), new Promise((r) => setTimeout(r, 400))]);
                         activeImg.value = src;
+                        activeColor.value = c;
                       }}
                     />
                   ))}

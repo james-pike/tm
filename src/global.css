@@ -3816,29 +3816,22 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
      rounded top edge — the photo shows above (and fades into) it, and the logo
      sits raised on the panel, tucked into the image. The panel keeps its solid
      green sign surface (content is never over the bare photo). */
+  /* Full-width opaque green sign surface below the faded image (the logo sits on
+     it, pulled up into the image's fade) — not a floating rounded card. */
   .login-modal--split .login-modal__form-pane {
-    flex: 0 0 auto;
-    width: calc(100% - 56px); max-width: none;
-    position: relative; z-index: 2;
+    flex: 1 1 auto;
+    width: 100%; max-width: 100%;
+    position: relative; z-index: 1;
     overflow: visible;
     justify-content: flex-start;
-    /* Overlap = half the image so the panel's rounded top lands halfway up the
-       hero image on every size. */
-    margin: calc(var(--login-img-h, 190px) * -0.5) auto 0;
-    /* Self-contained floating card: rounded on all corners, ends after the form
-       (doesn't run to the screen bottom). */
-    border-radius: 30px;
-    padding-bottom: 1.4rem;
-    /* Translucent iron-textured "sign" surface so the panel reads as distinct
-       from the flat solid-green card behind it (the side gaps): the photo shows
-       through a touch in the logo area, the chevron texture + slight dark scrim
-       set it apart lower down, and a soft top highlight + shadow lift its rounded
-       edge off the image. */
+    margin: 0 auto 0;
+    border-radius: 0;
     background:
-      linear-gradient(rgba(27, 101, 81, 0.82), rgba(27, 101, 81, 0.82)),
+      linear-gradient(rgba(27, 101, 81, 0.55), rgba(27, 101, 81, 0.55)),
       var(--wt-iron) left top / 1400px auto repeat,
-      linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.16));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 -3px 18px rgba(0, 0, 0, 0.18);
+      linear-gradient(rgba(0, 0, 0, 0.30), rgba(0, 0, 0, 0.30)),
+      #1B6551;
+    box-shadow: none;
   }
   /* Pull the logo (transparent header) + the rest of the content up into the
      image's faded bottom, so everything sits higher. */
@@ -3908,9 +3901,7 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
      so let more of the photo frame the sides of the logo/form panel. */
   /* Content-sized floating panel (inherits the half-image overlap + full
      rounding + centring from the shared rule); wider image strips on tablet. */
-  .login-modal--split .login-modal__form-pane { flex: 0 0 auto; justify-content: flex-start; padding-top: 0.5rem; width: calc(100% - 128px); }
-  /* Logo seats just below the panel's rounded top (the panel itself is raised
-     into the image now). */
+  .login-modal--split .login-modal__form-pane { flex: 0 0 auto; justify-content: flex-start; padding-top: 0.5rem; width: calc(100% - 96px); }
   .login-modal--split .login-modal__header {
     margin-top: 0;
     padding: 1.2rem 2.25rem 1.35rem;
@@ -3940,6 +3931,10 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
     min-height: 74px;
     padding: 12px 10px;
   }
+  /* Bigger password label + field on tablet — the base 16px input / 0.72rem
+     label read a touch small on the larger card. */
+  .login-modal--split .login-modal__field label { font-size: 0.86rem; }
+  .login-modal--split .login-modal__field input { font-size: 18px; padding: 17px 18px; }
   /* Password field + LOGIN button share one row (neither needs the full width). */
   .login-modal__signin-row { display: flex; align-items: flex-end; gap: 0.75rem; }
   .login-modal__signin-row .login-modal__field { flex: 1 1 auto; margin: 0; }
@@ -16221,6 +16216,9 @@ html body .site-header .site-header__inner { background: transparent !important;
     margin: 4px auto;
     border: 1px solid #fff;
     border-radius: 10px;
+    /* Shorter hero image on mobile so the logo sits higher (the tablet keeps its
+       taller image from the ≤1280 value). */
+    --login-img-h: clamp(140px, 19vh, 210px);
   }
   /* Centre the logo + form in the space below the hero image so the content uses
      the full card height on taller phones instead of clustering near the top
@@ -16232,6 +16230,9 @@ html body .site-header .site-header__inner { background: transparent !important;
      the wider-phone content a bit too low). */
   /* Less space above the logo (between the panel's rounded top and the wordmark). */
   .login-modal--split .login-modal__header { padding-top: 1rem; }
+  /* Inset the darker-green panel a little so the lighter-green card shows behind
+     it on the sides (the "layer" look the tablet + narrow phone already have). */
+  .login-modal--split .login-modal__form-pane { width: calc(100% - 24px); }
   /* The panel is inset a bit more now (wider image strips beside the logo), so
      trim the form's side padding by the same amount — the portals + password
      keep the width/x-position they had before the inset was widened. */
@@ -16248,7 +16249,7 @@ html body .site-header .site-header__inner { background: transparent !important;
   /* Thinner image strips (less panel inset) + tighter form padding so the portal
      tiles are wide enough that "SUPERINTENDENTS" fits on the 2nd line instead of
      wrapping to a 3rd. */
-  .login-modal--split .login-modal__form-pane { width: calc(100% - 26px); }
+  .login-modal--split .login-modal__form-pane { width: calc(100% - 18px); }
   .login-modal--split .login-modal__form { padding-left: 0.55rem; padding-right: 0.55rem; padding-top: 0.45rem; }
   /* Tighten the vertical gap between the logo and the portals/password area on
      the narrowest phones (it read as a large empty band between them). */
@@ -16262,7 +16263,34 @@ html body .site-header .site-header__inner { background: transparent !important;
   .login-modal--split .login-modal__logo-white { height: 84px; }
   .login-modal--split .login-modal__brand--img .brand-apparel { font-size: 2rem; }
   .login-modal__form .login-portals--grid .login-portal { font-size: 1.08rem; min-height: 84px; }
-  .login-modal--split .login-modal__field label { font-size: 0.82rem; }
-  .login-modal--split .login-modal__field input { font-size: 18px; padding: 16px 18px; }
-  .login-modal--split .login-modal__submit.btn { font-size: 1.08rem; padding: 16px 28px; }
+  .login-modal--split .login-modal__field label { font-size: 0.9rem; }
+  .login-modal--split .login-modal__field input { font-size: 20px; padding: 18px 20px; }
+  .login-modal--split .login-modal__submit.btn { font-size: 1.08rem; padding: 18px 28px; }
+}
+
+/* Cart "items in cart" dot on tablet: sit it at the cart ICON's top-right corner
+   (the icon sits inside the wider tonal cart button, so the button-corner default
+   left the dot floating far from the icon). */
+@media (min-width: 601px) and (max-width: 999px) {
+  .site-header .cart-btn__dot { top: 20px; right: 24px; }
+}
+
+/* Cart allowance legend on tablet: pull it into the left corner at half the
+   drawer width (like desktop), with minimal left + top margin (it was offset in
+   from the left with a big top gap). */
+@media (min-width: 601px) and (max-width: 999px) {
+  .modal-overlay:has(.cart-drawer):not(.checkout-page) .cart-drawer__allowance .allowance {
+    width: 50%;
+    max-width: none;
+    margin: 4px 0 8px 2px;
+  }
+}
+
+/* Tablet narrow: match the LOGIN button's height to the password field (the base
+   14px button padding left it ~10px shorter than the 17px-padded input). */
+@media (min-width: 601px) and (max-width: 899px) {
+  .login-modal--split .login-modal__signin-row .login-modal__submit.btn {
+    padding-top: 19px;
+    padding-bottom: 19px;
+  }
 }
