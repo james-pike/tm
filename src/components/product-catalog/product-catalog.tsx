@@ -116,6 +116,7 @@ const BRAND_BY_SKU: Record<string, string> = {
   "TM-7": "Canada Sportswear", // Women's Lakeview Full-Zip hoodie #L00671 (CSW)
   "TM-8": "Canada Sportswear", // Lakeview Adult Full-Zip hoodie #L00670 (CSW)
   "TM-11": "Canada Sportswear", // Flux Quarter-Zip #L00545 (CSW L-series)
+  "TM-22": "Canada Sportswear", // Vault Pullover Hooded Sweatshirt #L00550 (CSW L-series)
 };
 function brandOf(p: Product): string | null {
   if (BRAND_BY_SKU[p.sku]) return BRAND_BY_SKU[p.sku];
@@ -201,23 +202,41 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
     const el = nameRef.value;
     if (!el) return;
     const fit = () => {
-      // Phones (<=600px): the title wraps to (up to) two lines (see
-      // .product-card__name-text in global.css). If it would spill onto a third
-      // line, scale the font down a touch so it always fits in two rows rather
-      // than truncating. Re-runs on resize; clear inline styles first.
-      if (window.matchMedia("(max-width: 600px)").matches) {
+      // Hide for the duration of this pass. fit() runs more than once (once
+      // immediately, again when web fonts finish loading, again on width
+      // changes), and each pass can land on a different size. Re-hiding at the
+      // start means the title is only ever *revealed* at its final size — so
+      // the later font-load / resize pass can't be seen resizing a title that
+      // is already on screen (the "pop"). The reveal + fade happens at the end.
+      el.style.opacity = "0";
+      // Phones and the narrower (tab-bar) tablet tier (<=999px): the title wraps
+      // to (up to) two lines (see .product-card__name-text in global.css). If it
+      // would spill onto a third line, scale the font down a touch so it always
+      // fits in two rows rather than truncating. At 3 columns the tablet cards
+      // are too narrow to hold long titles on one line without shrinking the
+      // text uncomfortably small, so they wrap here like the phone cards.
+      // Re-runs on resize; clear inline styles first.
+      if (window.matchMedia("(max-width: 1100px)").matches) {
         el.style.whiteSpace = "";
         el.style.overflow = "";
         el.style.fontSize = "";
         const textEl = (el.querySelector(".product-card__name-text") as HTMLElement) || el;
         const base = parseFloat(getComputedStyle(el).fontSize);
         let px = base;
-        const min = base * 0.72;
+        // On narrow phones the cards are tiny, so a long title would otherwise
+        // shrink down to ~10–11px to fit two lines. Hold a higher floor there so
+        // titles read a bit larger; the very longest then clip at two lines
+        // (the clamp cap) instead of shrinking further. Wider phones/tablets keep
+        // the gentler floor so their (roomier) cards still show full titles.
+        const min = base * (window.innerWidth <= 400 ? 0.84 : 0.72);
         let guard = 0;
         while (textEl.scrollHeight > textEl.clientHeight + 1 && px > min && guard++ < 40) {
           px -= 0.5;
           el.style.fontSize = `${px}px`;
         }
+        // Reveal only now that the size is final, so the title never flashes at a
+        // different size (it's hidden by default in global.css).
+        el.style.opacity = "1";
         return;
       }
       el.style.fontSize = "";
@@ -256,14 +275,35 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
         el.style.overflow = "";
         el.style.fontSize = "";
       }
+      // Reveal only now that the size is final (hidden by default in global.css).
+      el.style.opacity = "1";
     };
-    // Measure only after the grid has laid out and web fonts have loaded —
-    // measuring too early reports no overflow and the title stays wrapped.
+    // Size and reveal synchronously on mount so the title paints at its final
+    // size in the same frame as the rest of the card. The old code only ran fit
+    // after two rAFs, so the title (opacity:0 by default) stayed blank for a
+    // couple of frames and visibly appeared after the card on every category/tab
+    // change. A single fit() call flips opacity 0→1 within one synchronous pass
+    // (no paint in between, so never a visible blank). The deferred run + the
+    // fonts.ready pass below re-measure to correct the first-load case where web
+    // fonts hadn't finished loading when this first ran.
     const run = () => requestAnimationFrame(() => requestAnimationFrame(fit));
+    fit();
     run();
     if ((document as any).fonts?.ready) (document as any).fonts.ready.then(run);
-    window.addEventListener("resize", run);
-    cleanup(() => window.removeEventListener("resize", run));
+    // Only re-fit when the card's own width actually changes. On mobile,
+    // scrolling shows/hides the URL bar and fires `resize` with the width
+    // unchanged — re-fitting on those would make the title flicker (it is
+    // briefly hidden at the top of every pass) for no layout reason.
+    let lastWidth = el.clientWidth;
+    const onResize = () => {
+      const w = el.clientWidth;
+      if (w !== lastWidth) {
+        lastWidth = w;
+        run();
+      }
+    };
+    window.addEventListener("resize", onResize);
+    cleanup(() => window.removeEventListener("resize", onResize));
   });
 
   // Effective hidden-colour set for THIS product — empty when the SKU is exempt
@@ -413,7 +453,10 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
                     <span class="product-card__color-more" aria-label={`+${extra} more colours`}>+{extra}</span>
                   )}
                   {(hoverColorName.value || singleColorName) && (
-                    <span class={`product-card__color-name${singleColorName ? "" : " product-card__color-name--overlay"}`}>{hoverColorName.value || singleColorName}</span>
+                    // Use the hover overlay whenever a swatch is hovered — including
+                    // single-colour products — so the colour label shows on hover
+                    // there too (the persistent single-colour label is non-overlay).
+                    <span class={`product-card__color-name${hoverColorName.value ? " product-card__color-name--overlay" : ""}`}>{hoverColorName.value || singleColorName}</span>
                   )}
                 </div>
               ) : <span />;

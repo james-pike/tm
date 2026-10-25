@@ -645,6 +645,10 @@ export default component$(() => {
   const selectedPortal = useSignal<Portal>("labourers");
   const overlayFading = useSignal(false);
   const menuOpen = useSignal(false);
+  // Set when the menu closes because a search was committed from inside it, so
+  // the scroll-lock release lands on the results (top of the catalog) instead of
+  // restoring the scrolled-down position the menu was opened from.
+  const menuSearchScrollTop = useSignal(false);
   const savedLocale = useLocaleLoader();
   const locale = useSignal<Locale>(savedLocale.value);
 
@@ -1122,7 +1126,25 @@ export default component$(() => {
     } else {
       const scrollY = Math.abs(parseInt(document.body.style.top || "0", 10));
       document.body.style.cssText = "";
-      window.scrollTo({ top: scrollY, behavior: "instant" });
+      if (menuSearchScrollTop.value) {
+        // Search committed from the menu: don't restore the pre-menu scroll —
+        // land on the results at the top of the catalog (below the sticky
+        // header/tab bar). Deferred a frame so it runs after the body is
+        // unlocked (scrollTo is a no-op while body is position:fixed).
+        menuSearchScrollTop.value = false;
+        requestAnimationFrame(() => {
+          const catalog = document.querySelector(".home-catalog") as HTMLElement | null;
+          if (catalog) {
+            const headerH = window.innerWidth < 601 ? 64 : window.innerWidth <= 1024 ? 67 : 66;
+            const top = catalog.getBoundingClientRect().top + window.scrollY - headerH;
+            window.scrollTo({ top: Math.max(top, 0), behavior: "instant" });
+          } else {
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }
+        });
+      } else {
+        window.scrollTo({ top: scrollY, behavior: "instant" });
+      }
     }
   }, { strategy: 'document-ready' });
 
@@ -1266,9 +1288,8 @@ export default component$(() => {
               </button>
             )}
             <div class="login-modal__form-pane">
-              <button type="button" class="login-modal__lang" onClick$={toggleLocale} aria-label="Toggle language">
-                {locale.value === "en" ? "Français" : "English"}
-              </button>
+              {/* Language toggle removed from the login gate — users switch
+                  EN/FR from the header/menu or footer once signed in. */}
               <div class="login-modal__header">
                 <div class="login-modal__brand login-modal__brand--img">
                   <img src="/tamarack-logo-white.png" alt="Tamarack" class="login-modal__logo-white" width="1451" height="250" />
@@ -1502,6 +1523,10 @@ export default component$(() => {
                       e.preventDefault();
                       // Close the menu takeover so the filtered products are visible
                       // (searching from inside the open menu otherwise did nothing).
+                      // Flag the close as a search commit so the scroll-lock release
+                      // lands on the results instead of restoring the scrolled-down
+                      // position the menu was opened at.
+                      menuSearchScrollTop.value = true;
                       menuOpen.value = false;
                       if (loc.url.pathname.replace(/\/+$/, "") === "") {
                         // On the grid: commit the live-filtered results in place.
@@ -1595,8 +1620,22 @@ export default component$(() => {
                   tabCat === "Footwear"
                     ? (pCat === "Safety Boots" || pCat === "Safety Shoes")
                     : pCat === tabCat;
+                // If the menu is opened from a product page (/<sku>/), pre-open the
+                // accordion on that product's category so the drawer lands already
+                // focused where the user is (the open item gets the green selected
+                // state too). The drawer is re-created each time it opens, so this
+                // initial value is recomputed per open. Collapses to the tab-bar
+                // category: footwear SKUs map to the "Footwear" section.
+                const pdpSku = loc.url.pathname.replace(/^\/+|\/+$/g, "");
+                const pdpProduct = pdpSku ? allProducts.find((p) => p.sku === pdpSku) : undefined;
+                const pdpTabCat = pdpProduct
+                  ? (pdpProduct.category === "Safety Boots" || pdpProduct.category === "Safety Shoes"
+                      ? "Footwear"
+                      : pdpProduct.category)
+                  : undefined;
+                const openCat = pdpTabCat && NAV_CATS.some((c) => c.cat === pdpTabCat) ? pdpTabCat : undefined;
                 return (
-                  <Accordion.Root class="nav-drawer__accordion" collapsible>
+                  <Accordion.Root class="nav-drawer__accordion" collapsible value={openCat}>
                     {NAV_CATS.map((c) => {
                       const items = allProducts.filter((p) => catMatches(p.category, c.cat));
                       return (
@@ -1722,9 +1761,23 @@ export default component$(() => {
               <button class="modal__close cart-drawer__close-desktop" onClick$={() => (cartOpen.value = false)}>x</button>
             </div>
             {cart.items.length === 0 ? (
-              <div class="cart-drawer__empty">
-                <p>{t("cart.empty", locale.value)}</p>
-                <Link href="/" class="cart-drawer__back-link" onClick$={() => (cartOpen.value = false)}>{t("cart.backtoapparel", locale.value)}</Link>
+              <div class="cart-drawer__items cart-drawer__items--empty">
+                {/* Keep the same grey PRODUCT/QTY/TOTAL secondary bar the populated
+                    cart shows, so the empty cart reads as the same view with no
+                    rows rather than the header floating on the empty message. */}
+                <table class="cart-table">
+                  <thead>
+                    <tr>
+                      <th class="cart-table__th-product">{t("cart.invoice.product", locale.value)}</th>
+                      <th class="cart-table__th-qty">{t("cart.invoice.qty", locale.value)}</th>
+                      {loginType.value !== "tech" && <th class="cart-table__th-total"><span class="cart-table__th-qty-inline">{t("cart.invoice.qty", locale.value)} / </span>{t("cart.invoice.total", locale.value)}</th>}
+                    </tr>
+                  </thead>
+                </table>
+                <div class="cart-drawer__empty">
+                  <p>{t("cart.empty", locale.value)}</p>
+                  <Link href="/" class="cart-drawer__back-link" onClick$={() => (cartOpen.value = false)}>{t("cart.backtoapparel", locale.value)}</Link>
+                </div>
               </div>
             ) : (
               <>

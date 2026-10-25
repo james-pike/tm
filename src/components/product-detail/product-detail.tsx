@@ -532,6 +532,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
                 </div>
               </div>
             )}
+            <div class="product-modal__color-qty-row">
             {p.colors.length > 0 && (
               <div class="product-modal__field">
                 <label class="product-modal__label">{t("modal.color", locale.value)}{selectedColor.value && <span class="product-modal__color-inline"> — {colorName(selectedColor.value, locale.value)}</span>}</label>
@@ -571,6 +572,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
                 >+</button>
               </div>
               {qtyNotice.value && <p class="product-modal__qty-note" role="status">{qtyNotice.value}</p>}
+            </div>
             </div>
             <div class="product-modal__actions">
               <button
