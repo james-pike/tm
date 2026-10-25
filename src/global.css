@@ -5464,9 +5464,11 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
   /* Half width (left-aligned) rather than spanning the whole cart/checkout. */
   max-width: 50%;
 }
-/* Phones: too cramped at half width — go full. */
+/* Phones: too cramped at half width — go full, and pull the greige surround in
+   about halfway (0.85/1/0.75rem → ~0.45/0.5/0.4rem) so the list sits tighter to
+   the edges. */
 @media (max-width: 600px) {
-  .allowance { max-width: 100%; }
+  .allowance { max-width: 100%; padding: 0.45rem 0.5rem 0.4rem; }
 }
 
 /* Cart drawer: the allowance legend and the checkout footer share one row, so
@@ -15634,7 +15636,10 @@ html { background: rgb(223, 226, 230) !important; }
    Give the route one calm off-white ground, white section cards with a single
    border weight and radius, and even gutters — the conventional checkout look.
    Scoped to .checkout-page so the in-drawer cart keeps its own styling. */
-.checkout-page .drawer.cart-drawer { background: #ffffff; }
+/* White ground on every breakpoint (mobile forces .drawer.cart-drawer to the
+   greige --mn-panel with !important for the cart; the checkout page wants the
+   inverse: a white ground with soft off-white fields, like the rest of the site). */
+.checkout-page .drawer.cart-drawer { background: #ffffff !important; }
 .checkout-page .cart-drawer__details-step {
   padding: 0 !important;
   gap: 14px !important;
@@ -15667,10 +15672,44 @@ html { background: rgb(223, 226, 230) !important; }
   border-top: none;
   margin: 0;
 }
+/* Mobile narrow: drop the checkmark icon on the Place Order button so the label
+   stays on one line instead of wrapping to two in the cramped footer. */
+@media (max-width: 400px) {
+  .checkout-page .cart-drawer__order-btn svg { display: none; }
+}
 .checkout-page .checkout-modal__field input,
 .checkout-page .checkout-modal__field select {
-  background: var(--ce-white);
+  /* Off-white fields on the white ground — the inverse of the old white-on-greige,
+     matching the cart page and the rest of the site. */
+  background: var(--ce-greige);
   border: 1px solid var(--ce-gray-300);
+}
+
+/* Order-summary toggle (single-column checkout, below the 1000px 2-col layout):
+   make it read as a tappable accordion header — a soft off-white bar with a thin
+   border and rounded corners — and line it up with the order-details fields
+   (drop the desktop left divider/indent, which only belongs in the 2-col view). */
+@media (max-width: 999px) {
+  .checkout-page .cart-drawer__summary {
+    padding-left: 1.15rem !important;
+    padding-right: 1.15rem !important;
+    border-left: none !important;
+  }
+  .checkout-page .cart-drawer__checkout-title {
+    background: var(--ce-greige);
+    border: 1px solid var(--ce-gray-300);
+    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    color: var(--ce-gray-600);
+    /* Keep the label on one line (it wrapped in the padded box on 320px). */
+    white-space: nowrap;
+  }
+  .checkout-page .cart-drawer__checkout-title:hover,
+  .checkout-page details[open] > .cart-drawer__checkout-title {
+    background: var(--ce-gray-200);
+  }
+  /* A touch more presence on the +/− marker so the affordance is unmistakable. */
+  .checkout-page .cart-drawer__checkout-title::after { font-size: 1.05rem; color: var(--ce-gray-600); }
 }
 
 /* --- Checkout / Place Order button (cart drawer AND checkout page) ---
@@ -15835,8 +15874,12 @@ html { background: rgb(223, 226, 230) !important; }
 .site-header--hero-hidden.site-header--hero-visible,
 body:has(.home-catalog) .site-header,
 body:has(.home-catalog__header, .apparel-titlebar, .pdp-breadcrumb) .site-header {
-  background-color: #1B6551 !important;
-  background-image: none !important;
+  /* Green via background-IMAGE, not background-color — see .site-header note:
+     iOS Safari tints its toolbar by sampling the top sticky element's
+     background-COLOR and ignores background-image, so a transparent color +
+     flat-green gradient paints green yet leaves Safari's chrome neutral white. */
+  background-color: transparent !important;
+  background-image: linear-gradient(#1B6551, #1B6551) !important;
 }
 
 /* White header text/links on the green header bar */
@@ -15852,8 +15895,9 @@ body:has(.home-catalog__header, .apparel-titlebar, .pdp-breadcrumb) .site-header
 html body header.site-header,
 html body header.site-header--white,
 html body header.site-header--tabs-stuck {
-  background: #1B6551 !important;
-  background-image: none !important;
+  /* Flat-green gradient fill, transparent color — keeps Safari chrome neutral. */
+  background-color: transparent !important;
+  background-image: linear-gradient(#1B6551, #1B6551) !important;
 }
 /* Footer: white link/text (email, privacy, localization) */
 .site-footer, .site-footer a, .site-footer .locale-btn, .site-footer__locale, .site-footer__privacy-link, .site-footer__col a { color: rgba(255,255,255,0.9) !important; }
@@ -15866,7 +15910,7 @@ html body header.site-header--tabs-stuck {
 
 /* ── The header bar is painted by .site-header::before (a white panel). Repaint
       it Tamarack green so the bar actually turns green. ────────────────────── */
-html body header.site-header::before { background: #1B6551 !important; }
+html body header.site-header::before { background-color: transparent !important; background-image: linear-gradient(#1B6551, #1B6551) !important; }
 /* Footer icons (email, etc.) white to match the text */
 .site-footer svg { stroke: rgba(255, 255, 255, 0.9) !important; color: rgba(255, 255, 255, 0.9) !important; }
 .site-footer svg [fill]:not([fill="none"]) { fill: rgba(255, 255, 255, 0.9) !important; }
@@ -16285,6 +16329,39 @@ html body .site-header .site-header__inner { background: transparent !important;
     width: 50%;
     max-width: none;
     margin: 4px 0 8px 2px;
+  }
+}
+
+/* Tablet narrow (601–999): the cart overlay inherited the desktop's centred ROW
+   layout with an absolutely-positioned card, so the allowance legend (a sibling
+   AFTER the card) became the only in-flow item and floated vertically centred
+   OVER the cart items and the Checkout footer — it read as "hidden by the cart".
+   Apply the SAME column-scroll treatment phones use (max-width:600px above): the
+   card flows in a scrolling column so the legend sits BELOW it. Cart overlay only
+   — the /checkout route keeps its own layout. The overlay's own opaque background
+   is left untouched, so nothing behind it shows through. */
+@media (min-width: 601px) and (max-width: 999px) {
+  .modal-overlay:has(.cart-drawer):not(.checkout-page) {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow-y: auto;
+    /* The in-flow card now respects the overlay's box, so zero its padding or the
+       cart insets ~26px from the header and side edges (the old absolute card
+       pinned to left:0/right:0 and ignored it). */
+    padding: 0;
+  }
+  .modal-overlay:has(.cart-drawer):not(.checkout-page) .drawer.cart-drawer {
+    /* !important to beat the 601–999 rule that pins the card absolute (it forces
+       the full-screen drawer that /checkout still wants). */
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    flex: 0 0 auto;
   }
 }
 
