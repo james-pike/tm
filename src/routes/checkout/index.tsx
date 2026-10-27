@@ -271,7 +271,7 @@ export default component$(() => {
             <img src="/logo.png" alt="Tamarack" class="site-header__logo-img" width="200" height="200" loading="eager" decoding="sync" />
           </Link>
           <nav class="site-header__nav">
-            <button class="cart-btn" onClick$={() => nav("/")}>
+            <button class="cart-btn" onClick$={() => { try { sessionStorage.setItem("reopen-cart", "1"); } catch { /* ignore */ } nav("/"); }}>
               <span class="cart-btn__label">{t("cart.mycart", locale.value)}</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
             </button>
@@ -289,7 +289,7 @@ export default component$(() => {
         ) : (
           <>
             <div class="cart-drawer__details-step">
-              <button class="cart-drawer__back-btn" onClick$={() => nav("/")}>
+              <button class="cart-drawer__back-btn" onClick$={() => { try { sessionStorage.setItem("reopen-cart", "1"); } catch { /* ignore */ } nav("/"); }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
                 {t("cart.backtocart", locale.value)}
               </button>

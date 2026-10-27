@@ -1181,7 +1181,18 @@ export default component$(() => {
   useVisibleTask$(({ track }) => {
     const p = track(() => loc.url.pathname);
     if (prevPath.value !== null && prevPath.value !== p) {
-      cartOpen.value = false;
+      // "Back to Cart"/cart button on the /checkout route navigates here to RE-open
+      // the cart. This close-on-nav would otherwise slam it shut right after, so
+      // honour the flag and open the cart (at the cart step) instead of closing it.
+      let reopen = false;
+      try { reopen = sessionStorage.getItem("reopen-cart") === "1"; } catch { /* ignore */ }
+      if (reopen) {
+        try { sessionStorage.removeItem("reopen-cart"); } catch { /* ignore */ }
+        checkoutStep.value = "cart";
+        cartOpen.value = true;
+      } else {
+        cartOpen.value = false;
+      }
       searchOpen.value = false;
     }
     prevPath.value = p;
@@ -1508,7 +1519,7 @@ export default component$(() => {
             )}
             {/* EN/FR toggle moved to the footer. Cart is hidden in authorizer mode. */}
             {loginType.value !== "authorizer" && (
-            <button class={`cart-btn ${cart.items.length > 0 ? "cart-btn--active" : ""}`} onClick$={() => { if (isCheckout.value) { cartOpen.value = true; nav("/"); return; } cartOpen.value = !cartOpen.value; if (cartOpen.value) menuOpen.value = false; if (!cartOpen.value) checkoutStep.value = "cart"; }}>
+            <button class={`cart-btn ${cart.items.length > 0 ? "cart-btn--active" : ""}`} onClick$={() => { if (isCheckout.value) { try { sessionStorage.setItem("reopen-cart", "1"); } catch { /* ignore */ } nav("/"); return; } cartOpen.value = !cartOpen.value; if (cartOpen.value) menuOpen.value = false; if (!cartOpen.value) checkoutStep.value = "cart"; }}>
               <span class="cart-btn__label cart-btn__label-full">{t("cart.mycart", locale.value)}</span>
               <span class="cart-btn__label-short">{t("cart.short", locale.value)}</span>
               {cartOpen.value && !isCheckout.value ? (

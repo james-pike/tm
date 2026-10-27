@@ -748,6 +748,24 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
     });
   });
 
+  // This component also renders the PDP route (see `isPdp`), so navigating back
+  // from a product to /#<category> does NOT remount it: the mount-time applyHash()
+  // above runs only once, and no `hashchange` fires on a path change — so the
+  // breadcrumb's category was ignored and the grid stayed on "All" (with the
+  // active pill stuck on the All tab). Apply the hash REACTIVELY by tracking the
+  // location, so every SPA navigation that lands on the grid with a #category hash
+  // selects and highlights exactly that category. Guarded to a #category hash, so
+  // normal grid/search navigation never triggers it.
+  // eslint-disable-next-line qwik/no-use-visible-task
+  useVisibleTask$(({ track }) => {
+    const hash = track(() => loc.url.hash).replace("#", "");
+    if (hash && HASH_TO_CAT[hash]) {
+      activeCat.value = HASH_TO_CAT[hash];
+      history.replaceState(null, "", loc.url.pathname);
+      centerActiveTab();
+    }
+  });
+
   const doSearch = $((query: string) => {
     if (query.trim()) {
       activeCat.value = categoryForQuery(query, baseProducts.value);

@@ -1956,6 +1956,11 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   box-shadow: none;
 }
 .doc-panel .privacy-page__body { max-width: 68ch; }
+/* Mobile: trim the extra white space above the policy text (the 1.75rem top
+   padding read as a big empty gap under the Back bar on a phone). */
+@media (max-width: 600px) {
+  .privacy-page .doc-panel { padding-top: 0.85rem; }
+}
 .privacy-page__title {
   font-size: 1.6rem;
   font-weight: 800;
@@ -5468,7 +5473,9 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
    about halfway (0.85/1/0.75rem → ~0.45/0.5/0.4rem) so the list sits tighter to
    the edges. */
 @media (max-width: 600px) {
-  .allowance { max-width: 100%; padding: 0.45rem 0.5rem 0.4rem; }
+  .allowance { max-width: 100%; padding: 0.3rem 0.4rem 0.3rem; }
+  /* Pull the legend's side edges closer to the screen edges too (was inset 2px). */
+  .cart-drawer__bottom .allowance { margin-left: 1px; margin-right: 1px; }
 }
 
 /* Cart drawer: the allowance legend and the checkout footer share one row, so
@@ -10184,10 +10191,12 @@ details[open] > .cart-drawer__checkout-title::after {
 @media (max-width: 999px) {
   .site-header__inner { padding-left: 12px !important; }
 }
-/* Phones: no side margins between the header buttons — their own padding is
-   enough of a touch gap, and the saved width keeps the bar from x-overflowing
-   on narrow devices. */
-@media (max-width: 767px) {
+/* Phones AND tablet: no side margins between the header buttons so they sit flush
+   (their own padding is enough of a touch gap). The base rule above gives them
+   `margin: 0 2px`, which was only zeroed ≤767px and ≥1000px — leaving a 2px seam
+   between the buttons across the whole 768–999px tablet range. Extended to ≤999px.
+   Desktop (≥1000px) keeps its own zero-margin rule and is untouched. */
+@media (max-width: 999px) {
   .site-header .locale-btn,
   .site-header .cart-btn,
   .site-header .cart-btn.cart-btn--active,
@@ -15673,11 +15682,29 @@ body:has(.checkout-page) .site-footer { display: none; }
 /* Keep the input fields from sprawling across the wide details column. */
 .checkout-page .checkout-modal__form,
 .checkout-page .checkout-modal__pay { max-width: 640px; }
+/* Mobile/tablet (single column): the 2-column gutter trim (right-padding on the
+   form) and the 640px cap don't belong here — they left the fields with uneven
+   side padding and a fixed width. Even the gutters and let the fields be fluid. */
+@media (max-width: 999px) {
+  .checkout-page .checkout-modal__form { padding-right: 1.15rem !important; max-width: none; }
+  .checkout-page .checkout-modal__pay { max-width: none; }
+}
 .checkout-page .cart-drawer__back-btn {
   /* Same light-grey secondary-bar fill as the cart's PRODUCT/QTY strip, so the
      bar reads distinct from the order-details content below it. */
   background: #f2f2f2 !important;
   border-bottom: none;
+}
+/* Mobile: make the Back-to-Cart bar an in-flow grey bar like tablet. On phones it
+   was position:fixed (to resist overscroll drag), but that made it read as part of
+   the scrolling content rather than the distinct secondary bar tablet presents. */
+@media (max-width: 600px) {
+  .checkout-page .cart-drawer__back-btn {
+    position: static !important;
+    top: auto !important;
+    width: 100% !important;
+    z-index: auto !important;
+  }
 }
 .checkout-page .cart-drawer__footer {
   background: transparent;
@@ -16386,12 +16413,14 @@ html body .site-header .site-header__inner { background: transparent !important;
   }
 }
 
-/* Checkout page (tablet): the catalog's tonal-green logout styling is scoped to
-   body:has(.home-catalog), so on checkout the logout button fell through to the
-   sign-blue fill. Match it to the same tonal green as the rest of the header. */
+/* Checkout AND privacy pages (tablet): the catalog's tonal-green logout styling is
+   scoped to body:has(.home-catalog), so on these routes the logout button fell
+   through to the sign-blue fill. Match it to the same tonal green as the header. */
 @media (min-width: 601px) and (max-width: 999px) {
   body:has(.checkout-page) .site-header .logout-btn,
-  body:has(.checkout-page) .site-header .logout-btn:hover {
+  body:has(.checkout-page) .site-header .logout-btn:hover,
+  body:has(.privacy-page) .site-header .logout-btn,
+  body:has(.privacy-page) .site-header .logout-btn:hover {
     background: #22705A !important;
   }
 }
@@ -16404,11 +16433,11 @@ html body .site-header .site-header__inner { background: transparent !important;
 }
 
 /* Checkout (mobile): the drawer sits inside an overlay already offset below the
-   header, so the default `top: header-pin - 5` double-counted that offset and
-   left a gray band between the fixed "Back to Cart" bar and the order summary.
-   Offset the drawer by just the back bar's height instead. */
+   header. The Back-to-Cart bar is now an in-flow child of the drawer (not a fixed
+   bar needing reserved space above it), so pin the drawer to the overlay top and
+   let the bar sit flush under the header. */
 @media (max-width: 600px) {
-  .checkout-page .drawer.cart-drawer { top: 42px; }
+  .checkout-page .drawer.cart-drawer { top: 0; }
 }
 
 /* Narrow tablet: drop the thin white seam strip above the header. It read as a
