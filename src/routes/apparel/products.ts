@@ -74,12 +74,14 @@ export const allProducts = [
     "sizes": "XS - 4XL",
     "badge": "",
     "colors": [
-      "#1a1a18"
+      "#1a1a18",
+      "#1e4d2b"
     ],
     "price": 45.5,
     "img": "/skus/L00555-tamarack.png",
     "imgs": [
-      "/skus/L00555-tamarack.png"
+      "/skus/L00555-tamarack.png",
+      "/skus/L00555-forestgreen-tamarack.png"
     ],
     "material": "70% ring-spun combed cotton / 30% polyester fleece",
     "details": "Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555",

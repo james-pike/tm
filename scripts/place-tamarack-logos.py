@@ -45,6 +45,8 @@ TASKS = [
     ("8800",   "8800-forestgreen.png",      "8800-forestgreen-tamarack.png"),
     ("ATC1015", "ATC1015-forestgreen.png",  "ATC1015-forestgreen-tamarack.png"),
     ("ATC1000", "ATC1000-forestgreen.png",  "ATC1000-forestgreen-tamarack.png"),
+    # TM-3 Surfer Full-Zip: Forest Green added as a second colour.
+    ("L00555", "L00555-forestgreen.png",    "L00555-forestgreen-tamarack.png"),
 ]
 
 # Optional: bake only the named outputs, e.g.
