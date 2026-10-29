@@ -387,14 +387,12 @@ export const allProducts = [
     "sizes": "XS - 4XL",
     "badge": "",
     "colors": [
-      "#1a1a18",
-      "#008652"
+      "#1a1a18"
     ],
     "price": 40,
-    "img": "/skus/S445-kellygreen-tamarack.png",
+    "img": "/skus/S445-black-tamarack.png",
     "imgs": [
-      "/skus/S445-black-tamarack.png",
-      "/skus/S445-kellygreen-tamarack.png"
+      "/skus/S445-black-tamarack.png"
     ],
     "material": "100% polyester snag-resistant mesh",
     "details": "Snag-resistant micro-mesh knit, Moisture wicking, Flat-knit collar, Three-button placket, #S445",
