@@ -97,13 +97,13 @@ export const allProducts = [
     "badge": "",
     "colors": [
       "#1a1a18",
-      "#007a53"
+      "#1e4d2b"
     ],
     "price": 15,
-    "img": "/skus/S350-kellygreen-tamarack.png",
+    "img": "/skus/S350-forestgreen-tamarack.png",
     "imgs": [
       "/skus/S350-tamarack.png",
-      "/skus/S350-kellygreen-tamarack.png"
+      "/skus/S350-forestgreen-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
     "details": "Wicking technology, Side seamed, Breathable, Classic fit, #S350",
@@ -119,13 +119,13 @@ export const allProducts = [
     "badge": "",
     "colors": [
       "#1a1a18",
-      "#007a53"
+      "#1e4d2b"
     ],
     "price": 15,
-    "img": "/skus/L350-kellygreen-tamarack.png",
+    "img": "/skus/L350-forestgreen-tamarack.png",
     "imgs": [
       "/skus/L350-tamarack.png",
-      "/skus/L350-kellygreen-tamarack.png"
+      "/skus/L350-forestgreen-tamarack.png"
     ],
     "material": "100% performance polyester interlock",
     "details": "Wicking technology, Side seamed, Contoured fit, Breathable, #L350",
@@ -165,13 +165,13 @@ export const allProducts = [
     "badge": "New",
     "colors": [
       "#1a1a18",
-      "#008652"
+      "#1e4d2b"
     ],
     "price": 30,
     "img": "/skus/L00550-black-tamarack.png",
     "imgs": [
       "/skus/L00550-black-tamarack.png",
-      "/skus/L00550-kelly-tamarack.png"
+      "/skus/L00550-forestgreen-tamarack.png"
     ],
     "material": "70% ring-spun combed cotton / 30% polyester fleece",
     "details": "Self-fabric lined hood with drawcord, 100% ring-spun combed cotton face for a superior print surface, Rib-knit cuff and hem, Kangaroo pocket, Tear-away label, #L00550",
@@ -269,13 +269,13 @@ export const allProducts = [
     "badge": "",
     "colors": [
       "#1a1a18",
-      "#079e75"
+      "#1e4d2b"
     ],
     "price": 19.5,
-    "img": "/skus/8800-kellygreen-tamarack.png",
+    "img": "/skus/8800-forestgreen-tamarack.png",
     "imgs": [
       "/skus/8800-black-tamarack.png",
-      "/skus/8800-kellygreen-tamarack.png"
+      "/skus/8800-forestgreen-tamarack.png"
     ],
     "material": "50% cotton / 50% polyester DryBlend jersey",
     "details": "DryBlend moisture-wicking jersey, Welt-knit collar and cuffs, Three-button placket, #8800",

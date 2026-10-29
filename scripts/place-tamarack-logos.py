@@ -38,7 +38,19 @@ TASKS = [
     ("105751", "105751-black.jpg",          "105751-black-tamarack.png"),
     ("105751", "105751-tarmac.jpg",         "105751-tarmac-tamarack.png"),
     ("6328JG", "6328JG-safetygreen.jpg",    "6328JG-safetygreen-tamarack.png"),
+    # Oct 2026: Kelly -> Forest Green for TM-4 / TM-5 / TM-22 / TM-19.
+    ("S350",   "S350-forestgreen.png",      "S350-forestgreen-tamarack.png"),
+    ("L350",   "L350-forestgreen.png",      "L350-forestgreen-tamarack.png"),
+    ("L00550", "L00550-forestgreen.png",    "L00550-forestgreen-tamarack.png"),
+    ("8800",   "8800-forestgreen.png",      "8800-forestgreen-tamarack.png"),
 ]
+
+# Optional: bake only the named outputs, e.g.
+#   python3 scripts/place-tamarack-logos.py S350-forestgreen-tamarack.png
+import sys
+ONLY = set(sys.argv[1:])
+if ONLY:
+    TASKS = [t for t in TASKS if t[2] in ONLY]
 
 placements = json.load(open(f"{SM}/src/data/placements.json"))
 P = placements.get("placements", placements)
