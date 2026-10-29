@@ -44,6 +44,7 @@ TASKS = [
     ("L00550", "L00550-forestgreen.png",    "L00550-forestgreen-tamarack.png"),
     ("8800",   "8800-forestgreen.png",      "8800-forestgreen-tamarack.png"),
     ("ATC1015", "ATC1015-forestgreen.png",  "ATC1015-forestgreen-tamarack.png"),
+    ("ATC1000", "ATC1000-forestgreen.png",  "ATC1000-forestgreen-tamarack.png"),
 ]
 
 # Optional: bake only the named outputs, e.g.

@@ -11,13 +11,13 @@ export const allProducts = [
     "badge": "",
     "colors": [
       "#1a1a18",
-      "#008652"
+      "#1e4d2b"
     ],
     "price": 13.25,
     "img": "/skus/ATC1000-tamarack.png",
     "imgs": [
       "/skus/ATC1000-tamarack.png",
-      "/skus/ATC1000-kelly-tamarack.png"
+      "/skus/ATC1000-forestgreen-tamarack.png"
     ],
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000",
