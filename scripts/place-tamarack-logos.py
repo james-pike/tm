@@ -49,6 +49,15 @@ TASKS = [
     ("L00555", "L00555-forestgreen.png",    "L00555-forestgreen-tamarack.png"),
 ]
 
+# Optional per-output alignment of the blank BEFORE the logo goes on, so a
+# colour's photo lines up with the colour it sits beside in the gallery:
+# (scale, dx, dy) — scale about the top-left, then shift in source pixels.
+# Measured by matching the model's outline against the other colour's image.
+ALIGN = {
+    # Forest blank is ~0.8% larger and offset vs TM-3's black image.
+    "L00555-forestgreen-tamarack.png": (0.992, 3, 5),
+}
+
 # Optional: bake only the named outputs, e.g.
 #   python3 scripts/place-tamarack-logos.py S350-forestgreen-tamarack.png
 import sys
@@ -90,6 +99,16 @@ for code, src, out in TASKS:
     logo = logo_dark if f"{code}::{slug}".lower() in DARK else logo_light
     base = Image.open(f"{SM}/public/skus/{src}").convert("RGBA")
     W, H = base.size
+    if out in ALIGN:
+        sc, dx, dy = ALIGN[out]
+        base = base.transform((W, H), Image.AFFINE, (1 / sc, 0, -dx / sc, 0, 1 / sc, -dy / sc),
+                              resample=Image.BICUBIC, fillcolor=(255, 255, 255, 255))
+        # A downward shift uncovers a strip at the top (where the photo is
+        # cropped through the subject): extend the first real row up into it.
+        top = max(0, round(dy)) + 1
+        if top > 1:
+            edge = base.crop((0, top, W, top + 1)).resize((W, top))
+            base.paste(edge, (0, 0))
     bx, by = pl["x"] * W, pl["y"] * H
     bw, bh = pl["w"] * W, pl["h"] * H
     # object-contain the logo inside the box (preserve aspect, center)
