@@ -105,9 +105,12 @@ export function buildOrderEmailHtml(o: OrderEmailData): string {
         <tr>
           <td bgcolor="#12463a" style="background-color:#12463a;padding:20px 24px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
             <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-              ${o.logoUrl ? `<td style="padding-right:12px;vertical-align:middle"><img src="${esc(o.logoUrl)}" alt="Tamarack Apparel logo" width="54" height="54" style="display:block;width:54px;height:54px;margin-left:-5px"></td>` : ""}
               <td style="vertical-align:middle">
-                <h1 style="color:#ffffff;margin:0;font-size:20px">Tamarack Apparel</h1>
+                ${o.logoUrl
+                  // Hosted PNG with fixed size. If Outlook blocks images, the
+                  // styled alt text keeps the header branded (white on green).
+                  ? `<img src="${esc(o.logoUrl)}" alt="Tamarack Apparel" width="203" height="35" style="display:block;width:203px;height:35px;border:0;outline:none;text-decoration:none;color:#ffffff;font-family:sans-serif;font-size:20px;font-weight:700;line-height:35px">`
+                  : `<h1 style="color:#ffffff;margin:0;font-size:20px">Tamarack Apparel</h1>`}
                 ${o.orderNumber ? `<p style="color:#ffffff;margin:6px 0 0;font-size:19px;font-weight:700;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>` : ""}
               </td>
             </tr></table>

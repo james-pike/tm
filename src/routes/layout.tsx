@@ -404,9 +404,9 @@ export const useSubmitOrder = routeAction$(
       if (b && !/^https?:\/\//i.test(b)) b = "https://" + b;
       let origin = url.origin;
       try { origin = new URL(b).origin; } catch { origin = url.origin; }
-      // White-dome variant of the logo — the standard favicon is a green dome
-      // that disappears on the email's dark-green banner.
-      return `${origin}/favicon-512-white.png`;
+      // White Tamarack logo (trees + wordmark) — reads on the email's
+      // dark-green banner.
+      return `${origin}/tamarack-logo-white.png`;
     })();
 
     // Build the confirmation-email payload once (used by the no-card path and
