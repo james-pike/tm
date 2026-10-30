@@ -17,7 +17,7 @@ export const allProducts = [
     "img": "/skus/ATC1000-tamarack.png",
     "imgs": [
       "/skus/ATC1000-tamarack.png",
-      "/skus/ATC1000-forestgreen-tamarack.png"
+      "/skus/ATC1000-forestgreen-tamarack-v2.png"
     ],
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1000",
@@ -36,10 +36,10 @@ export const allProducts = [
       "#1e4d2b"
     ],
     "price": 24.5,
-    "img": "/skus/ATC1015-forestgreen-tamarack.png",
+    "img": "/skus/ATC1015-forestgreen-tamarack-v2.png",
     "imgs": [
       "/skus/ATC1015-tamarack.png",
-      "/skus/ATC1015-forestgreen-tamarack.png"
+      "/skus/ATC1015-forestgreen-tamarack-v2.png"
     ],
     "material": "100% cotton",
     "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, 1x1 rib knit collar, Rib knit cuffs, Double needle cover stitch at sleeve & bottom hem, Classic fit, OEKO-TEX® STANDARD 100 certified, #ATC1015",
@@ -98,10 +98,10 @@ export const allProducts = [
       "#1e4d2b"
     ],
     "price": 15,
-    "img": "/skus/S350-forestgreen-tamarack.png",
+    "img": "/skus/S350-forestgreen-tamarack-v2.png",
     "imgs": [
       "/skus/S350-tamarack.png",
-      "/skus/S350-forestgreen-tamarack.png"
+      "/skus/S350-forestgreen-tamarack-v2.png"
     ],
     "material": "100% performance polyester interlock",
     "details": "Wicking technology, Side seamed, Breathable, Classic fit, #S350",
@@ -120,10 +120,10 @@ export const allProducts = [
       "#1e4d2b"
     ],
     "price": 15,
-    "img": "/skus/L350-forestgreen-tamarack.png",
+    "img": "/skus/L350-forestgreen-tamarack-v2.png",
     "imgs": [
       "/skus/L350-tamarack.png",
-      "/skus/L350-forestgreen-tamarack.png"
+      "/skus/L350-forestgreen-tamarack-v2.png"
     ],
     "material": "100% performance polyester interlock",
     "details": "Wicking technology, Side seamed, Contoured fit, Breathable, #L350",
@@ -169,7 +169,7 @@ export const allProducts = [
     "img": "/skus/L00550-black-tamarack.png",
     "imgs": [
       "/skus/L00550-black-tamarack.png",
-      "/skus/L00550-forestgreen-tamarack.png"
+      "/skus/L00550-forestgreen-tamarack-v2.png"
     ],
     "material": "70% ring-spun combed cotton / 30% polyester fleece",
     "details": "Self-fabric lined hood with drawcord, 100% ring-spun combed cotton face for a superior print surface, Rib-knit cuff and hem, Kangaroo pocket, Tear-away label, #L00550",
@@ -188,9 +188,9 @@ export const allProducts = [
       "#1a1a18"
     ],
     "price": 45.5,
-    "img": "/skus/L00555-forestgreen-tamarack.png",
+    "img": "/skus/L00555-forestgreen-tamarack-v2.png",
     "imgs": [
-      "/skus/L00555-forestgreen-tamarack.png",
+      "/skus/L00555-forestgreen-tamarack-v2.png",
       "/skus/L00555-tamarack.png"
     ],
     "material": "70% ring-spun combed cotton / 30% polyester fleece",
@@ -252,10 +252,10 @@ export const allProducts = [
       "#1e4d2b"
     ],
     "price": 19.5,
-    "img": "/skus/8800-forestgreen-tamarack.png",
+    "img": "/skus/8800-forestgreen-tamarack-v2.png",
     "imgs": [
       "/skus/8800-black-tamarack.png",
-      "/skus/8800-forestgreen-tamarack.png"
+      "/skus/8800-forestgreen-tamarack-v2.png"
     ],
     "material": "50% cotton / 50% polyester DryBlend jersey",
     "details": "DryBlend moisture-wicking jersey, Welt-knit collar and cuffs, Three-button placket, #8800",
