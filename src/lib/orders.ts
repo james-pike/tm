@@ -104,7 +104,7 @@ export function buildOrderEmailHtml(o: OrderEmailData, opts: { intro?: string } 
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#12463a" style="background-color:#12463a;border-radius:8px 8px 0 0;-webkit-print-color-adjust:exact;print-color-adjust:exact">
         <tr>
           <td bgcolor="#12463a" style="background-color:#12463a;padding:20px 24px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
               <td style="vertical-align:middle">
                 ${o.logoUrl
                   // Hosted PNG with fixed size. If Outlook blocks images, the
@@ -112,13 +112,10 @@ export function buildOrderEmailHtml(o: OrderEmailData, opts: { intro?: string } 
                   ? `<img src="${esc(o.logoUrl)}" alt="Tamarack Apparel" width="203" height="35" style="display:block;width:203px;height:35px;border:0;outline:none;text-decoration:none;color:#ffffff;font-family:sans-serif;font-size:20px;font-weight:700;line-height:35px">`
                   : `<h1 style="color:#ffffff;margin:0;font-size:20px">Tamarack Apparel</h1>`}
               </td>
-            </tr>
-            ${o.orderNumber ? `<tr>
-              <td style="padding:6px 0 0">
+              ${o.orderNumber ? `<td align="right" style="vertical-align:middle;text-align:right;white-space:nowrap;padding-left:12px">
                 <p style="color:#ffffff;margin:0;font-size:19px;font-weight:400;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>
-              </td>
-            </tr>` : ""}
-            </table>
+              </td>` : ""}
+            </tr></table>
           </td>
         </tr>
       </table>
