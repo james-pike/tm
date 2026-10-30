@@ -214,7 +214,7 @@ export async function sendApprovalRequestEmail(
       to: cfg.to,
       subject: `Approval needed${o.orderNumber ? ` — Order ${o.orderNumber}` : ""} — ${o.employee.name}`,
       html: banner + buildOrderEmailHtml(o, {
-        intro: "The following order has been submitted for your review. Please approve or decline it at your earliest convenience.",
+        intro: "The following order has been submitted for your review.",
       }),
     });
   } catch (err) {
