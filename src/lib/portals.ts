@@ -56,7 +56,7 @@ export interface AllowanceGroup {
 const DRESS_SHIRTS = ["TM-12", "TM-13", "TM-14", "TM-15", "TM-17", "TM-19"];
 const TECH_SUPERVISOR_ALLOWANCES: AllowanceGroup[] = [
   { key: "shirts", label: "dress & golf shirts", skus: DRESS_SHIRTS, cap: 5, season: "all" },
-  { key: "cap", label: "ball cap", skus: ["TM-9"], cap: 1, season: "summer" },
+  { key: "cap", label: "ball cap", skus: ["TM-9"], cap: 1, season: "all" },
   { key: "fleece", label: "zip fleece / hooded sweatshirt", skus: ["TM-11", "TM-3", "TM-8"], cap: 1, season: "winter" },
   // One winter-coat allowance covering both Carhartt duck coats and the Storm
   // Defender rain jacket (any one of the three).
@@ -68,17 +68,14 @@ export const PORTAL_ALLOWANCES: Record<Portal, AllowanceGroup[]> = {
   // Labourer / Carpenter — high-visibility work wear.
   labourers: [
     { key: "tees", label: "t-shirts", skus: ["TM-1", "TM-2", "TM-4", "TM-5", "TM-6"], cap: 5, season: "all" },
-    { key: "cap", label: "ball cap", skus: ["TM-9"], cap: 1, season: "summer" },
+    { key: "cap", label: "ball cap", skus: ["TM-9"], cap: 1, season: "all" },
     { key: "hoodie", label: "hooded sweatshirt", skus: ["TM-3", "TM-8"], cap: 1, season: "winter" },
     { key: "toque", label: "toque", skus: ["TM-10"], cap: 1, season: "winter" },
     { key: "hivis-coat", label: "high-visibility coat", skus: ["TM-21"], cap: 1, season: "winter", approval: true },
   ],
   technicians: TECH_SUPERVISOR_ALLOWANCES,
-  // Foreman & Superintendents share the technicians' rules, except their ball
-  // cap is available year-round (not summer-only).
-  supervisors: TECH_SUPERVISOR_ALLOWANCES.map((g) =>
-    g.key === "cap" ? { ...g, season: "all" as const } : g,
-  ),
+  // Foreman & Superintendents share the technicians' rules.
+  supervisors: TECH_SUPERVISOR_ALLOWANCES,
   // Site Clerks — one order per year, no seasonal split (every group is "all").
   clerks: [
     { key: "shirts", label: "dress & golf shirts", skus: DRESS_SHIRTS, cap: 5, season: "all" },
