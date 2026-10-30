@@ -115,7 +115,7 @@ export function buildOrderEmailHtml(o: OrderEmailData, opts: { intro?: string } 
             </tr>
             ${o.orderNumber ? `<tr>
               <td style="padding:6px 0 0">
-                <p style="color:#ffffff;margin:0;font-size:19px;font-weight:700;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>
+                <p style="color:#ffffff;margin:0;font-size:19px;font-weight:600;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>
               </td>
             </tr>` : ""}
             </table>
