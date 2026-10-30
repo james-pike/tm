@@ -72,7 +72,7 @@ export function esc(s: string | undefined | null): string {
     .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-export function buildOrderEmailHtml(o: OrderEmailData): string {
+export function buildOrderEmailHtml(o: OrderEmailData, opts: { intro?: string } = {}): string {
   const itemRows = o.items.map((i) =>
     `<tr>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${esc(i.name)}${i.code ? ` <span style="color:#999;font-size:12px">${esc(i.code)}</span>` : i.sku ? ` <span style="color:#999;font-size:12px">(${esc(i.sku)})</span>` : ""}${i.approval ? ` <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:#fdecc8;color:#8a5a00;font-size:11px;font-weight:700;white-space:nowrap">NEEDS APPROVAL</span>` : ""}</td>
@@ -118,9 +118,9 @@ export function buildOrderEmailHtml(o: OrderEmailData): string {
         </tr>
       </table>
       <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
-        <p style="margin:0 0 16px;font-size:16px">${o.pendingApproval
+        <p style="margin:0 0 16px;font-size:16px">${opts.intro ?? (o.pendingApproval
           ? "We've received your order — it's now pending approval. You'll be contacted once it's approved."
-          : "Thank you for your order!"}</p>
+          : "Thank you for your order!")}</p>
         <p style="margin:0 0 4px"><strong>Date:</strong> ${esc(o.date)}</p>
         <p style="margin:0 0 4px"><strong>Name:</strong> ${esc(o.employee.name)}</p>
         ${o.employee.email ? `<p style="margin:0 0 4px"><strong>Email:</strong> <a href="mailto:${esc(o.employee.email)}">${esc(o.employee.email)}</a></p>` : ""}
@@ -213,7 +213,9 @@ export async function sendApprovalRequestEmail(
       from: cfg.from,
       to: cfg.to,
       subject: `Approval needed${o.orderNumber ? ` — Order ${o.orderNumber}` : ""} — ${o.employee.name}`,
-      html: banner + buildOrderEmailHtml(o),
+      html: banner + buildOrderEmailHtml(o, {
+        intro: "The following order has been submitted for your review. Please approve or decline it at your earliest convenience.",
+      }),
     });
   } catch (err) {
     console.error("Failed to send approval-request email:", err);
