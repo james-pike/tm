@@ -211,13 +211,8 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
     const el = nameRef.value;
     if (!el) return;
     const fit = () => {
-      // Hide for the duration of this pass. fit() runs more than once (once
-      // immediately, again when web fonts finish loading, again on width
-      // changes), and each pass can land on a different size. Re-hiding at the
-      // start means the title is only ever *revealed* at its final size — so
-      // the later font-load / resize pass can't be seen resizing a title that
-      // is already on screen (the "pop"). The reveal + fade happens at the end.
-      el.style.opacity = "0";
+      // The title is visible from first paint; this pass only fine-tunes its
+      // size. It is never hidden, so it can't appear after the rest of the card.
       // Phones and the narrower (tab-bar) tablet tier (<=999px): the title wraps
       // to (up to) two lines (see .product-card__name-text in global.css). If it
       // would spill onto a third line, scale the font down a touch so it always
@@ -243,9 +238,6 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
           px -= 0.5;
           el.style.fontSize = `${px}px`;
         }
-        // Reveal only now that the size is final, so the title never flashes at a
-        // different size (it's hidden by default in global.css).
-        el.style.opacity = "1";
         return;
       }
       el.style.fontSize = "";
@@ -284,17 +276,11 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
         el.style.overflow = "";
         el.style.fontSize = "";
       }
-      // Reveal only now that the size is final (hidden by default in global.css).
-      el.style.opacity = "1";
     };
-    // Size and reveal synchronously on mount so the title paints at its final
-    // size in the same frame as the rest of the card. The old code only ran fit
-    // after two rAFs, so the title (opacity:0 by default) stayed blank for a
-    // couple of frames and visibly appeared after the card on every category/tab
-    // change. A single fit() call flips opacity 0→1 within one synchronous pass
-    // (no paint in between, so never a visible blank). The deferred run + the
-    // fonts.ready pass below re-measure to correct the first-load case where web
-    // fonts hadn't finished loading when this first ran.
+    // Size synchronously on mount so the title paints at its final size in the
+    // same frame as the rest of the card. The deferred run + the fonts.ready
+    // pass below re-measure for the first-load case where web fonts hadn't
+    // finished loading when this first ran.
     const run = () => requestAnimationFrame(() => requestAnimationFrame(fit));
     fit();
     run();
@@ -619,7 +605,20 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
     // groups; byCategory keeps the shared T-Shirts → Polos → … ordering.
     if (isPortal(loginType.value)) {
       const allow = allowedSkus(loginType.value, currentSeason());
-      return byCategory(allProducts.filter((p) => allow.has(p.sku)));
+      const list = byCategory(allProducts.filter((p) => allow.has(p.sku)));
+      // Inspectors & Technicians get their own sweater order: Flux (TM-11),
+      // Surfer (TM-3), Lakeview (TM-8). Other portals keep the DB order.
+      if (loginType.value === "technicians") {
+        const order = ["TM-11", "TM-3", "TM-8"];
+        const slots = list
+          .map((p, i) => (order.includes(p.sku) ? i : -1))
+          .filter((i) => i !== -1);
+        const picked = slots
+          .map((i) => list[i])
+          .sort((x, y) => order.indexOf(x.sku) - order.indexOf(y.sku));
+        slots.forEach((i, k) => (list[i] = picked[k]));
+      }
+      return list;
     }
     if (isElectrical.value) {
       // Electrical membership is DB-driven (products.portals includes

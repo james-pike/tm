@@ -26,26 +26,6 @@ export const allProducts = [
     ]
   },
   {
-    "sku": "TM-6",
-    "name": "Women's ATC Everyday Cotton Tee",
-    "category": "T-Shirts",
-    "sizes": "XS - 4XL",
-    "badge": "",
-    "colors": [
-      "#1a1a18"
-    ],
-    "price": 13.25,
-    "img": "/skus/ATC1000L-tamarack.png",
-    "imgs": [
-      "/skus/ATC1000L-tamarack.png"
-    ],
-    "material": "100% cotton",
-    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, OEKO-TEX® STANDARD 100 certified, #ATC1000L",
-    "portals": [
-      "labourers"
-    ]
-  },
-  {
     "sku": "TM-2",
     "name": "ATC Everyday Cotton LS Tee",
     "category": "T-Shirts",
@@ -68,23 +48,41 @@ export const allProducts = [
     ]
   },
   {
-    "sku": "TM-3",
-    "name": "Surfer Full-Zip Hooded Sweater",
-    "category": "Sweaters",
+    "sku": "TM-6",
+    "name": "Women's ATC Everyday Cotton Tee",
+    "category": "T-Shirts",
     "sizes": "XS - 4XL",
     "badge": "",
     "colors": [
-      "#1a1a18",
-      "#1e4d2b"
+      "#1a1a18"
     ],
-    "price": 45.5,
-    "img": "/skus/L00555-tamarack.png",
+    "price": 13.25,
+    "img": "/skus/ATC1000L-tamarack.png",
     "imgs": [
-      "/skus/L00555-tamarack.png",
-      "/skus/L00555-forestgreen-tamarack.png"
+      "/skus/ATC1000L-tamarack.png"
     ],
-    "material": "70% ring-spun combed cotton / 30% polyester fleece",
-    "details": "Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555",
+    "material": "100% cotton",
+    "details": "Compacted yarns to minimize shrinkage, Taped neck and shoulders, Double needle cover stitch at collar/sleeve/hem, 1x1 rib knit collar, Side seamed, OEKO-TEX® STANDARD 100 certified, #ATC1000L",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-8",
+    "name": "Lakeview Full-Zip Hooded Sweater",
+    "category": "Sweaters",
+    "sizes": "S - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 65,
+    "img": "/skus/L00670-tamarack.png",
+    "imgs": [
+      "/skus/L00670-tamarack.png"
+    ],
+    "material": "80% cotton / 20% recycled polyester fleece, 3-ply fleece",
+    "details": "Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, #L00670",
     "portals": [
       "labourers"
     ]
@@ -180,21 +178,23 @@ export const allProducts = [
     ]
   },
   {
-    "sku": "TM-8",
-    "name": "Lakeview Full-Zip Hooded Sweater",
+    "sku": "TM-3",
+    "name": "Surfer Full-Zip Hooded Sweater",
     "category": "Sweaters",
-    "sizes": "S - 4XL",
+    "sizes": "XS - 4XL",
     "badge": "",
     "colors": [
+      "#1e4d2b",
       "#1a1a18"
     ],
-    "price": 65,
-    "img": "/skus/L00670-tamarack.png",
+    "price": 45.5,
+    "img": "/skus/L00555-forestgreen-tamarack.png",
     "imgs": [
-      "/skus/L00670-tamarack.png"
+      "/skus/L00555-forestgreen-tamarack.png",
+      "/skus/L00555-tamarack.png"
     ],
-    "material": "80% cotton / 20% recycled polyester fleece, 3-ply fleece",
-    "details": "Double layer hood lined with jersey, Contrast chevron tape at neck seam, Adjustable contrast flat draw cord, Double layer ribbed cuff and hem with spandex, YKK metal center front zipper, #L00670",
+    "material": "70% ring-spun combed cotton / 30% polyester fleece",
+    "details": "Self-fabric lined hood with drawcord, Rib-knit cuff and hem, Kangaroo pocket, YKK zipper, Tear-away label, #L00555",
     "portals": [
       "labourers"
     ]
@@ -242,26 +242,6 @@ export const allProducts = [
     ]
   },
   {
-    "sku": "TM-13",
-    "name": "Core365 Men's Operate Long-Sleeve Twill Shirt",
-    "category": "Polos",
-    "sizes": "S - 4XL",
-    "badge": "",
-    "colors": [
-      "#1a1a18"
-    ],
-    "price": 52,
-    "img": "/skus/88193-black-tamarack.jpg",
-    "imgs": [
-      "/skus/88193-black-tamarack.jpg"
-    ],
-    "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
-    "details": "UV protection, button-down collar, flat-felled seams, adjustable cuffs, left chest pocket, back yoke with box pleat, #88193",
-    "portals": [
-      "labourers"
-    ]
-  },
-  {
     "sku": "TM-19",
     "name": "Gildan DryBlend Jersey Polo",
     "category": "Polos",
@@ -279,6 +259,26 @@ export const allProducts = [
     ],
     "material": "50% cotton / 50% polyester DryBlend jersey",
     "details": "DryBlend moisture-wicking jersey, Welt-knit collar and cuffs, Three-button placket, #8800",
+    "portals": [
+      "labourers"
+    ]
+  },
+  {
+    "sku": "TM-13",
+    "name": "Core365 Men's Operate Long-Sleeve Twill Shirt",
+    "category": "Polos",
+    "sizes": "S - 4XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18"
+    ],
+    "price": 52,
+    "img": "/skus/88193-black-tamarack.jpg",
+    "imgs": [
+      "/skus/88193-black-tamarack.jpg"
+    ],
+    "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
+    "details": "UV protection, button-down collar, flat-felled seams, adjustable cuffs, left chest pocket, back yoke with box pleat, #88193",
     "portals": [
       "labourers"
     ]

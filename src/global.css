@@ -3349,11 +3349,8 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
   /* Let the title shrink inside its flex slot so the fit-to-one-line script
      (see product-catalog.tsx) can measure and scale long titles down. */
   min-width: 0;
-  /* Hidden until the fit script has sized it, then revealed (it sets opacity:1)
-     — so the title only ever appears at its final size instead of flashing at
-     the base size first and resizing. A short fade smooths the reveal. */
-  opacity: 0;
-  transition: opacity 0.12s ease;
+  /* Visible from first paint, so the title arrives with the rest of the card.
+     The fit script (product-catalog.tsx) only fine-tunes its size. */
 }
 .product-card__price-group {
   display: flex;
