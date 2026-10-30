@@ -114,9 +114,7 @@ export function buildOrderEmailHtml(o: OrderEmailData, opts: { intro?: string } 
               </td>
             </tr>
             ${o.orderNumber ? `<tr>
-              <!-- Indented to start under the "Tamarack" lettering (the trees
-                   take the logo's first 48px), not under the trees. -->
-              <td style="padding:6px 0 0 ${o.logoUrl ? 48 : 0}px">
+              <td style="padding:6px 0 0">
                 <p style="color:#ffffff;margin:0;font-size:19px;font-weight:700;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>
               </td>
             </tr>` : ""}
