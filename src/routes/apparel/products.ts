@@ -162,14 +162,14 @@ export const allProducts = [
     "sizes": "XS - 4XL",
     "badge": "New",
     "colors": [
-      "#1a1a18",
-      "#1e4d2b"
+      "#1e4d2b",
+      "#1a1a18"
     ],
     "price": 30,
-    "img": "/skus/L00550-black-tamarack.png",
+    "img": "/skus/L00550-forestgreen-tamarack-v2.png",
     "imgs": [
-      "/skus/L00550-black-tamarack.png",
-      "/skus/L00550-forestgreen-tamarack-v2.png"
+      "/skus/L00550-forestgreen-tamarack-v2.png",
+      "/skus/L00550-black-tamarack.png"
     ],
     "material": "70% ring-spun combed cotton / 30% polyester fleece",
     "details": "Self-fabric lined hood with drawcord, 100% ring-spun combed cotton face for a superior print surface, Rib-knit cuff and hem, Kangaroo pocket, Tear-away label, #L00550",

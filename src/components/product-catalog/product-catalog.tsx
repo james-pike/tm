@@ -606,9 +606,10 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
     if (isPortal(loginType.value)) {
       const allow = allowedSkus(loginType.value, currentSeason());
       const list = byCategory(allProducts.filter((p) => allow.has(p.sku)));
-      // Inspectors & Technicians get their own sweater order: Flux (TM-11),
-      // Surfer (TM-3), Lakeview (TM-8). Other portals keep the DB order.
-      if (loginType.value === "technicians") {
+      // Inspectors & Technicians and Foreman & Superintendents get their own
+      // sweater order: Flux (TM-11), Surfer (TM-3), Lakeview (TM-8). Other
+      // portals keep the DB order.
+      if (loginType.value === "technicians" || loginType.value === "supervisors") {
         const order = ["TM-11", "TM-3", "TM-8"];
         const slots = list
           .map((p, i) => (order.includes(p.sku) ? i : -1))
