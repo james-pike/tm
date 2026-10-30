@@ -191,6 +191,25 @@ export async function sendConfirmationEmail(cfg: SendEmailConfig, o: OrderEmailD
   }
 }
 
+/** The authorizer's "approval needed" email: the order, then the approval box. */
+export function buildApprovalRequestHtml(o: OrderEmailData, approveUrl: string): string {
+  // Sits BELOW the order. Built from bgcolor tables (not div backgrounds) so
+  // the yellow box and the green button both show in Outlook.
+  const banner = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;margin:12px auto 0;font-family:sans-serif">
+    <tr><td bgcolor="#fdecc8" style="background-color:#fdecc8;padding:14px 18px;border-radius:8px;color:#8a5a00;font-size:14px">
+      <strong>Approval needed.</strong> This order is on hold until you approve it.
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px"><tr>
+        <td bgcolor="#12463a" style="background-color:#12463a;border-radius:6px">
+          <a href="${esc(approveUrl)}" style="display:inline-block;padding:9px 16px;border:1px solid #12463a;border-radius:6px;color:#ffffff;text-decoration:none;font-weight:700;font-family:sans-serif;font-size:14px">Review &amp; approve</a>
+        </td>
+      </tr></table>
+    </td></tr>
+  </table>`;
+  return buildOrderEmailHtml(o, {
+    intro: "The following order has been submitted for your review.",
+  }) + banner;
+}
+
 /**
  * Notify the order authorizer that a new order needs approval. Sends the order
  * summary with a banner + a link to log in and approve/deny. Never throws — a
@@ -202,20 +221,13 @@ export async function sendApprovalRequestEmail(
   approveUrl: string,
 ): Promise<void> {
   if (!cfg.to.length) return;
-  const banner = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto 12px;padding:14px 18px;border-radius:8px;background:#fdecc8;color:#8a5a00;font-size:14px">
-    <strong>Approval needed.</strong> This order is on hold until you approve it.
-    <div style="margin-top:8px"><a href="${esc(approveUrl)}" style="display:inline-block;padding:9px 16px;border-radius:6px;background:#12463a;color:#fff;text-decoration:none;font-weight:700">Review &amp; approve</a></div>
-    <div style="margin-top:6px;font-size:12px;color:#9a6a10">Log in with your authorizer password to approve or deny.</div>
-  </div>`;
   try {
     const resend = new Resend(cfg.apiKey);
     await resend.emails.send({
       from: cfg.from,
       to: cfg.to,
       subject: `Approval needed${o.orderNumber ? ` — Order ${o.orderNumber}` : ""} — ${o.employee.name}`,
-      html: banner + buildOrderEmailHtml(o, {
-        intro: "The following order has been submitted for your review.",
-      }),
+      html: buildApprovalRequestHtml(o, approveUrl),
     });
   } catch (err) {
     console.error("Failed to send approval-request email:", err);
