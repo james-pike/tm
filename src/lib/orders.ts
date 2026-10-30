@@ -75,7 +75,7 @@ export function esc(s: string | undefined | null): string {
 export function buildOrderEmailHtml(o: OrderEmailData, opts: { intro?: string } = {}): string {
   const itemRows = o.items.map((i) =>
     `<tr>
-      <td style="padding:6px 12px;border-bottom:1px solid #eee">${esc(i.name)}${i.code ? ` <span style="color:#999;font-size:12px">${esc(i.code)}</span>` : i.sku ? ` <span style="color:#999;font-size:12px">(${esc(i.sku)})</span>` : ""}${i.approval ? ` <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:#fdecc8;color:#8a5a00;font-size:11px;font-weight:700;white-space:nowrap">NEEDS APPROVAL</span>` : ""}</td>
+      <td style="padding:6px 12px;border-bottom:1px solid #eee">${esc(i.name)}${i.code ? ` <span style="color:#000;font-weight:600;font-size:14px">${esc(i.code)}</span>` : i.sku ? ` <span style="color:#000;font-weight:600;font-size:14px">(${esc(i.sku)})</span>` : ""}${i.approval ? ` <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:#fdecc8;color:#8a5a00;font-size:11px;font-weight:700;white-space:nowrap">NEEDS APPROVAL</span>` : ""}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${i.color ? esc(i.color.startsWith("#") ? colorName(i.color) : i.color) + " / " : ""}${esc(i.size)}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee;text-align:right">$${(((Number(i.price) || 0) * i.quantity)).toFixed(2)}</td>
@@ -111,9 +111,16 @@ export function buildOrderEmailHtml(o: OrderEmailData, opts: { intro?: string } 
                   // styled alt text keeps the header branded (white on green).
                   ? `<img src="${esc(o.logoUrl)}" alt="Tamarack Apparel" width="203" height="35" style="display:block;width:203px;height:35px;border:0;outline:none;text-decoration:none;color:#ffffff;font-family:sans-serif;font-size:20px;font-weight:700;line-height:35px">`
                   : `<h1 style="color:#ffffff;margin:0;font-size:20px">Tamarack Apparel</h1>`}
-                ${o.orderNumber ? `<p style="color:#ffffff;margin:6px 0 0;font-size:19px;font-weight:700;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>` : ""}
               </td>
-            </tr></table>
+            </tr>
+            ${o.orderNumber ? `<tr>
+              <!-- Indented to start under the "Tamarack" lettering (the trees
+                   take the logo's first 48px), not under the trees. -->
+              <td style="padding:6px 0 0 ${o.logoUrl ? 48 : 0}px">
+                <p style="color:#ffffff;margin:0;font-size:19px;font-weight:700;letter-spacing:0.04em">Order #${esc(o.orderNumber)}</p>
+              </td>
+            </tr>` : ""}
+            </table>
           </td>
         </tr>
       </table>
@@ -173,7 +180,11 @@ export interface SendEmailConfig {
  * staff is BCC'd; if there's no customer email, send To staff so the order
  * still arrives. Never throws — a failed email must not fail a paid order.
  */
-export async function sendConfirmationEmail(cfg: SendEmailConfig, o: OrderEmailData): Promise<void> {
+export async function sendConfirmationEmail(
+  cfg: SendEmailConfig,
+  o: OrderEmailData,
+  opts: { intro?: string } = {},
+): Promise<void> {
   const customerEmail = (o.employee.email || "").trim();
   const toAddresses = customerEmail ? [customerEmail] : cfg.staffAddresses;
   const bccAddresses = customerEmail ? cfg.staffAddresses : [];
@@ -184,7 +195,7 @@ export async function sendConfirmationEmail(cfg: SendEmailConfig, o: OrderEmailD
       to: toAddresses,
       ...(bccAddresses.length ? { bcc: bccAddresses } : {}),
       subject: `${o.orderNumber ? `#${o.orderNumber} — ` : ""}Tamarack Apparel Order — ${o.employee.name} — ${o.date}`,
-      html: buildOrderEmailHtml(o),
+      html: buildOrderEmailHtml(o, opts),
     });
   } catch (err) {
     console.error("Failed to send order email:", err);
@@ -219,17 +230,56 @@ export async function sendApprovalRequestEmail(
   cfg: { apiKey: string; from: string; to: string[] },
   o: OrderEmailData,
   approveUrl: string,
-): Promise<void> {
-  if (!cfg.to.length) return;
+): Promise<string | null> {
+  if (!cfg.to.length) return null;
+  const employeeEmail = (o.employee.email || "").trim();
   try {
     const resend = new Resend(cfg.apiKey);
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: cfg.from,
       to: cfg.to,
+      // The employee's address rides on Resend as the reply-to (we don't store
+      // it). On approval we read it back from Resend to send their confirmation.
+      ...(employeeEmail ? { replyTo: employeeEmail } : {}),
       subject: `Approval needed${o.orderNumber ? ` — Order ${o.orderNumber}` : ""} — ${o.employee.name}`,
       html: buildApprovalRequestHtml(o, approveUrl),
     });
+    if (error) console.error("Approval-request email rejected by Resend:", error);
+    return data?.id ?? null;
   } catch (err) {
     console.error("Failed to send approval-request email:", err);
+    return null;
   }
+}
+
+/** Opening line of the employee's email, sent once the authorizer approves. */
+export const APPROVED_INTRO = "Thank you for your order! It has been approved and sent for processing.";
+
+/**
+ * Read the employee's contact details back from the authorizer's approval
+ * email on Resend: the email from its reply-to, the phone from its body.
+ * Resend keeps emails for 30 days, so an older approval returns nothing.
+ */
+export async function fetchApprovalContact(
+  apiKey: string,
+  emailId: string,
+): Promise<{ email?: string; phone?: string }> {
+  try {
+    const { data, error } = await new Resend(apiKey).emails.get(emailId);
+    if (error || !data) {
+      console.warn("Could not fetch approval email from Resend:", error);
+      return {};
+    }
+    const email = (data.reply_to || [])[0]?.trim() || undefined;
+    const m = /<strong>Phone:<\/strong>\s*([^<]+)</.exec(data.html || "");
+    const phone = m ? unesc(m[1].trim()) : undefined;
+    return { email, phone };
+  } catch (err) {
+    console.error("Failed to fetch approval email from Resend:", err);
+    return {};
+  }
+}
+
+function unesc(s: string): string {
+  return s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#0*39;/g, "'").replace(/&amp;/g, "&");
 }
