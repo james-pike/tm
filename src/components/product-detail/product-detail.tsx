@@ -7,7 +7,7 @@ import { expandSizes, sortColorsWhiteLast } from "../../routes/apparel/utils";
 import { LoginTypeContext } from "../../routes/layout";
 import { ProductImage } from "../product-image/product-image";
 import { ProductCard } from "../product-catalog/product-catalog";
-import { allowedSkus, currentSeason, isPortal, remainingAllowance } from "../../lib/portals";
+import { allowedSkus, currentSeason, isPortal, portalDefaultColor, remainingAllowance } from "../../lib/portals";
 
 // Tall sizes are rendered on their own row, separate from the regular sizes.
 const TALL_SIZES = new Set(["ST", "MT", "LT", "XLT", "2XLT", "3XLT", "4XLT", "5XLT"]);
@@ -282,7 +282,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
     selectedColor.value = "";
     const p0 = product.value;
     if (!p0) return;
-    selectedColor.value = sortColorsWhiteLast(p0.colors)[0];
+    selectedColor.value = portalDefaultColor(loginType.value, p0.sku) || sortColorsWhiteLast(p0.colors)[0];
     // Open on the colour the gallery card was showing (its default image colour,
     // or whatever swatch the user switched to before clicking through). The card
     // stashes it in sessionStorage right before navigating; consume it once.

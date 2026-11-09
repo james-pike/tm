@@ -79,13 +79,26 @@ export const PORTAL_ALLOWANCES: Record<Portal, AllowanceGroup[]> = {
   // Site Clerks — one order per year, no seasonal split (every group is "all").
   clerks: [
     { key: "shirts", label: "dress & golf shirts", skus: DRESS_SHIRTS, cap: 5, season: "all" },
-    { key: "fleece", label: "zip fleece / hooded sweatshirt", skus: ["TM-11", "TM-22"], cap: 1, season: "all" },
+    { key: "fleece", label: "zip fleece / hooded sweatshirt", skus: ["TM-11", "TM-22", "TM-3", "TM-8"], cap: 1, season: "all" },
     { key: "cap", label: "ball cap", skus: ["TM-9"], cap: 1, season: "all" },
     // The Carhartt Iconic Duck jacket (TM-16) is a Labourers-only item; Site
     // Clerks' hi-vis coat is just the Viking Handyman (TM-21).
     { key: "hivis-coat", label: "high-visibility coat", skus: ["TM-21"], cap: 1, season: "all", approval: true },
   ],
 };
+
+// Per-portal default colour for a SKU (overrides the product's own default
+// image/swatch on the catalog card and product page). Site Clerks see the
+// Surfer full-zip (TM-3) in black first; Carpenters & Labourers see the
+// Lakeview full-zip (TM-8) in black first.
+const PORTAL_DEFAULT_COLORS: Partial<Record<Portal, Record<string, string>>> = {
+  clerks: { "TM-3": "#1a1a18" },
+  labourers: { "TM-8": "#1a1a18" },
+};
+
+export function portalDefaultColor(portal: string | null | undefined, sku: string): string | undefined {
+  return isPortal(portal) ? PORTAL_DEFAULT_COLORS[portal]?.[sku] : undefined;
+}
 
 // The allowance groups active for a portal in a given season (season "all"
 // groups are always included).

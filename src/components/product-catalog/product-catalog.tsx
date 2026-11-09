@@ -7,7 +7,7 @@ import type { Product } from "../../routes/apparel/products";
 import { sizeGroups, sortColorsWhiteLast } from "../../routes/apparel/utils";
 import { stickyTop, LoginTypeContext } from "../../routes/layout";
 import { SecondaryBarContext } from "../../context/secondary-bar";
-import { allowedSkus, currentSeason, isPortal, portalLabel } from "../../lib/portals";
+import { allowedSkus, currentSeason, isPortal, portalDefaultColor, portalLabel } from "../../lib/portals";
 
 // FIT (gender) sidebar facet is disabled for Tamarack.
 const SHOW_FIT_FACET = false;
@@ -605,12 +605,26 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
     // groups; byCategory keeps the shared T-Shirts → Polos → … ordering.
     if (isPortal(loginType.value)) {
       const allow = allowedSkus(loginType.value, currentSeason());
-      const list = byCategory(allProducts.filter((p) => allow.has(p.sku)));
-      // Inspectors & Technicians and Foreman & Superintendents get their own
-      // sweater order: Surfer (TM-3), Flux (TM-11), Lakeview (TM-8). Other
-      // portals keep the DB order.
-      if (loginType.value === "technicians" || loginType.value === "supervisors") {
-        const order = ["TM-3", "TM-11", "TM-8"];
+      const portal = loginType.value;
+      const list = byCategory(allProducts.filter((p) => allow.has(p.sku))).map((p) => {
+        // Portal default colour: show that colour's photo on the card (imgs
+        // line up with colors), which also makes it the PDP's opening colour.
+        const c = portalDefaultColor(portal, p.sku);
+        const idx = c ? p.colors.indexOf(c) : -1;
+        return idx >= 0 && p.imgs?.[idx] ? { ...p, img: p.imgs[idx] } : p;
+      });
+      // Per-portal sweater order (the listed SKUs are reshuffled among their
+      // own slots; everything else keeps the DB order).
+      // Inspectors & Technicians and Foreman & Superintendents: Surfer (TM-3),
+      // Flux (TM-11), Lakeview (TM-8). Site Clerks: Surfer (TM-3) before
+      // Vault (TM-22).
+      const SWEATER_ORDER: Partial<Record<string, string[]>> = {
+        technicians: ["TM-3", "TM-11", "TM-8"],
+        supervisors: ["TM-3", "TM-11", "TM-8"],
+        clerks: ["TM-3", "TM-22"],
+      };
+      const order = SWEATER_ORDER[loginType.value];
+      if (order) {
         const slots = list
           .map((p, i) => (order.includes(p.sku) ? i : -1))
           .filter((i) => i !== -1);
