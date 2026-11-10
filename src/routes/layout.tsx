@@ -537,6 +537,12 @@ export const useSubmitOrder = routeAction$(
     // TEST_NO_EMAIL_PO).
     const testNoEmailPo = (env.get("TEST_NO_EMAIL_PO") || env.get("VITE_TEST_NO_EMAIL_PO") || "TEST-NOEMAIL").trim().toUpperCase();
     const skipEmail = !!testNoEmailPo && (employee.po || "").trim().toUpperCase() === testNoEmailPo;
+    // Self-test PO ("TEST-SELF", override with TEST_SELF_PO): the approval
+    // request goes to the employee's own email instead of the authorizer, and
+    // the approved email skips the staff BCC — so the whole approval flow can
+    // be tested without emailing anyone else.
+    const testSelfPo = (env.get("TEST_SELF_PO") || env.get("VITE_TEST_SELF_PO") || "TEST-SELF").trim().toUpperCase();
+    const selfTest = !!testSelfPo && (employee.po || "").trim().toUpperCase() === testSelfPo && !!(employee.email || "").trim();
 
     // Orders awaiting approval email nobody but the authorizer for now: the
     // employee (and the staff BCC) get the confirmation only once it's
@@ -551,8 +557,10 @@ export const useSubmitOrder = routeAction$(
 
     // New PO orders wait for the authorizer — email them the approval request.
     if (apiKey && !skipEmail && status === "awaiting_authorization") {
-      const authorizerTo = (env.get("AUTHORIZER_EMAIL") || env.get("VITE_AUTHORIZER_EMAIL") || "")
-        .split(",").map((a) => a.trim()).filter(Boolean);
+      const authorizerTo = selfTest
+        ? [(employee.email || "").trim()]
+        : (env.get("AUTHORIZER_EMAIL") || env.get("VITE_AUTHORIZER_EMAIL") || "")
+          .split(",").map((a) => a.trim()).filter(Boolean);
       let siteBase = (env.get("SITE_URL") || url.origin || "").trim();
       if (siteBase && !/^https?:\/\//i.test(siteBase)) siteBase = "https://" + siteBase;
       let approveUrl = url.origin;

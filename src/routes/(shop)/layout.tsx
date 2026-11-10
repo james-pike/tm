@@ -180,8 +180,18 @@ async function sendApprovedOrderEmail(env: Env, origin: string, id: number, orde
       payment: { method: "po", giftAmount: 0, cardAmount: 0 },
     };
     const from = env.get("RESEND_FROM") || env.get("VITE_RESEND_FROM") || "Tamarack <onboarding@resend.dev>";
-    const staffAddresses = (env.get("ORDER_NOTIFY_TO") || env.get("VITE_ORDER_NOTIFY_TO") || "info@tamarackapparel.ca")
+    let staffAddresses = (env.get("ORDER_NOTIFY_TO") || env.get("VITE_ORDER_NOTIFY_TO") || "info@tamarackapparel.ca")
       .split(",").map((a) => a.trim()).filter(Boolean);
+    // Self-test PO (see useSubmitOrder): no staff BCC, and only send if the
+    // employee's address was found — never fall back to emailing staff.
+    const selfPo = (env.get("TEST_SELF_PO") || env.get("VITE_TEST_SELF_PO") || "TEST-SELF").trim().toUpperCase();
+    if (selfPo && String(row.po_number || "").trim().toUpperCase() === selfPo) {
+      if (!contact.email) {
+        console.warn(`[TEST-SELF] Order ${id} approved — employee email not found on Resend, nothing sent.`);
+        return;
+      }
+      staffAddresses = [];
+    }
     await sendConfirmationEmail({ apiKey, from, staffAddresses }, o, { intro: APPROVED_INTRO });
   } catch (e) {
     console.error("Failed to send approved-order email:", e);
