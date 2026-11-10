@@ -36,11 +36,11 @@ const LOCALE_COOKIE = "ce_locale";
 // including the product pages. Hero slide-in mode is therefore OFF.
 
 // Canadian provincial sales tax rates (combined GST/HST/PST/QST)
-const PROVINCE_TAX: Record<string, number> = {
+export const PROVINCE_TAX: Record<string, number> = {
   AB: 0.05, BC: 0.12, MB: 0.12, NB: 0.15, NL: 0.15,
   NS: 0.14, ON: 0.13, PE: 0.15, QC: 0.14975, SK: 0.11,
 };
-const PROVINCE_NAMES: Record<string, string> = {
+export const PROVINCE_NAMES: Record<string, string> = {
   AB: "Alberta", BC: "British Columbia", MB: "Manitoba",
   NB: "New Brunswick", NL: "Newfoundland and Labrador",
   NS: "Nova Scotia", ON: "Ontario", PE: "Prince Edward Island",
@@ -538,11 +538,14 @@ export const useSubmitOrder = routeAction$(
     const testNoEmailPo = (env.get("TEST_NO_EMAIL_PO") || env.get("VITE_TEST_NO_EMAIL_PO") || "TEST-NOEMAIL").trim().toUpperCase();
     const skipEmail = !!testNoEmailPo && (employee.po || "").trim().toUpperCase() === testNoEmailPo;
 
-    if (apiKey && !skipEmail) {
+    // Orders awaiting approval email nobody but the authorizer for now: the
+    // employee (and the staff BCC) get the confirmation only once it's
+    // approved — see useApproveOrder in routes/(shop)/layout.tsx.
+    if (apiKey && !skipEmail && status !== "awaiting_authorization") {
       await sendConfirmationEmail({ apiKey, from: fromAddress, staffAddresses }, buildEmailData());
     } else if (skipEmail) {
       console.warn(`[TEST PO] Order ${orderNumber} saved — skipping all emails (PO "${employee.po}").`);
-    } else {
+    } else if (!apiKey) {
       console.warn("RESEND_API_KEY not configured — order saved but email not sent");
     }
 
@@ -554,7 +557,28 @@ export const useSubmitOrder = routeAction$(
       if (siteBase && !/^https?:\/\//i.test(siteBase)) siteBase = "https://" + siteBase;
       let approveUrl = url.origin;
       try { approveUrl = new URL(siteBase).origin; } catch { approveUrl = url.origin; }
-      await sendApprovalRequestEmail({ apiKey, from: fromAddress, to: authorizerTo }, buildEmailData(), approveUrl);
+      const approvalEmailId = await sendApprovalRequestEmail({ apiKey, from: fromAddress, to: authorizerTo }, buildEmailData(), approveUrl);
+      // Keep only Resend's id for that email (not the employee's address), so
+      // approval can read the address back from Resend.
+      if (approvalEmailId && orderId != null) {
+        const saveId = () =>
+          db.execute({ sql: "UPDATE orders SET approval_email_id = ? WHERE id = ?", args: [approvalEmailId, orderId as any] });
+        try {
+          await saveId();
+        } catch (err) {
+          // First use on a database without the column: add it, then retry.
+          if (/no such column/i.test(String((err as Error)?.message))) {
+            try {
+              await db.execute("ALTER TABLE orders ADD COLUMN approval_email_id TEXT");
+              await saveId();
+            } catch (err2) {
+              console.error("Could not save approval email id:", err2);
+            }
+          } else {
+            console.error("Could not save approval email id:", err);
+          }
+        }
+      }
     }
 
     return { success: true, orderNumber };

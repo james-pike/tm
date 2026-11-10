@@ -72,10 +72,15 @@ export function esc(s: string | undefined | null): string {
     .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-export function buildOrderEmailHtml(o: OrderEmailData, opts: { intro?: string } = {}): string {
+export function buildOrderEmailHtml(
+  o: OrderEmailData,
+  // showApprovalTags: the yellow "NEEDS APPROVAL" tag on flagged items. Only the
+  // authorizer's approval request shows it; the employee's emails don't.
+  opts: { intro?: string; showApprovalTags?: boolean } = {},
+): string {
   const itemRows = o.items.map((i) =>
     `<tr>
-      <td style="padding:6px 12px;border-bottom:1px solid #eee">${esc(i.name)}${i.code ? ` <span style="color:#000;font-weight:600;font-size:14px">${esc(i.code)}</span>` : i.sku ? ` <span style="color:#000;font-weight:600;font-size:14px">(${esc(i.sku)})</span>` : ""}${i.approval ? ` <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:#fdecc8;color:#8a5a00;font-size:11px;font-weight:700;white-space:nowrap">NEEDS APPROVAL</span>` : ""}</td>
+      <td style="padding:6px 12px;border-bottom:1px solid #eee">${esc(i.name)}${i.code ? ` <span style="color:#000;font-weight:600;font-size:14px">${esc(i.code)}</span>` : i.sku ? ` <span style="color:#000;font-weight:600;font-size:14px">(${esc(i.sku)})</span>` : ""}${i.approval && opts.showApprovalTags ? ` <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:#fdecc8;color:#8a5a00;font-size:11px;font-weight:700;white-space:nowrap">NEEDS APPROVAL</span>` : ""}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${i.color ? esc(i.color.startsWith("#") ? colorName(i.color) : i.color) + " / " : ""}${esc(i.size)}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee;text-align:right">$${(((Number(i.price) || 0) * i.quantity)).toFixed(2)}</td>
@@ -213,6 +218,7 @@ export function buildApprovalRequestHtml(o: OrderEmailData, approveUrl: string):
   </table>`;
   return buildOrderEmailHtml(o, {
     intro: "The following order has been submitted for your review.",
+    showApprovalTags: true,
   }) + banner;
 }
 
