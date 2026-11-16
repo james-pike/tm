@@ -76,6 +76,33 @@ export function stickyTop(): number {
 
 export const LoginTypeContext = createContextId<Signal<string>>("loginType");
 
+// Save a PO order's employee email/phone (for the approval confirmation).
+// Adds the columns on first use. Never throws.
+async function saveEmployeeContact(db: ReturnType<typeof createClient>, orderId: unknown, email: string, phone: string) {
+  if (orderId == null || (!email && !phone)) return;
+  const save = () => db.execute({
+    sql: "UPDATE orders SET emp_email = ?, emp_phone = ? WHERE id = ?",
+    args: [email || null, phone || null, orderId as any],
+  });
+  try {
+    await save();
+  } catch (err) {
+    if (!/no such column/i.test(String((err as Error)?.message))) {
+      console.error("Could not save employee contact on order:", err);
+      return;
+    }
+    try {
+      for (const col of ["emp_email", "emp_phone"]) {
+        try { await db.execute(`ALTER TABLE orders ADD COLUMN ${col} TEXT`); }
+        catch (e) { if (!/duplicate column/i.test(String((e as Error)?.message))) throw e; }
+      }
+      await save();
+    } catch (err2) {
+      console.error("Could not save employee contact on order:", err2);
+    }
+  }
+}
+
 export const useLocaleLoader = routeLoader$(({ cookie }) => {
   const saved = cookie.get(LOCALE_COOKIE)?.value;
   return (saved === "fr" ? "fr" : "en") as Locale;
@@ -329,9 +356,9 @@ export const useSubmitOrder = routeAction$(
           args: [
             vendor,
             "",
-            // The name + shipping address ARE stored (so the admin can fulfill the
-            // order); email/phone are NOT — for card orders they travel through
-            // Stripe metadata to the webhook, never a column here.
+            // The name + shipping address are stored here (so the admin can
+            // fulfill the order); email/phone are saved just after, for the
+            // approval confirmation (saveEmployeeContact).
             employee.name || "",
             portalTag, // emp_dept carries the portal tag (which lineup ordered)
             employee.po || "",
@@ -387,6 +414,14 @@ export const useSubmitOrder = routeAction$(
       // placement — an unapproved order isn't a numbered order yet. So we leave
       // orderNumber empty here; the emails omit the number accordingly.
       orderNumber = "";
+
+      // PO orders wait for approval and the employee's confirmation is sent
+      // then, so keep their email/phone on the order for it (emp_email,
+      // emp_phone, added on first use). Never fails the order: if this can't be
+      // saved, approval falls back to the Resend lookup, then the notify list.
+      if (status === "awaiting_authorization") {
+        await saveEmployeeContact(db, orderId, (employee.email || "").trim(), (employee.phone || "").trim());
+      }
     } catch (err) {
       console.error("Failed to save order to database:", err);
       return fail(500, { message: "Order could not be saved. Please try again." });

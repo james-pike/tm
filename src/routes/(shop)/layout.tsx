@@ -122,9 +122,9 @@ export const useDecisionHistory = routeLoader$<DecisionRow[]>(async ({ cookie, e
 type Env = { get(k: string): string | undefined };
 
 // Email the employee (To) + the ORDER_NOTIFY_TO list (BCC) that their order was
-// approved. Their address isn't stored here: it's read back from the
-// authorizer's approval email on Resend (its reply-to). If that's gone (Resend
-// keeps 30 days) the email goes To the notify list instead. Never throws.
+// approved. Their address is saved on the order at checkout (emp_email); older
+// orders read it back from the authorizer's approval email on Resend. With no
+// address at all the email goes To the notify list instead. Never throws.
 async function sendApprovedOrderEmail(env: Env, origin: string, id: number, orderNo: number) {
   try {
     const apiKey = env.get("RESEND_API_KEY") || env.get("VITE_RESEND_API_KEY");
@@ -138,7 +138,17 @@ async function sendApprovedOrderEmail(env: Env, origin: string, id: number, orde
     const testPo = (env.get("TEST_NO_EMAIL_PO") || env.get("VITE_TEST_NO_EMAIL_PO") || "TEST-NOEMAIL").trim().toUpperCase();
     if (testPo && String(row.po_number || "").trim().toUpperCase() === testPo) return;
 
-    const contact = row.approval_email_id ? await fetchApprovalContact(apiKey, String(row.approval_email_id)) : {};
+    // The employee's email/phone are saved on the order at checkout. Orders
+    // placed before that fall back to reading them from the approval email on
+    // Resend (its reply-to), which only works while Resend still has it.
+    let contact: { email?: string; phone?: string } = {
+      email: String(row.emp_email || "").trim() || undefined,
+      phone: String(row.emp_phone || "").trim() || undefined,
+    };
+    if (!contact.email && row.approval_email_id) {
+      const fromResend = await fetchApprovalContact(apiKey, String(row.approval_email_id));
+      contact = { email: fromResend.email, phone: contact.phone || fromResend.phone };
+    }
     const items = JSON.parse(row.items || "[]") as OrderItem[];
     const province = String(row.province || "");
     const taxRate = PROVINCE_TAX[province] ?? 0;
