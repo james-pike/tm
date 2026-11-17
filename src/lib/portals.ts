@@ -89,11 +89,9 @@ export const PORTAL_ALLOWANCES: Record<Portal, AllowanceGroup[]> = {
 
 // Per-portal default colour for a SKU (overrides the product's own default
 // image/swatch on the catalog card and product page). Site Clerks see the
-// Surfer full-zip (TM-3) in black first; Carpenters & Labourers see the
-// Lakeview full-zip (TM-8) in black first.
+// Surfer full-zip (TM-3) in black first.
 const PORTAL_DEFAULT_COLORS: Partial<Record<Portal, Record<string, string>>> = {
   clerks: { "TM-3": "#1a1a18" },
-  labourers: { "TM-8": "#1a1a18" },
 };
 
 export function portalDefaultColor(portal: string | null | undefined, sku: string): string | undefined {

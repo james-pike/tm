@@ -74,13 +74,11 @@ export const allProducts = [
     "sizes": "S - 4XL",
     "badge": "",
     "colors": [
-      "#1e4d2b",
       "#1a1a18"
     ],
     "price": 65,
-    "img": "/skus/L00670-forestgreen-tamarack.png",
+    "img": "/skus/L00670-tamarack.png",
     "imgs": [
-      "/skus/L00670-forestgreen-tamarack.png",
       "/skus/L00670-tamarack.png"
     ],
     "material": "80% cotton / 20% recycled polyester fleece, 3-ply fleece",
