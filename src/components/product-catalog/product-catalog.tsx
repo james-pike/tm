@@ -615,13 +615,13 @@ export const ProductCatalog = component$<{ class?: string }>(({ "class": cls }) 
       });
       // Per-portal sweater order (the listed SKUs are reshuffled among their
       // own slots; everything else keeps the DB order).
-      // Inspectors & Technicians and Foreman & Superintendents: Surfer (TM-3),
-      // Flux (TM-11), Lakeview (TM-8). Site Clerks: Surfer (TM-3) before
-      // Vault (TM-22).
+      // Inspectors & Technicians: Surfer (TM-3), Flux (TM-11), Lakeview (TM-8).
+      // Foreman & Superintendents: Surfer (TM-3), Flux (TM-11), Lakeview (TM-8).
+      // Site Clerks: Flux (TM-11), Lakeview (TM-8), Surfer (TM-3), Vault (TM-22).
       const SWEATER_ORDER: Partial<Record<string, string[]>> = {
         technicians: ["TM-3", "TM-11", "TM-8"],
         supervisors: ["TM-3", "TM-11", "TM-8"],
-        clerks: ["TM-3", "TM-22"],
+        clerks: ["TM-11", "TM-8", "TM-3", "TM-22"],
       };
       const order = SWEATER_ORDER[loginType.value];
       if (order) {

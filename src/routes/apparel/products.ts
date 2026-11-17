@@ -222,63 +222,43 @@ export const allProducts = [
     ]
   },
   {
-    "sku": "TM-12",
-    "name": "Core365 Men's Optimum Short-Sleeve Twill Shirt",
+    "sku": "TM-15",
+    "name": "Core365 Ladies Optimum Short-Sleeve Twill Shirt",
     "category": "Polos",
-    "sizes": "S - 4XL",
+    "sizes": "XS - 3XL",
     "badge": "",
     "colors": [
       "#1a1a18"
     ],
     "price": 45,
-    "img": "/skus/88194-black-tamarack.jpg",
+    "img": "/skus/78194-black-tamarack.png",
     "imgs": [
-      "/skus/88194-black-tamarack.jpg"
+      "/skus/78194-black-tamarack.png"
     ],
     "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
-    "details": "UV protection, button-down collar, flat-felled seams, left chest pocket, back yoke with box pleat, #88194",
+    "details": "UV protection, button-down collar, flat-felled seams, left chest pocket, back yoke with box pleat, #78194",
     "portals": [
       "labourers"
     ]
   },
   {
-    "sku": "TM-19",
-    "name": "Gildan DryBlend Jersey Polo",
+    "sku": "TM-12",
+    "name": "Trimark Men's Stirling Short Sleeve Shirt",
     "category": "Polos",
-    "sizes": "S - 3XL",
+    "sizes": "S - 5XL",
     "badge": "",
     "colors": [
-      "#1a1a18",
-      "#1e4d2b"
-    ],
-    "price": 19.5,
-    "img": "/skus/8800-forestgreen-tamarack-v2.png",
-    "imgs": [
-      "/skus/8800-black-tamarack.png",
-      "/skus/8800-forestgreen-tamarack-v2.png"
-    ],
-    "material": "50% cotton / 50% polyester DryBlend jersey",
-    "details": "DryBlend moisture-wicking jersey, Welt-knit collar and cuffs, Three-button placket, #8800",
-    "portals": [
-      "labourers"
-    ]
-  },
-  {
-    "sku": "TM-13",
-    "name": "Core365 Men's Operate Long-Sleeve Twill Shirt",
-    "category": "Polos",
-    "sizes": "S - 4XL",
-    "badge": "",
-    "colors": [
+      "#1e4d2b",
       "#1a1a18"
     ],
-    "price": 52,
-    "img": "/skus/88193-black-tamarack.jpg",
+    "price": 45,
+    "img": "/skus/17745-forestgreen-tamarack.png",
     "imgs": [
-      "/skus/88193-black-tamarack.jpg"
+      "/skus/17745-forestgreen-tamarack.png",
+      "/skus/17745-black-tamarack.png"
     ],
-    "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
-    "details": "UV protection, button-down collar, flat-felled seams, adjustable cuffs, left chest pocket, back yoke with box pleat, #88193",
+    "material": "65% polyester / 35% combed cotton woven twill (4.3 oz / 145 gsm)",
+    "details": "Button-down collar, Upper patch pocket (left chest), Center-back box pleat, Back yoke, Flat-felled seams, Contrast inner yoke, EZ-Care fabric, #17745",
     "portals": [
       "labourers"
     ]
@@ -304,21 +284,23 @@ export const allProducts = [
     ]
   },
   {
-    "sku": "TM-15",
-    "name": "Core365 Ladies Optimum Short-Sleeve Twill Shirt",
+    "sku": "TM-13",
+    "name": "Trimark Men's Wilshire Long Sleeve Shirt",
     "category": "Polos",
-    "sizes": "XS - 3XL",
+    "sizes": "S - 5XL",
     "badge": "",
     "colors": [
+      "#1e4d2b",
       "#1a1a18"
     ],
-    "price": 45,
-    "img": "/skus/78194-black-tamarack.png",
+    "price": 52,
+    "img": "/skus/17744-forestgreen-tamarack.png",
     "imgs": [
-      "/skus/78194-black-tamarack.png"
+      "/skus/17744-forestgreen-tamarack.png",
+      "/skus/17744-black-tamarack.png"
     ],
-    "material": "55/45 cotton/polyester twill (4.4 oz / 150 gsm)",
-    "details": "UV protection, button-down collar, flat-felled seams, left chest pocket, back yoke with box pleat, #78194",
+    "material": "65% polyester / 35% combed cotton woven twill (4.3 oz / 145 gsm)",
+    "details": "Button-down collar, Left chest pocket, Adjustable one-button cuffs with single pleats, Center-back box pleat, Back yoke, Flat-felled seams, Contrast inner yoke, EZ-Care fabric, #17744",
     "portals": [
       "labourers"
     ]
@@ -342,6 +324,28 @@ export const allProducts = [
     "portals": [
       "labourers",
       "labourers-only"
+    ]
+  },
+  {
+    "sku": "TM-19",
+    "name": "Gildan DryBlend Jersey Polo",
+    "category": "Polos",
+    "sizes": "S - 3XL",
+    "badge": "",
+    "colors": [
+      "#1a1a18",
+      "#1e4d2b"
+    ],
+    "price": 19.5,
+    "img": "/skus/8800-forestgreen-tamarack-v2.png",
+    "imgs": [
+      "/skus/8800-black-tamarack.png",
+      "/skus/8800-forestgreen-tamarack-v2.png"
+    ],
+    "material": "50% cotton / 50% polyester DryBlend jersey",
+    "details": "DryBlend moisture-wicking jersey, Welt-knit collar and cuffs, Three-button placket, #8800",
+    "portals": [
+      "labourers"
     ]
   },
   {
