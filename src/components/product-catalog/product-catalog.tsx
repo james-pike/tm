@@ -4,7 +4,7 @@ import { LocaleContext, t } from "../../i18n";
 import { allProducts, categoryLabel, colorName } from "../../routes/apparel/products";
 import { CLOTHING_CATEGORIES, CATEGORY_ICONS } from "../../lib/categories";
 import type { Product } from "../../routes/apparel/products";
-import { sizeGroups, sortColorsWhiteLast } from "../../routes/apparel/utils";
+import { sizeGroups, sortSwatches } from "../../routes/apparel/utils";
 import { stickyTop, LoginTypeContext } from "../../routes/layout";
 import { SecondaryBarContext } from "../../context/secondary-bar";
 import { allowedSkus, currentSeason, isPortal, portalDefaultColor, portalLabel } from "../../lib/portals";
@@ -307,7 +307,7 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
 
   const allColors = item.colors || [];
   const shownColors = allColors.filter((c) => !hiddenColors.has(c));
-  const visibleColors = sortColorsWhiteLast(shownColors.length ? shownColors : allColors);
+  const visibleColors = sortSwatches(shownColors.length ? shownColors : allColors);
   const singleColorName =
     visibleColors.length === 1
       ? (visibleColors[0].startsWith("#") ? colorName(visibleColors[0], locale.value) : visibleColors[0])
@@ -402,7 +402,7 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
               // If every colour got hidden (e.g. a single-colour product whose one
               // colour is in the declutter list, like the Royal-blue notebook),
               // fall back to the product's own colours so its swatch still shows.
-              const visible = sortColorsWhiteLast(shown.length ? shown : all);
+              const visible = sortSwatches(shown.length ? shown : all);
               // Cap the swatches at 4; beyond that a "+N" chip stands in for the
               // rest, so a product with many colours doesn't spill a long row of
               // dots across the card.
@@ -478,7 +478,7 @@ export const ProductCard = component$<{ item: Product; sku: string; index: numbe
             {(() => {
               const all = item.colors || [];
               const shown = all.filter((c) => !hiddenColors.has(c));
-              const visible = sortColorsWhiteLast(shown.length ? shown : all);
+              const visible = sortSwatches(shown.length ? shown : all);
               if (!visible.length) return null;
               // List up to 4 colour names; if there are more, a ", +N" indicator
               // stands in for the rest rather than a truncated run-on list.

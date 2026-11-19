@@ -3,7 +3,7 @@ import { Carousel } from "@qwik-ui/headless";
 import { Link } from "@builder.io/qwik-city";
 import { LocaleContext, t } from "../../i18n";
 import { allProducts, colorName, categoryLabel } from "../../routes/apparel/products";
-import { expandSizes, sortColorsWhiteLast } from "../../routes/apparel/utils";
+import { expandSizes, sortSwatches, defaultColor } from "../../routes/apparel/utils";
 import { LoginTypeContext } from "../../routes/layout";
 import { ProductImage } from "../product-image/product-image";
 import { ProductCard } from "../product-catalog/product-catalog";
@@ -282,7 +282,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
     selectedColor.value = "";
     const p0 = product.value;
     if (!p0) return;
-    selectedColor.value = portalDefaultColor(loginType.value, p0.sku) || sortColorsWhiteLast(p0.colors)[0];
+    selectedColor.value = portalDefaultColor(loginType.value, p0.sku) || defaultColor(p0);
     // Open on the colour the gallery card was showing (its default image colour,
     // or whatever swatch the user switched to before clicking through). The card
     // stashes it in sessionStorage right before navigating; consume it once.
@@ -558,7 +558,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
               <div class="product-modal__field">
                 <label class="product-modal__label">{t("modal.color", locale.value)}{selectedColor.value && <span class="product-modal__color-inline"> — {colorName(selectedColor.value, locale.value)}</span>}</label>
                 <div class="product-modal__options">
-                  {sortColorsWhiteLast(p.colors).map((color) => (
+                  {sortSwatches(p.colors).map((color) => (
                     <button
                       key={color}
                       class={`product-modal__color ${selectedColor.value === color ? "active" : ""}`}

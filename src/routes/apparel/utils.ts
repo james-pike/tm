@@ -1,12 +1,24 @@
 // Utility functions that won't be overwritten by auto-generation
 
 // White (#ffffff) is always rendered after every other swatch.
-export function sortColorsWhiteLast(colors: readonly string[]): string[] {
-  return [...colors].sort((a, b) => {
-    const aw = a.toLowerCase() === "#ffffff" ? 1 : 0;
-    const bw = b.toLowerCase() === "#ffffff" ? 1 : 0;
-    return aw - bw;
-  });
+const BLACK_HEXES = new Set(["#1a1a18", "#000000"]);
+const isWhite = (c: string) => c.toLowerCase() === "#ffffff";
+
+// Swatch display order: black always first, white last, everything else in
+// its stored order. Display only — the stored colors[] order still lines up
+// with imgs[], and the default colour comes from the product's main image
+// (see defaultColor), so a green-default product still opens on green.
+export function sortSwatches(colors: readonly string[]): string[] {
+  const rank = (c: string) => (BLACK_HEXES.has(c.toLowerCase()) ? 0 : isWhite(c) ? 2 : 1);
+  return [...colors].sort((a, b) => rank(a) - rank(b));
+}
+
+// The colour a product opens on: the one whose photo is its main image
+// (imgs[i] lines up with colors[i]), else the first non-white colour.
+export function defaultColor(p: { colors: readonly string[]; img?: string; imgs?: readonly string[] }): string {
+  const i = p.img && p.imgs ? p.imgs.indexOf(p.img) : -1;
+  if (i >= 0 && p.colors[i]) return p.colors[i];
+  return p.colors.find((c) => !isWhite(c)) ?? p.colors[0];
 }
 
 const SIZE_ORDER = ["XXS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL"];
