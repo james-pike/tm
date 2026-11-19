@@ -46,7 +46,10 @@ TASKS = [
     ("ATC1015", "ATC1015-forestgreen.png",  "ATC1015-forestgreen-tamarack.png"),
     ("ATC1000", "ATC1000-forestgreen.png",  "ATC1000-forestgreen-tamarack.png"),
     # TM-3 Surfer Full-Zip: Forest Green added as a second colour.
-    ("L00555", "L00555-forestgreen.png",    "L00555-forestgreen-tamarack.png"),
+    # Nov 2026: TM-3 Surfer re-shot on a male model (black + forest green);
+    # -v3 names bust the browser cache over the old woman-model photos.
+    ("L00555", "L00555-black.png",          "L00555-black-tamarack-v3.png"),
+    ("L00555", "L00555-forestgreen.png",    "L00555-forestgreen-tamarack-v3.png"),
 ]
 
 # Optional per-output alignment of the blank BEFORE the logo goes on, so a
@@ -54,8 +57,6 @@ TASKS = [
 # (scale, dx, dy) — scale about the top-left, then shift in source pixels.
 # Measured by matching the model's outline against the other colour's image.
 ALIGN = {
-    # Forest blank is ~0.8% larger and offset vs TM-3's black image.
-    "L00555-forestgreen-tamarack.png": (0.992, 3, 5),
 }
 
 # Optional: bake only the named outputs, e.g.
