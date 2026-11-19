@@ -190,8 +190,20 @@ async function sendApprovedOrderEmail(env: Env, origin: string, id: number, orde
       payment: { method: "po", giftAmount: 0, cardAmount: 0 },
     };
     const from = env.get("RESEND_FROM") || env.get("VITE_RESEND_FROM") || "Tamarack <onboarding@resend.dev>";
+    // The authorizer already had the approval-request email and just approved
+    // it, so they never get this confirmation: drop their address(es) from the
+    // staff BCC (the notify list and AUTHORIZER_EMAIL can share an address).
+    const authorizers = new Set(
+      (env.get("AUTHORIZER_EMAIL") || env.get("VITE_AUTHORIZER_EMAIL") || "")
+        .split(",").map((a) => a.trim().toLowerCase()).filter(Boolean),
+    );
     let staffAddresses = (env.get("ORDER_NOTIFY_TO") || env.get("VITE_ORDER_NOTIFY_TO") || "info@tamarackapparel.ca")
-      .split(",").map((a) => a.trim()).filter(Boolean);
+      .split(",").map((a) => a.trim()).filter((a) => a && !authorizers.has(a.toLowerCase()));
+    // No employee address and nobody left to notify: nothing to send.
+    if (!contact.email && !staffAddresses.length) {
+      console.warn(`Order ${id} approved — no employee email and no non-authorizer staff to notify; confirmation not sent.`);
+      return;
+    }
     // Self-test PO (see useSubmitOrder): no staff BCC, and only send if the
     // employee's address was found — never fall back to emailing staff.
     const selfPo = (env.get("TEST_SELF_PO") || env.get("VITE_TEST_SELF_PO") || "TEST-SELF").trim().toUpperCase();
