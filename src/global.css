@@ -2655,8 +2655,14 @@ body:has(.nav-drawer-overlay) .site-header .hamburger-btn { pointer-events: auto
 @media (max-width: 600px) {
   /* Menu drawer was a bit thick — tighten rows and the frame around them. */
   .nav-drawer__link, .nav-drawer__cat-trigger { padding: 9px 14px; }
+  /* Category titles read a touch small on phones (was 1rem). */
+  .nav-drawer__cat-trigger { font-size: 1.1rem; }
   .nav-drawer__cat-content .nav-drawer__cat-item { padding: 7px 6px 7px 14px; }
-  .nav-drawer__links, .nav-drawer__footer { padding: 1px; }
+  /* No side padding on the list: rows (incl. the green selected bar) run full
+     bleed to the screen edges like the header and bars, with no thin grey
+     line down either side. */
+  .nav-drawer__links { padding: 1px 0; }
+  .nav-drawer__footer { padding: 1px; }
   .nav-drawer__header { margin: 0 var(--wt-box-my); }
 }
 .nav-drawer__cat-item {
@@ -5470,7 +5476,9 @@ body:has(.home-catalog) .site-header .cart-btn .cart-btn__label { color: #ffffff
    about halfway (0.85/1/0.75rem → ~0.45/0.5/0.4rem) so the list sits tighter to
    the edges. */
 @media (max-width: 600px) {
-  .allowance { max-width: 100%; padding: 0.3rem 0.4rem 0.3rem; }
+  /* Tight OUTER margin (in line with the 8px-inset cart box above, instead of
+     the base 0.9rem/1.25rem inset) but a comfortable INNER padding. */
+  .allowance { max-width: 100%; margin: 8px 8px 4px; padding: 0.6rem 0.75rem 0.55rem; }
   /* Pull the legend's side edges closer to the screen edges too (was inset 2px). */
   .cart-drawer__bottom .allowance { margin-left: 1px; margin-right: 1px; }
 }

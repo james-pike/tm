@@ -597,7 +597,7 @@ export const ProductDetailPanel = component$<ProductDetailPanelProps>((props) =>
             </div>
             <div class="product-modal__actions">
               <button
-                class={`btn btn--primary product-modal__add product-modal__add--branded ${added.value ? "product-modal__add--added" : ""} ${(!!capInfo.value && capInfo.value.remaining <= 0) ? "product-modal__add--locked" : ""}`}
+                class={`btn btn--primary product-modal__add product-modal__add--branded ${added.value ? "product-modal__add--added" : ""} ${(!added.value && !!capInfo.value && capInfo.value.remaining <= 0) ? "product-modal__add--locked" : ""}`}
                 disabled={!selectedSize.value || (waistLengthSkus.has(p.sku) && (!selectedWaist.value || !selectedLength.value)) || (!!getVariantMap(p) && !selectedVariant.value)}
                 onMouseEnter$={() => { hovering.value = true; }}
                 onMouseLeave$={() => { hovering.value = false; }}
