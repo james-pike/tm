@@ -245,6 +245,11 @@ export const useSubmitOrder = routeAction$(
     const wantsGift = paymentMethod === "giftcard" || paymentMethod === "giftcard_card";
     const wantsCard = paymentMethod === "card" || paymentMethod === "giftcard_card";
 
+    // Every order ships to the one fixed address, whatever the browser sent.
+    employee.address1 = "3187 Albion Road South";
+    employee.city = "Ottawa";
+    employee.province = "ON";
+    employee.postal = "K1V 8Y3";
     const province = employee.province;
     if (!province || !PROVINCE_TAX[province]) {
       return fail(400, { message: "Please select a province before submitting the order." });
@@ -791,10 +796,11 @@ export default component$(() => {
   const empEmail = useSignal("");
   const empPhone = useSignal("");
   const empDept = useSignal("");
-  const empProvince = useSignal("");
-  const empAddress1 = useSignal("");
-  const empCity = useSignal("");
-  const empPostal = useSignal("");
+  // Fixed shipping address (the only one): 3187 Albion Road South, Ottawa.
+  const empProvince = useSignal("ON");
+  const empAddress1 = useSignal("3187 Albion Road South");
+  const empCity = useSignal("Ottawa");
+  const empPostal = useSignal("K1V 8Y3");
   const empPO = useSignal("");
 
   // Payment: 'po' (invoice), 'giftcard', 'giftcard_card', 'card'.
@@ -1051,7 +1057,7 @@ export default component$(() => {
     empEmail.value = "";
     empPhone.value = "";
     empDept.value = "";
-    empProvince.value = "";
+    empProvince.value = "ON"; // keep the pre-filled shipping address for the next order
     empPO.value = "";
     payMethod.value = "po";
     giftCode.value = "";

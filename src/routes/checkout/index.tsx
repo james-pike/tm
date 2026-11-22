@@ -73,10 +73,11 @@ export default component$(() => {
   const empEmail = useSignal("");
   const empPhone = useSignal("");
   const empDept = useSignal("");
-  const empProvince = useSignal("");
-  const empAddress1 = useSignal("");
-  const empCity = useSignal("");
-  const empPostal = useSignal("");
+  // Fixed shipping address (the only one; shown read-only): 3187 Albion Road South, Ottawa.
+  const empProvince = useSignal("ON");
+  const empAddress1 = useSignal("3187 Albion Road South");
+  const empCity = useSignal("Ottawa");
+  const empPostal = useSignal("K1V 8Y3");
   const empPO = useSignal("");
 
   const cartCount = useComputed$(() => cart.items.reduce((sum, i) => sum + i.quantity, 0));
@@ -348,40 +349,6 @@ export default component$(() => {
                     <input type="text" value={empLastName.value} onInput$={(_, el) => { empLastName.value = el.value; formError.value = ""; }} />
                   </div>
                 </div>
-                {/* Full shipping address — all required. */}
-                <div class={`checkout-modal__field ${formTouched.value && !empAddress1.value ? "checkout-modal__field--error" : ""}`}>
-                  <label>{t("cart.address", locale.value)}</label>
-                  <input type="text" autoComplete="street-address" value={empAddress1.value} onInput$={(_, el) => { empAddress1.value = el.value; formError.value = ""; }} />
-                </div>
-                <div class={`checkout-modal__field ${formTouched.value && !empCity.value ? "checkout-modal__field--error" : ""}`}>
-                  <label>{t("cart.city", locale.value)}</label>
-                  <input type="text" autoComplete="address-level2" value={empCity.value} onInput$={(_, el) => { empCity.value = el.value; formError.value = ""; }} />
-                </div>
-                {/* Province + Postal share a row (neither needs full width).
-                    Province sits high so the tax line in the summary updates as
-                    soon as possible. */}
-                <div class="checkout-modal__row">
-                <div class={`checkout-modal__field ${formTouched.value && !empProvince.value ? "checkout-modal__field--error" : ""}`}>
-                  <label>{t("cart.province", locale.value)}</label>
-                  <select required value={empProvince.value} onChange$={(_, el) => { empProvince.value = el.value; formError.value = ""; }}>
-                    <option value="" disabled hidden>{locale.value === "fr" ? "Sélectionner…" : "Select…"}</option>
-                    <option value="AB">{t("prov.AB", locale.value)}</option>
-                    <option value="BC">{t("prov.BC", locale.value)}</option>
-                    <option value="MB">{t("prov.MB", locale.value)}</option>
-                    <option value="NB">{t("prov.NB", locale.value)}</option>
-                    <option value="NL">{t("prov.NL", locale.value)}</option>
-                    <option value="NS">{t("prov.NS", locale.value)}</option>
-                    <option value="ON">{t("prov.ON", locale.value)}</option>
-                    <option value="PE">{t("prov.PE", locale.value)}</option>
-                    <option value="QC">{t("prov.QC", locale.value)}</option>
-                    <option value="SK">{t("prov.SK", locale.value)}</option>
-                  </select>
-                </div>
-                <div class={`checkout-modal__field ${formTouched.value && !empPostal.value ? "checkout-modal__field--error" : ""}`}>
-                  <label>{t("cart.postal", locale.value)}</label>
-                  <input type="text" autoComplete="postal-code" value={empPostal.value} onInput$={(_, el) => { empPostal.value = el.value; formError.value = ""; }} />
-                </div>
-                </div>
                 {/* Email + Phone share a row. */}
                 <div class="checkout-modal__row">
                 <div class={`checkout-modal__field ${formTouched.value && !empEmail.value ? "checkout-modal__field--error" : ""}`}>
@@ -392,6 +359,13 @@ export default component$(() => {
                   <label>{t("cart.phone", locale.value)}</label>
                   <input type="tel" value={empPhone.value} onInput$={(_, el) => { empPhone.value = el.value; formError.value = ""; }} />
                 </div>
+                </div>
+                {/* Every order ships to one fixed address (not editable; the order
+                    action enforces it too). */}
+                <div class="checkout-modal__shipto">
+                  <span class="checkout-modal__shipto-label">{locale.value === "fr" ? "Livrer à" : "Ship to"}</span>
+                  <span class="checkout-modal__shipto-name">{empAddress1.value}</span>
+                  <span>{empCity.value}, {empProvince.value} {empPostal.value}</span>
                 </div>
               </div>
 

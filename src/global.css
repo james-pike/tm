@@ -16461,3 +16461,38 @@ html body .site-header .site-header__inner { background: transparent !important;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 }
+
+/* Checkout: the fixed ship-to address block (read-only). */
+.checkout-modal__shipto {
+  grid-column: 1 / -1;
+  display: flex; flex-direction: column; gap: 2px;
+  margin: 4px 0 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+  background: #f4f4f1;
+  font-size: 0.95rem; line-height: 1.4; color: #3d434a;
+}
+.checkout-modal__shipto-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8e93; margin-bottom: 2px; }
+.checkout-modal__shipto-name { font-weight: 600; color: #1f2326; }
+
+/* Login gate: a little more room between the password field and the Login
+   button (≈10px → 16px). */
+html body .login-modal .login-modal__submit { margin-top: 16px !important; }
+
+/* Login gate, desktop only: a touch more side padding around the portal
+   buttons and the password field / Login button (14px each side), so they sit
+   a little narrower than the logo. Tablets and phones unchanged. */
+@media (min-width: 1025px) {
+  html body .login-modal .login-modal__form > .login-modal__field,
+  html body .login-modal .login-modal__form > .login-modal__signin-row { margin-left: 14px !important; margin-right: 14px !important; }
+  /* keep "SUPERINTENDENTS" on one line in the narrower tiles */
+  html body .login-modal .login-portal { padding-left: 4px !important; padding-right: 4px !important; letter-spacing: 0.01em !important; }
+}
+/* Checkout: a little more room above the Ship To box (below email / phone). */
+.checkout-modal__shipto { margin-top: 12px !important; }
+/* Ship To box: same fill, border and corner radius as the checkout inputs. */
+.checkout-modal__shipto { background: rgb(240, 240, 238) !important; border: 1px solid rgb(200, 200, 194) !important; border-radius: 6px !important; }
+/* Checkout: slightly wider gap between the side-by-side fields (first / last
+   name, email / phone). */
+.checkout-modal .checkout-modal__row, .checkout-page .checkout-modal__row { column-gap: 16px !important; }
