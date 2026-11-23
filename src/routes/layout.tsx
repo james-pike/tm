@@ -714,24 +714,6 @@ export default component$(() => {
   const orderAction = useSubmitOrder();
 
   const showLogin = useSignal(false);
-  // The gate is rendered in the browser, so the <video>'s `muted` attribute
-  // doesn't actually mute it — and iOS Safari never autoplays an unmuted video
-  // (it waited for a tap). Mute it for real and start it once the gate shows;
-  // if the device still refuses (e.g. iOS Low Power Mode), show the play icon.
-  // eslint-disable-next-line qwik/no-use-visible-task
-  useVisibleTask$(({ track }) => {
-    track(() => showLogin.value);
-    const start = () => {
-      const v = document.querySelector("video.login-modal__slide") as HTMLVideoElement | null;
-      if (!v) return false;
-      v.muted = true; v.defaultMuted = true; v.playsInline = true;
-      v.setAttribute("muted", ""); v.setAttribute("playsinline", "");
-      const p = v.play();
-      if (p && typeof p.then === "function") p.then(() => { loginVideoPaused.value = false; }).catch(() => { loginVideoPaused.value = true; });
-      return true;
-    };
-    if (!start()) setTimeout(start, 300);
-  }, { strategy: "document-ready" });
   // Which portal tile is picked on the login screen (see PORTALS). Submitted as
   // a hidden field with the password; it decides the role's lineup + caps.
   const selectedPortal = useSignal<Portal>("labourers");
