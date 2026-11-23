@@ -1416,36 +1416,47 @@ export default component$(() => {
                       required
                       placeholder={t("login.password.placeholder", locale.value)}
                       // iOS Safari won't scroll a focused input that lives inside a
-                      // position:fixed overlay into view (Chrome does), so the
-                      // keyboard covers the password row. Lift the login card just
-                      // enough that the field + submit sit above the keyboard, using
-                      // the visual viewport (its height is the space above the
-                      // keyboard). React to the viewport actually resizing rather
-                      // than a fixed delay — the keyboard animates in slower on
-                      // tablet, so a one-shot timeout fired before it had shrunk and
-                      // nothing lifted. Reset on blur. Only ever nudges upward.
+                      // position:fixed overlay into view, so the keyboard would cover
+                      // the password row. Lift the login card just enough that the
+                      // field + Login button sit above the keyboard (the visual
+                      // viewport's height is the space above it).
+                      // The keyboard opens in several viewport-resize steps; moving the
+                      // card on each one made it hop around. So wait until the resizes
+                      // stop (~140ms quiet), then lift it ONCE, in one smooth move.
+                      // A single fallback covers a keyboard that never fires resize.
+                      // Reset on blur. Only ever nudges upward.
                       onFocus$={() => {
                         const vv = typeof window !== "undefined" ? window.visualViewport : null;
                         if (!vv) return;
-                        const nudge = () => {
+                        const w = window as unknown as { __loginKbNudge?: () => void; __loginKbTimer?: number; __loginKbFallback?: number };
+                        const apply = () => {
                           const row = document.querySelector(".login-modal__signin-row") as HTMLElement | null;
                           const card = document.querySelector(".login-modal--split") as HTMLElement | null;
                           if (!row || !card) return;
-                          const hidden = row.getBoundingClientRect().bottom - (vv.offsetTop + vv.height - 12);
-                          card.style.transition = "transform 0.2s ease";
-                          card.style.transform = hidden > 0 ? `translateY(${-Math.ceil(hidden)}px)` : "";
+                          // measure without the current lift, so repeated calls settle on one value
+                          const current = new DOMMatrixReadOnly(getComputedStyle(card).transform).m42 || 0;
+                          const hidden = row.getBoundingClientRect().bottom - current - (vv.offsetTop + vv.height - 12);
+                          const target = hidden > 0 ? -Math.ceil(hidden) : 0;
+                          if (Math.abs(target - current) < 2) return; // already there — no extra move
+                          card.style.transition = "transform 0.22s ease-out";
+                          card.style.transform = target ? `translateY(${target}px)` : "";
                         };
-                        (window as unknown as { __loginKbNudge?: () => void }).__loginKbNudge = nudge;
-                        vv.addEventListener("resize", nudge);
-                        // a couple of fallbacks in case resize doesn't fire
-                        setTimeout(nudge, 350);
-                        setTimeout(nudge, 700);
+                        const settle = () => {
+                          window.clearTimeout(w.__loginKbTimer);
+                          w.__loginKbTimer = window.setTimeout(apply, 140);
+                        };
+                        w.__loginKbNudge = settle;
+                        vv.addEventListener("resize", settle);
+                        window.clearTimeout(w.__loginKbFallback);
+                        w.__loginKbFallback = window.setTimeout(apply, 650);
                       }}
                       onBlur$={() => {
-                        const w = window as unknown as { __loginKbNudge?: () => void };
+                        const w = window as unknown as { __loginKbNudge?: () => void; __loginKbTimer?: number; __loginKbFallback?: number };
                         if (window.visualViewport && w.__loginKbNudge) {
                           window.visualViewport.removeEventListener("resize", w.__loginKbNudge);
                         }
+                        window.clearTimeout(w.__loginKbTimer);
+                        window.clearTimeout(w.__loginKbFallback);
                         w.__loginKbNudge = undefined;
                         const card = document.querySelector(".login-modal--split") as HTMLElement | null;
                         if (card) card.style.transform = "";
