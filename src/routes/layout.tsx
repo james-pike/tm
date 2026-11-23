@@ -708,6 +708,8 @@ export default component$(() => {
     return p === "/checkout" || p === "/checkout/";
   });
   const loginAction = useLogin();
+  // Login-gate video: tap/click (or the corner button) pauses / plays it.
+  const loginVideoPaused = useSignal(false);
   const logoutAction = useLogout();
   const orderAction = useSubmitOrder();
 
@@ -1456,7 +1458,14 @@ export default component$(() => {
                 </div>
               </Form>
             </div>
-            <div class="login-modal__carousel" aria-hidden="true">
+            <div class="login-modal__carousel login-modal__carousel--video"
+              onClick$={(_, el) => {
+                const v = el.querySelector("video") as HTMLVideoElement | null;
+                if (!v) return;
+                if (v.paused) { v.play().catch(() => {}); loginVideoPaused.value = false; }
+                else { v.pause(); loginVideoPaused.value = true; }
+              }}
+            >
               {/* Silent looping hero video from tamarackhomes.com (Kingston home tour).
                   The poster (its first frame) shows until it starts, and stays
                   if autoplay is blocked. */}
@@ -1465,6 +1474,15 @@ export default component$(() => {
                      poster="/login-hero-poster.jpg">
                 <source src="/login-hero.mp4" type="video/mp4" />
               </video>
+              {/* Play / pause, bottom-right — same as the Black & McDonald gate. */}
+              <button type="button" class={`login-modal__video-toggle ${loginVideoPaused.value ? "is-paused" : ""}`}
+                      aria-label={loginVideoPaused.value ? "Play video" : "Pause video"}>
+                {loginVideoPaused.value ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+                )}
+              </button>
             </div>
           </div>
         </div>
