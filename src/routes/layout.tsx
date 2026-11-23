@@ -1457,9 +1457,14 @@ export default component$(() => {
               </Form>
             </div>
             <div class="login-modal__carousel" aria-hidden="true">
-              <img src="/login-hero.jpg" alt="" width="1920" height="776"
-                   loading="eager" decoding="sync"
-                   class="login-modal__slide is-active" />
+              {/* Silent looping hero video from tamarackhomes.com (Kingston home tour).
+                  The poster (its first frame) shows until it starts, and stays
+                  if autoplay is blocked. */}
+              <video class="login-modal__slide is-active" width="1280" height="720" key="kingston"
+                     autoplay muted loop playsInline preload="auto"
+                     poster="/login-hero-poster.jpg">
+                <source src="/login-hero.mp4" type="video/mp4" />
+              </video>
             </div>
           </div>
         </div>
